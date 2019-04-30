@@ -29,5 +29,5 @@ func main()  {
 	http.Handle("/public/key/refresh",email.NewEmailRecord())
 	http.Handle("/public/app",software.NewUpdateSoft())
 
-	log.Fatal(http.ListenAndServe(":80", nil))
+	log.Fatal(http.ListenAndServe(":9527", nil))
 }
