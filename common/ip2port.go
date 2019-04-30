@@ -9,7 +9,6 @@ func GetPort(ips string) uint16  {
 
 	p:= h & (0x3FF)
 
-
 	p+=50000
 
 	return uint16(p)

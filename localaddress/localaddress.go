@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"fmt"
 	"log"
+	"strings"
 )
 
 type localaddress struct {
@@ -22,7 +23,11 @@ func (la *localaddress)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 
 	log.Println(r.RemoteAddr)
 
-	fmt.Fprintf(w,r.RemoteAddr)
+	ra := r.RemoteAddr
+
+	arr:=strings.Split(ra,":")
+
+	fmt.Fprintf(w,arr[0])
 
 }
 
