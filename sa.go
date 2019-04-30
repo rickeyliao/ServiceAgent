@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"io"
 	"log"
 	"sync"
 	"fmt"
@@ -19,8 +18,14 @@ type countHandler struct {
 func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	fmt.Println(r.URL.Path,r.Method)
+	if r.Method != "POST"{
+		fmt.Fprintf(w,"terst")
+		return
+	}
 	h.n++
 	fmt.Fprintf(w, "count is %d\n", h.n)
+
 }
 
 func main() {
@@ -40,9 +45,9 @@ func main() {
 //	}
 //
 //}
-
-func HelloServer(w http.ResponseWriter,req *http.Request)  {
-	io.WriteString(w,"hello, world\n")
-}
+//
+//func HelloServer(w http.ResponseWriter,req *http.Request)  {
+//	io.WriteString(w,"hello, world\n")
+//}
 
 
