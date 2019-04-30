@@ -8,26 +8,42 @@ import (
 	"github.com/rickeyliao/ServiceAgent/software"
 	"os"
 	"github.com/rickeyliao/ServiceAgent/common"
-	"fmt"
+	"strconv"
 )
 
 func main()  {
-	var host,port string
+	var remotehost,remoteport,localip string
 
 	if len(os.Args) > 1{
-		host = os.Args[1]
+		remotehost = os.Args[1]
 		if len(os.Args)>2{
-			port = os.Args[2]
+			remoteport = os.Args[2]
+			if len(os.Args)>3{
+				localip = os.Args[3]
+			}
 		}
 	}
 
-	common.NewRemoteUrl(host,port)
-	fmt.Println("Remote Server:",common.GetRemoteUrlInst().GetHostName(""))
+	common.NewRemoteUrl(remotehost,remoteport)
+
 
 	http.Handle("/public/keys/verify", key.NewKeyAuth())
 	http.Handle("/public/keys/consume",key.NewKeyImport())
 	http.Handle("/public/key/refresh",email.NewEmailRecord())
 	http.Handle("/public/app",software.NewUpdateSoft())
 
-	log.Fatal(http.ListenAndServe(":9527", nil))
+	var localport uint16
+
+	if localip == ""{
+		localport = 9527
+	}else {
+		localport = common.GetPort(localip)
+	}
+
+	listenportstr := ":"+strconv.Itoa(int(localport))
+
+	log.Println("Remote Server:",common.GetRemoteUrlInst().GetHostName(""))
+	log.Println("Server Listen at:",localport)
+
+	log.Fatal(http.ListenAndServe(listenportstr, nil))
 }
