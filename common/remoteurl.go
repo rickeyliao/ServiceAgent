@@ -12,6 +12,7 @@ type remoteurl struct {
 
 type RemoteUrl interface {
 	GetHostName(path string) string
+	GetHostNameSSL(path string) string
 	SetHost(host string)
 	GetHost() string
 	SetPort(port uint16)
@@ -70,6 +71,11 @@ func (ru *remoteurl)getHostName(path string) string  {
 func (ru *remoteurl)GetHostName(path string) string  {
 	return "http://"+ru.getHostName(path)
 }
+
+func (ru *remoteurl)GetHostNameSSL(path string) string  {
+	return "https://"+ru.getHostName(path)
+}
+
 
 func (ru *remoteurl)SetHost(host string){
 	ru.host = host
