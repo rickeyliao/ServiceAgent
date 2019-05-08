@@ -5,6 +5,8 @@ import (
 	"log"
 	"sync"
 	"fmt"
+	"github.com/rickeyliao/ServiceAgent/common"
+	"io/ioutil"
 )
 
 
@@ -30,6 +32,18 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.Handle("/count", new(countHandler))
+	http.HandleFunc("/test", func(writer http.ResponseWriter, request *http.Request) {
+
+		body,_:=ioutil.ReadAll(request.Body)
+
+		res,code,err:=common.Post("http://39.98.40.7:8078/public/keys/consume",string(body))
+
+
+		fmt.Println(res)
+		fmt.Println(code)
+		fmt.Println(err)
+
+	})
 	log.Fatal(http.ListenAndServe(":33221", nil))
 }
 

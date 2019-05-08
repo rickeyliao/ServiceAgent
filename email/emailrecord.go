@@ -30,11 +30,14 @@ func (er *emailrecord)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	var ret string
-	ret,err=common.Post(common.GetRemoteUrlInst().GetHostName(r.URL.Path),string(body))
+	var code int
+	ret,code,err=common.Post(common.GetRemoteUrlInst().GetHostName(r.URL.Path),string(body))
 	if err!=nil{
 		fmt.Fprintf(w,"{}")
 		return
 	}
+
+	w.WriteHeader(code)
 
 	fmt.Fprintf(w,ret)
 }

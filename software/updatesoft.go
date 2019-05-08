@@ -21,10 +21,11 @@ func (us *updatesoft)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	ret,err:=common.Get(common.GetRemoteUrlInst().GetHostName(r.URL.Path))
+	ret,code,err:=common.Get(common.GetRemoteUrlInst().GetHostName(r.URL.Path))
 	if err!=nil{
 		fmt.Fprintf(w,"{}")
 		return
 	}
+	w.WriteHeader(code)
 	fmt.Fprintf(w,ret)
 }

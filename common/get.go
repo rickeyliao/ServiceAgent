@@ -6,13 +6,13 @@ import (
 	"log"
 )
 
-func Get(url string) (jsonret string,err error){
+func Get(url string) (jsonret string,code int,err error){
 
 	log.Println(url)
 
 	req,err:=http.NewRequest("GET",url,nil)
 	if err!= nil{
-		return "",err
+		return "",0,err
 	}
 
 	req.Header.Set("Content-Type","application/json")
@@ -21,15 +21,15 @@ func Get(url string) (jsonret string,err error){
 	resp,errresp:=client.Do(req)
 
 	if errresp!=nil{
-		return "", errresp
+		return "",0, errresp
 	}
 
 	defer resp.Body.Close()
 
 	body,errbody:=ioutil.ReadAll(resp.Body)
 	if errbody != nil{
-		return "",errbody
+		return "",0,errbody
 	}
 
-	return string(body),nil
+	return string(body),resp.StatusCode,nil
 }
