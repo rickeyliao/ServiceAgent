@@ -17,6 +17,7 @@ func NewKeyAuth() http.Handler {
 
 func (ka *keyauth)ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST"{
+		w.WriteHeader(500)
 		fmt.Fprintf(w,"{}")
 		return
 	}
@@ -25,6 +26,7 @@ func (ka *keyauth)ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if body,err=ioutil.ReadAll(r.Body); err!=nil{
+		w.WriteHeader(500)
 		fmt.Fprintf(w,"{}")
 		return
 	}
@@ -33,6 +35,7 @@ func (ka *keyauth)ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var code int
 	ret,code,err=common.Post(common.GetRemoteUrlInst().GetHostName(r.URL.Path),string(body))
 	if err!=nil{
+		w.WriteHeader(500)
 		fmt.Fprintf(w,"{}")
 		return
 	}

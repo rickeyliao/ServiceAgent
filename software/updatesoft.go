@@ -17,12 +17,14 @@ func NewUpdateSoft() http.Handler  {
 func (us *updatesoft)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 
 	if r.Method != "GET"{
+		w.WriteHeader(500)
 		fmt.Fprintf(w,"{}")
 		return
 	}
 
 	ret,code,err:=common.Get(common.GetRemoteUrlInst().GetHostName(r.URL.Path))
 	if err!=nil{
+		w.WriteHeader(500)
 		fmt.Fprintf(w,"{}")
 		return
 	}
