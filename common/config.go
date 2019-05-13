@@ -1,30 +1,25 @@
 package common
 
-type sarootconfig struct {
-	cfgDir string
-	cfgFileName string
-	cfgFileType string
+type SARootConfig struct {
+	CfgDir      string
+	CfgFileName string
+	CfgFileType string
 }
 
 
-type saconfig struct {
-	downloadDir string
-	uploadDir string
-	uploadMaxSize int64
-	remoteServerIP string
-	remoteServerPort uint16
-	verifyPath string
-	consumePath string
-	emaiPath string
-	updateSoftwarePath string
-	boostrapIPaddress []string
+type SAConfig struct {
+	DownloadDir string
+	UploadDir string
+	UploadMaxSize int64
+	RemoteServerIP string
+	RemoteServerPort uint16
+	VerifyPath string
+	ConsumePath string
+	EmailPath string
+	UpdateClientSoftwarePath string
+	SoftWareVersion string
+	BootstrapIPAddress []string
 }
-
-
-
-
-
-
 
 
 
