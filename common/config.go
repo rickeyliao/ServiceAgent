@@ -7,7 +7,6 @@ import (
 	"path"
 	"os"
 	"encoding/json"
-	"fmt"
 )
 
 
@@ -23,6 +22,7 @@ type SAConfig struct {
 	UpdateClientSoftwarePath string
 	SoftWareVersion string
 	BootstrapIPAddress []string
+	TestIPAddress string
 }
 
 
@@ -32,7 +32,6 @@ type SARootConfig struct {
 	CfgFileName string
 	SacInst *SAConfig
 }
-
 
 var (
 	sarInst *SARootConfig
@@ -70,17 +69,18 @@ func DefaultInitRootConfig() *SARootConfig {
 func DefaultInitConfig() *SAConfig  {
 	sa:=&SAConfig{}
 
-	sa.BootstrapIPAddress = []string{"103.45.98.72","174.7.124.45"}
+	sa.BootstrapIPAddress = []string{"103.45.98.72:50810","174.7.124.45:50810"}
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadDir = "download"
 	sa.EmailPath = "/public/key/refresh"
-	sa.RemoteServerIP = "47.90.242.83"
+	sa.RemoteServerIP = "47.90.242.83:80"
 	sa.RemoteServerPort = 50810
 	sa.SoftWareVersion = "0.1.0.0513"
 	sa.UpdateClientSoftwarePath = "/public/app"
 	sa.UploadDir = "upload"
 	sa.UploadMaxSize = 1000    //1g
 	sa.VerifyPath = "/public/keys/verify"
+	sa.TestIPAddress = "/localipaddress"
 
 	return sa
 }
@@ -92,8 +92,6 @@ func (sar *SARootConfig)InitConfig() *SARootConfig  {
 	}
 
 	cfgname:=path.Join(sar.CfgDir,sar.CfgFileName)
-
-	fmt.Println(cfgname,"======>")
 
 	if !tools.FileExists(cfgname){
 		if !tools.FileExists(sar.CfgDir){
@@ -119,6 +117,7 @@ func (sar *SARootConfig)InitConfig() *SARootConfig  {
 		}
     	sar.SacInst = sac
 	}
+
 	download:=path.Join(sar.HomeDir,sar.SacInst.DownloadDir)
 	upload:=path.Join(sar.HomeDir,sar.SacInst.UploadDir)
 
@@ -131,11 +130,4 @@ func (sar *SARootConfig)InitConfig() *SARootConfig  {
 
 	return sar
 }
-
-
-
-
-
-
-
 

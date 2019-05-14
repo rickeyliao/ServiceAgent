@@ -48,7 +48,6 @@ func main()  {
 
 	fmt.Println(cfg)
 
-
 	cfg.InitConfig()
 
 	fmt.Println(cfg)

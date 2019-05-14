@@ -3,6 +3,7 @@ package common
 import (
 	"strconv"
 	"sync"
+	"strings"
 )
 
 type remoteurl struct {
@@ -28,6 +29,15 @@ var (
 
 func GetRemoteUrlInst() RemoteUrl {
 	return remoteurlinst
+}
+
+func NewRemoteUrl1(ipaddress string) RemoteUrl {
+	arr:=strings.Split(ipaddress,":")
+	if len(arr) != 2{
+		return nil
+	}
+
+	return NewRemoteUrl(arr[0],arr[1])
 }
 
 func NewRemoteUrl(host string,port string) RemoteUrl {
