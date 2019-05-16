@@ -63,7 +63,7 @@ func DefaultInitRootConfig() *SARootConfig {
 	cfgdir:=path.Join(homedir,"config")
 
 	//The config path looks like /home/user/.sa/config
-	return &SARootConfig{HomeDir:homedir,CfgDir:cfgdir,CfgFileName:"sa.config"}
+	return &SARootConfig{HomeDir:homedir,CfgDir:cfgdir,CfgFileName:"sa.json"}
 }
 
 func DefaultInitConfig() *SAConfig  {

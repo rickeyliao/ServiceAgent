@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/rickeyliao/ServiceAgent/console/cmd"
+import "github.com/rickeyliao/ServiceAgent/appmain/cmd"
 
 func main() {
 	cmd.Execute()
