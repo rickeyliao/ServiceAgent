@@ -7,6 +7,8 @@ import (
 	"path"
 	"os"
 	"encoding/json"
+	"github.com/spf13/viper"
+	"strings"
 )
 
 
@@ -21,8 +23,10 @@ type SAConfig struct {
 	EmailPath string
 	UpdateClientSoftwarePath string
 	SoftWareVersion string
+	LocalListenPort uint16
 	BootstrapIPAddress []string
 	TestIPAddress string
+	ListenTyp string
 }
 
 
@@ -38,27 +42,52 @@ var (
 	saclock sync.Mutex
 )
 
-func GetSARootCfg() *SARootConfig {
+func GetSARootCfgHdir(hdir string) *SARootConfig {
 	if sarInst == nil{
 		saclock.Lock()
 		defer saclock.Unlock()
 
 		if sarInst == nil{
-			sarInst = DefaultInitRootConfig()
+			sarInst = DefaultInitRootConfig(hdir)
 		}
 
 	}
 	return sarInst
 }
 
-func DefaultInitRootConfig() *SARootConfig {
-	usrdir,err := tools.Home()
-	if err !=nil{
-		log.Fatal("Get Home Dir failed")
+func GetSARootCfg() *SARootConfig  {
+	if sarInst == nil{
+		saclock.Lock()
+		defer saclock.Unlock()
+
+		if sarInst == nil{
+			sarInst = DefaultInitRootConfig("")
+		}
+
+	}
+	return sarInst
+}
+
+func DefaultInitRootConfig(hdir string) *SARootConfig {
+
+	usrdir := hdir
+
+	if hdir == "" {
+		viper.AutomaticEnv()
+		sahome := viper.GetString("sahome")
+		usrdir = sahome
+		if sahome == "" {
+			var err error
+			usrdir, err = tools.Home()
+			if err != nil {
+				log.Fatal("Get Home Dir failed")
+			}
+		}
 	}
 
-	homedir:= path.Join(usrdir,".sa")
+	log.Println(usrdir)
 
+	homedir:= path.Join(usrdir,".sa")
 
 	cfgdir:=path.Join(homedir,"config")
 
@@ -74,8 +103,10 @@ func DefaultInitConfig() *SAConfig  {
 	sa.DownloadDir = "download"
 	sa.EmailPath = "/public/key/refresh"
 	sa.RemoteServerIP = "47.90.242.83:80"
-	sa.RemoteServerPort = 50810
-	sa.SoftWareVersion = "0.1.0.0513"
+	sa.RemoteServerPort = 80
+	sa.LocalListenPort = 50810
+	sa.ListenTyp = "udp4"
+	sa.SoftWareVersion = "0.1.0.0521"
 	sa.UpdateClientSoftwarePath = "/public/app"
 	sa.UploadDir = "upload"
 	sa.UploadMaxSize = 1000    //1g
@@ -83,6 +114,34 @@ func DefaultInitConfig() *SAConfig  {
 	sa.TestIPAddress = "/localipaddress"
 
 	return sa
+}
+
+func (sar *SARootConfig)LoadCfg() *SAConfig  {
+	viper.AddConfigPath(path.Join(sar.CfgDir))
+	strarr:=strings.Split(sar.CfgFileName,".")
+	viper.SetConfigName(strarr[0])
+
+	if err:=viper.ReadInConfig();err!=nil{
+		log.Println("Read config file error")
+		os.Exit(1)
+	}
+
+	cfg:=&SAConfig{}
+	viper.Unmarshal(cfg)
+
+	sar.SacInst = cfg
+
+	return cfg
+}
+
+
+func (sar *SARootConfig)IsInitialized() bool  {
+	cfgname := path.Join(sar.CfgDir,sar.CfgFileName)
+	if !tools.FileExists(cfgname){
+		return false
+	}
+
+	return true
 }
 
 

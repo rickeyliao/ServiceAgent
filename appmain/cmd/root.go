@@ -18,14 +18,18 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"encoding/json"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/kprc/nbsnetwork/tools"
+	"log"
+	"net/http"
+	"github.com/rickeyliao/ServiceAgent/key"
+	"github.com/rickeyliao/ServiceAgent/email"
+	"github.com/rickeyliao/ServiceAgent/software"
+	"github.com/rickeyliao/ServiceAgent/localaddress"
+	"strconv"
 )
 
-var cfgFile string
 var sahome string
 
 // rootCmd represents the base command when called without any subcommands
@@ -41,9 +45,45 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("call self")
+			sar:=common.GetSARootCfgHdir(sahome)
+			if !sar.IsInitialized() {
+				log.Println("Please Initialize First")
+				return
+			}
+			//load config
+			sar.LoadCfg()
+			cfg:=sar.SacInst
+			//if the program started, quit
+			if tools.CheckPortUsed(cfg.ListenTyp,cfg.LocalListenPort){
+				return
+			}
+			remotehost:=cfg.RemoteServerIP
+			remoteport:=cfg.RemoteServerPort
+
+			if remotehost == "" && remoteport == 0{
+				log.Println("Please set remote host and port")
+				return
+			}
+			ips:=remotehost + ":" + string(remoteport)
+			common.NewRemoteUrl1(ips)
+
+			http.Handle(cfg.VerifyPath, key.NewKeyAuth())
+			http.Handle(cfg.ConsumePath,key.NewKeyImport())
+			http.Handle(cfg.EmailPath,email.NewEmailRecord())
+			http.Handle(cfg.UpdateClientSoftwarePath,software.NewUpdateSoft())
+			http.Handle(cfg.TestIPAddress,localaddress.NewLocalAddress())
+
+			listenportstr := ":"+strconv.Itoa(int(cfg.LocalListenPort))
+
+			log.Println("Remote Server:",common.GetRemoteUrlInst().GetHostName(""))
+			log.Println("Server Listen at:",listenportstr)
+
+			log.Fatal(http.ListenAndServe(listenportstr, nil))
+
 		},
 }
+
+
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -60,7 +100,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.Flags().StringVarP(&cfgFile, "config", "c", "","config file (default is $HOME/.sa/config/sa.json)")
+	//rootCmd.Flags().StringVarP(&cfgFile, "config", "c", "","config file (default is $HOME/.sa/config/sa.json)")
 	rootCmd.Flags().StringVarP(&sahome,"homedir","d","","home directory (default is $HOME/.sa/)")
 
 	// Cobra also supports local flags, which will only run
@@ -70,45 +110,62 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	fmt.Println("cfgfile :",cfgFile)
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		_, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
 
-		// Search config in home directory with name ".console" (without extension).
-		viper.AddConfigPath("/Users/rickey/.sa/config")
-		viper.SetConfigName("sa")
-	}
+	//fmt.Println("cfgfile :",cfgFile)
+	//if cfgFile != "" {
+	//	// Use config file from the flag.
+	//	viper.SetConfigFile(cfgFile)
+	//} else {
+	//	// Find home directory.
+	//	_, err := homedir.Dir()
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		os.Exit(1)
+	//	}
+	//
+	//	// Search config in home directory with name ".console" (without extension).
+	//	viper.AddConfigPath("/Users/rickey/.sa/config")
+	//	viper.SetConfigName("sa")
+	//}
+	//
+	//viper.AutomaticEnv() // read in environment variables that match
+	//
+	//
+	//fmt.Println("=====>",viper.GetString("sahome"))
+	//// If a config file is found, read it in.
+	//if err := viper.ReadInConfig(); err == nil {
+	//	fmt.Println("Using config file:", viper.ConfigFileUsed())
+	//}
+	//
+	//fmt.Println(viper.GetStringSlice("bootstrapipaddress"))
+	//
+	//var cfg common.SAConfig
+	//
+	//viper.Unmarshal(&cfg)
+	//
+	//
+	//fmt.Println(cfg)
+	//
+	//
+	//viper.Set("UploadDir","/uploaddir")
+	//
+	//var cfg1 common.SAConfig
+	//
+	//viper.Unmarshal(&cfg1)
+	//
+	//
+	//fmt.Println(cfg1)
+	//
+	//
+	//c:=viper.AllSettings()
+	//
+	//s,_:=json.Marshal(c)
+	//
+	//fmt.Println(string(s))
+	//
+	//tools.Save2File(s,"/Users/rickey/.sa/config/sa.config")
 
-	viper.AutomaticEnv() // read in environment variables that match
 
-
-	fmt.Println("=====>",viper.GetString("sahome"))
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
-
-	fmt.Println(viper.GetStringSlice("bootstrapipaddress"))
-
-	var cfg common.SAConfig
-
-	viper.Unmarshal(&cfg)
-
-	fmt.Println(cfg)
-
-	c:=viper.AllSettings()
-
-	s,_:=json.Marshal(c)
-
-	fmt.Println(string(s))
 }
 
 

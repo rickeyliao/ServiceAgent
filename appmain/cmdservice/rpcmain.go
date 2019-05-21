@@ -1,0 +1,5 @@
+package cmdservice
+
+func init() {
+
+}
