@@ -159,7 +159,7 @@ func unforceInitRootConfig(hdir string) *SARootConfig {
 		if err=json.Unmarshal(d,prh);err!=nil{
 			log.Fatal("Cant recover home dir")
 		}
-		log.Println("root have init at:",prh.Rootdir)
+
 		savedir = prh.Rootdir
 
 	}
@@ -171,11 +171,16 @@ func unforceInitRootConfig(hdir string) *SARootConfig {
 
 
 func DefaultInitRootConfig(hdir string,force bool) *SARootConfig {
+	var sar *SARootConfig
 	if force{
-		return forceInitRootConfig(hdir)
+		sar =  forceInitRootConfig(hdir)
 	}else {
-		return unforceInitRootConfig(hdir)
+		sar =  unforceInitRootConfig(hdir)
 	}
+
+	log.Println("Config Root:",sar.HomeDir)
+
+	return sar
 }
 
 func DefaultInitConfig() *SAConfig  {
@@ -185,7 +190,7 @@ func DefaultInitConfig() *SAConfig  {
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadDir = "download"
 	sa.EmailPath = "/public/key/refresh"
-	sa.RemoteServerIP = "47.90.242.83:80"
+	sa.RemoteServerIP = "207.148.9.49"
 	sa.RemoteServerPort = 80
 	sa.LocalListenPort = 50810
 	sa.ListenTyp = "udp4"

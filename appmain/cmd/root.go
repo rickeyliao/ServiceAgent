@@ -64,8 +64,13 @@ to quickly create a Cobra application.`,
 				log.Println("Please set remote host and port")
 				return
 			}
-			ips:=remotehost + ":" + string(remoteport)
+
+			fmt.Println(remotehost)
+
+			ips:=remotehost + ":" + strconv.Itoa(int(remoteport))
 			common.NewRemoteUrl1(ips)
+
+			fmt.Println("----->",ips)
 
 			http.Handle(cfg.VerifyPath, key.NewKeyAuth())
 			http.Handle(cfg.ConsumePath,key.NewKeyImport())
