@@ -20,6 +20,8 @@ type SAConfig struct {
 	RemoteServerPort uint16
 	VerifyPath string
 	ConsumePath string
+	//IosSoftPath string
+	ListIpsPath string
 	EmailPath string
 	UpdateClientSoftwarePath string
 	SoftWareVersion string
@@ -27,6 +29,7 @@ type SAConfig struct {
 	BootstrapIPAddress []string
 	TestIPAddress string
 	ListenTyp string
+
 }
 
 
@@ -200,6 +203,8 @@ func DefaultInitConfig() *SAConfig  {
 	sa.UploadMaxSize = 1000    //1g
 	sa.VerifyPath = "/public/keys/verify"
 	sa.TestIPAddress = "/localipaddress"
+	sa.ListIpsPath = "/public/servers/list"
+	//sa.IosSoftPath = ""
 
 	return sa
 }

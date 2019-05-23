@@ -28,6 +28,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/software"
 	"github.com/rickeyliao/ServiceAgent/localaddress"
 	"strconv"
+	"github.com/rickeyliao/ServiceAgent/listallip"
 )
 
 
@@ -65,18 +66,18 @@ to quickly create a Cobra application.`,
 				return
 			}
 
-			fmt.Println(remotehost)
+			//fmt.Println(remotehost)
 
 			ips:=remotehost + ":" + strconv.Itoa(int(remoteport))
 			common.NewRemoteUrl1(ips)
-
-			fmt.Println("----->",ips)
 
 			http.Handle(cfg.VerifyPath, key.NewKeyAuth())
 			http.Handle(cfg.ConsumePath,key.NewKeyImport())
 			http.Handle(cfg.EmailPath,email.NewEmailRecord())
 			http.Handle(cfg.UpdateClientSoftwarePath,software.NewUpdateSoft())
 			http.Handle(cfg.TestIPAddress,localaddress.NewLocalAddress())
+			http.Handle(cfg.ListIpsPath,listallip.NewListAllIps())
+
 
 			listenportstr := ":"+strconv.Itoa(int(cfg.LocalListenPort))
 
