@@ -30,7 +30,6 @@ import (
 	"strconv"
 )
 
-var sahome string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -45,7 +44,7 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 		Run: func(cmd *cobra.Command, args []string) {
-			sar:=common.GetSARootCfgHdir(sahome)
+			sar:=common.GetSARootCfg()
 			if !sar.IsInitialized() {
 				log.Println("Please Initialize First")
 				return
@@ -55,6 +54,7 @@ to quickly create a Cobra application.`,
 			cfg:=sar.SacInst
 			//if the program started, quit
 			if tools.CheckPortUsed(cfg.ListenTyp,cfg.LocalListenPort){
+				log.Println("sa have started")
 				return
 			}
 			remotehost:=cfg.RemoteServerIP
@@ -101,7 +101,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	//rootCmd.Flags().StringVarP(&cfgFile, "config", "c", "","config file (default is $HOME/.sa/config/sa.json)")
-	rootCmd.Flags().StringVarP(&sahome,"homedir","d","","home directory (default is $HOME/.sa/)")
+	//rootCmd.Flags().StringVarP(&sahome,"homedir","d","","home directory (default is $HOME/.sa/)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

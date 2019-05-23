@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 	"fmt"
-	"github.com/rickeyliao/ServiceAgent/common"
+	"os"
 )
 
 
@@ -44,15 +44,18 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //}
 
 func main()  {
-	cfg:=common.GetSARootCfg()
+	//cfg:=common.GetSARootCfg()
+	//
+	//fmt.Println(cfg)
+	//
+	//cfg.InitConfig(false)
+	//
+	//fmt.Println(cfg)
+	//
+	//fmt.Println(*cfg.SacInst)
 
-	fmt.Println(cfg)
+	os.RemoveAll("/Users/rickey/xxsa")
 
-	cfg.InitConfig()
-
-	fmt.Println(cfg)
-
-	fmt.Println(*cfg.SacInst)
 
 }
 

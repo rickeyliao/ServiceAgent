@@ -37,18 +37,23 @@ type SARootConfig struct {
 	SacInst *SAConfig
 }
 
+
+type Roothome struct{
+	Rootdir string
+}
+
 var (
 	sarInst *SARootConfig
 	saclock sync.Mutex
 )
 
-func GetSARootCfgHdir(hdir string) *SARootConfig {
+func GetSARootCfgHdir(hdir string,force bool) *SARootConfig {
 	if sarInst == nil{
 		saclock.Lock()
 		defer saclock.Unlock()
 
 		if sarInst == nil{
-			sarInst = DefaultInitRootConfig(hdir)
+			sarInst = DefaultInitRootConfig(hdir,force)
 		}
 
 	}
@@ -61,38 +66,116 @@ func GetSARootCfg() *SARootConfig  {
 		defer saclock.Unlock()
 
 		if sarInst == nil{
-			sarInst = DefaultInitRootConfig("")
+			sarInst = DefaultInitRootConfig("",false)
 		}
 
 	}
 	return sarInst
 }
 
-func DefaultInitRootConfig(hdir string) *SARootConfig {
+func forceInitRootConfig(hdir string) *SARootConfig  {
+	var sahome string
+	var homedir string
+	var err error
 
-	usrdir := hdir
+	if homedir, err = tools.Home(); err != nil {
+		log.Fatal("Can't Get Home Directory")
+	}
 
-	if hdir == "" {
+	if hdir == ""{
 		viper.AutomaticEnv()
-		sahome := viper.GetString("sahome")
-		usrdir = sahome
+		sahome=viper.GetString("sahome")
 		if sahome == "" {
-			var err error
-			usrdir, err = tools.Home()
-			if err != nil {
-				log.Fatal("Get Home Dir failed")
-			}
+			sahome = path.Join(homedir,".sa")
+		}
+	}else{
+		hdir=path.Clean(hdir)
+		if isroot:=path.IsAbs(hdir);!isroot{
+			sahome = path.Join(homedir,hdir)
+		}else{
+			sahome = hdir
 		}
 	}
 
-	log.Println(usrdir)
+	if sahome == "" {
+		return nil
+	}
 
-	homedir:= path.Join(usrdir,".sa")
+	//save homedir to .sainit file
+	rh:=Roothome{sahome}
+	var brh []byte
+	if brh,err=json.Marshal(rh);err!=nil{
+		log.Fatal("Can't save to .sainit file")
+	}
+	tools.Save2File(brh,path.Join(homedir,".sainit"))
 
-	cfgdir:=path.Join(homedir,"config")
+	cfgdir := path.Join(sahome,"config")
 
-	//The config path looks like /home/user/.sa/config
-	return &SARootConfig{HomeDir:homedir,CfgDir:cfgdir,CfgFileName:"sa.json"}
+	return &SARootConfig{HomeDir:sahome,CfgDir:cfgdir,CfgFileName:"sa.json"}
+}
+
+func unforceInitRootConfig(hdir string) *SARootConfig {
+	var homedir string
+	var savedir string
+	var d []byte
+	var err error
+
+	if homedir, err = tools.Home(); err != nil {
+		log.Fatal("Can't Get Home Directory")
+	}
+	d,err =tools.OpenAndReadAll(path.Join(homedir,".sainit"))
+	if d == nil || len(d) == 0{
+
+		if hdir == ""{
+			viper.AutomaticEnv()
+			savedir=viper.GetString("sahome")
+			if savedir=="" {
+				savedir = path.Join(homedir, ".sa")
+			}
+		}else{
+			if isroot:=path.IsAbs(hdir);!isroot{
+				savedir = path.Join(homedir,hdir)
+			}else{
+				savedir = hdir
+			}
+		}
+		//save homedir to .sainit file
+		rh:=Roothome{savedir}
+		var brh []byte
+		if brh,err=json.Marshal(rh);err!=nil{
+			log.Fatal("Can't save to .sainit file")
+		}
+
+		tools.Save2File(brh,path.Join(homedir,".sainit"))
+
+
+		prh:=&Roothome{}
+		if err=json.Unmarshal(brh,prh);err!=nil{
+			log.Fatal("Cant recover home dir")
+		}
+
+	}else{
+		prh:=&Roothome{}
+		if err=json.Unmarshal(d,prh);err!=nil{
+			log.Fatal("Cant recover home dir")
+		}
+		log.Println("root have init at:",prh.Rootdir)
+		savedir = prh.Rootdir
+
+	}
+	if savedir == ""{
+		return nil
+	}
+	return &SARootConfig{HomeDir:savedir,CfgDir:path.Join(savedir,"config"),CfgFileName:"sa.json"}
+}
+
+
+func DefaultInitRootConfig(hdir string,force bool) *SARootConfig {
+	if force{
+		return forceInitRootConfig(hdir)
+	}else {
+		return unforceInitRootConfig(hdir)
+	}
 }
 
 func DefaultInitConfig() *SAConfig  {
@@ -145,9 +228,14 @@ func (sar *SARootConfig)IsInitialized() bool  {
 }
 
 
-func (sar *SARootConfig)InitConfig() *SARootConfig  {
+
+func (sar *SARootConfig)InitConfig(force bool) *SARootConfig  {
 	if sar.HomeDir == "" || sar.CfgDir == "" || sar.CfgFileName == "" {
 		log.Fatal("Please Set Config Path")
+	}
+
+	if force{
+		os.RemoveAll(sar.HomeDir)
 	}
 
 	cfgname:=path.Join(sar.CfgDir,sar.CfgFileName)
