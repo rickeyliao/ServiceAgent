@@ -31,7 +31,7 @@ func (ka *postsocks5)ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(string(body))
+	log.Println(r.RemoteAddr,string(body))
 
 	w.WriteHeader(200)
 	fmt.Fprintf(w,"{}")
