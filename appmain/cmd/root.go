@@ -29,6 +29,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/localaddress"
 	"strconv"
 	"github.com/rickeyliao/ServiceAgent/listallip"
+	"github.com/rickeyliao/ServiceAgent/postsocks5"
 )
 
 
@@ -77,7 +78,7 @@ to quickly create a Cobra application.`,
 			http.Handle(cfg.UpdateClientSoftwarePath,software.NewUpdateSoft())
 			http.Handle(cfg.TestIPAddress,localaddress.NewLocalAddress())
 			http.Handle(cfg.ListIpsPath,listallip.NewListAllIps())
-
+			http.Handle(cfg.PostSocks5Path,postsocks5.NewPostSocks5())
 
 			listenportstr := ":"+strconv.Itoa(int(cfg.LocalListenPort))
 

@@ -20,7 +20,7 @@ type SAConfig struct {
 	RemoteServerPort uint16
 	VerifyPath string
 	ConsumePath string
-	//IosSoftPath string
+	PostSocks5Path string
 	ListIpsPath string
 	EmailPath string
 	UpdateClientSoftwarePath string
@@ -198,7 +198,7 @@ func DefaultInitConfig() *SAConfig  {
 	sa.VerifyPath = "/public/keys/verify"
 	sa.TestIPAddress = "/localipaddress"
 	sa.ListIpsPath = "/public/servers/list"
-	//sa.IosSoftPath = ""
+	sa.PostSocks5Path = "/postsocks5"
 
 	return sa
 }
