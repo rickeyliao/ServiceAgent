@@ -8,8 +8,13 @@ import (
 )
 
 func Post(url string,jsonstr string) (jsonret string, code int,err error) {
-	log.Println(url)
-	log.Println(jsonstr)
+	return Post1(url,jsonstr,true)
+}
+func Post1(url string,jsonstr string,blog bool) (jsonret string, code int,err error){
+	if blog {
+		log.Println(url)
+		log.Println(jsonstr)
+	}
 
 	bjson := []byte(jsonstr)
 	req,err:=http.NewRequest("POST",url,bytes.NewBuffer(bjson))
