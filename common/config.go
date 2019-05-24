@@ -107,7 +107,7 @@ func forceInitRootConfig(hdir string) *SARootConfig  {
 	//save homedir to .sainit file
 	rh:=Roothome{sahome}
 	var brh []byte
-	if brh,err=json.Marshal(rh);err!=nil{
+	if brh,err=json.MarshalIndent(rh,"","\t");err!=nil{
 		log.Fatal("Can't save to .sainit file")
 	}
 	tools.Save2File(brh,path.Join(homedir,".sainit"))
@@ -145,17 +145,11 @@ func unforceInitRootConfig(hdir string) *SARootConfig {
 		//save homedir to .sainit file
 		rh:=Roothome{savedir}
 		var brh []byte
-		if brh,err=json.Marshal(rh);err!=nil{
+		if brh,err=json.MarshalIndent(rh,"","\t");err!=nil{
 			log.Fatal("Can't save to .sainit file")
 		}
 
 		tools.Save2File(brh,path.Join(homedir,".sainit"))
-
-
-		prh:=&Roothome{}
-		if err=json.Unmarshal(brh,prh);err!=nil{
-			log.Fatal("Cant recover home dir")
-		}
 
 	}else{
 		prh:=&Roothome{}
@@ -256,7 +250,7 @@ func (sar *SARootConfig)InitConfig(force bool) *SARootConfig  {
 		}
 		sac := DefaultInitConfig()
 		sar.SacInst = sac
-		bjson,err:=json.Marshal(*sac)
+		bjson,err:=json.MarshalIndent(*sac,"","\t")
 		if err!=nil{
 			log.Fatal("Json module error")
 		}
