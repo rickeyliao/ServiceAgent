@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 # The name of the executable (default is current directory name)
-#TARGET := $(shell echo $${PWD\#\#*/})
+BASENAME := $(shell echo $${PWD\#\#*/})
 TARGET := sa
 .DEFAULT_GOAL: $(TARGET)
 
@@ -11,18 +11,18 @@ BUILD := `git rev-parse HEAD`
 
 # Use linker flags to provide version/build settings to the target
 #LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -linkmode=external -v"
-LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
+LDFLAGS=-race -x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)" 
 
 # go source files, ignore vendor directory
 SRC = $(shell find . -type f -name '*.go' -not -path "./test/*")
 
-.PHONY: all build clean install uninstall fmt simplify check run
+.PHONY: all build clean install uninstall fmt simplify check run Test
 
 all: check install
 
-test:
+Test:
 	@echo $(LDFLAGS)
-
+	@echo $(GOBIN)
 
 $(TARGET): $(SRC)
 	@go build $(LDFLAGS) -o $(TARGET)
@@ -35,6 +35,7 @@ clean:
 
 install:
 	@go install $(LDFLAGS)
+	@mv $(GOBIN)/$(BASENAME) $(GOBIN)/$(TARGET)
 
 uninstall: clean
 	@rm -f $$(which ${TARGET})
