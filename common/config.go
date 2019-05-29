@@ -1,47 +1,43 @@
 package common
 
 import (
-	"github.com/kprc/nbsnetwork/tools"
-	"log"
-	"sync"
-	"path"
-	"os"
 	"encoding/json"
+	"github.com/kprc/nbsnetwork/tools"
 	"github.com/spf13/viper"
+	"log"
+	"os"
+	"path"
 	"strings"
+	"sync"
 )
 
-
 type SAConfig struct {
-	DownloadDir string   			`json:"downloaddir"`
-	UploadDir string     			`json:"uploaddir"`
-	UploadMaxSize int64				`json:"uploadmaxsize"`
-	RemoteServerIP string			`json:"remoteserverip"`
-	RemoteServerPort uint16			`json:"remoteserverport"`
-	VerifyPath string				`json:"verifypath"`
-	ConsumePath string				`json:"consumepath"`
-	PostSocks5Path string			`json:"postsocks5path"`
-	ListIpsPath string				`json:"listipspath"`
-	EmailPath string				`json:"emailpath"`
-	UpdateClientSoftwarePath string	`json:"updateclientsoftwarepath"`
-	SoftWareVersion string			`json:"softwareversion"`
-	LocalListenPort uint16			`json:"locallistenport"`
-	BootstrapIPAddress []string		`json:"bootstrapipaddress"`
-	TestIPAddress string			`json:"testipaddress"`
-	ListenTyp string				`json:"listentyp"`
-
+	DownloadDir              string   `json:"downloaddir"`
+	UploadDir                string   `json:"uploaddir"`
+	UploadMaxSize            int64    `json:"uploadmaxsize"`
+	RemoteServerIP           string   `json:"remoteserverip"`
+	RemoteServerPort         uint16   `json:"remoteserverport"`
+	VerifyPath               string   `json:"verifypath"`
+	ConsumePath              string   `json:"consumepath"`
+	PostSocks5Path           string   `json:"postsocks5path"`
+	ListIpsPath              string   `json:"listipspath"`
+	EmailPath                string   `json:"emailpath"`
+	UpdateClientSoftwarePath string   `json:"updateclientsoftwarepath"`
+	SoftWareVersion          string   `json:"softwareversion"`
+	LocalListenPort          uint16   `json:"locallistenport"`
+	BootstrapIPAddress       []string `json:"bootstrapipaddress"`
+	TestIPAddress            string   `json:"testipaddress"`
+	ListenTyp                string   `json:"listentyp"`
 }
-
 
 type SARootConfig struct {
 	HomeDir     string
 	CfgDir      string
 	CfgFileName string
-	SacInst *SAConfig
+	SacInst     *SAConfig
 }
 
-
-type Roothome struct{
+type Roothome struct {
 	Rootdir string
 }
 
@@ -50,33 +46,33 @@ var (
 	saclock sync.Mutex
 )
 
-func GetSARootCfgHdir(hdir string,force bool) *SARootConfig {
-	if sarInst == nil{
+func GetSARootCfgHdir(hdir string, force bool) *SARootConfig {
+	if sarInst == nil {
 		saclock.Lock()
 		defer saclock.Unlock()
 
-		if sarInst == nil{
-			sarInst = DefaultInitRootConfig(hdir,force)
+		if sarInst == nil {
+			sarInst = DefaultInitRootConfig(hdir, force)
 		}
 
 	}
 	return sarInst
 }
 
-func GetSARootCfg() *SARootConfig  {
-	if sarInst == nil{
+func GetSARootCfg() *SARootConfig {
+	if sarInst == nil {
 		saclock.Lock()
 		defer saclock.Unlock()
 
-		if sarInst == nil{
-			sarInst = DefaultInitRootConfig("",false)
+		if sarInst == nil {
+			sarInst = DefaultInitRootConfig("", false)
 		}
 
 	}
 	return sarInst
 }
 
-func forceInitRootConfig(hdir string) *SARootConfig  {
+func forceInitRootConfig(hdir string) *SARootConfig {
 	var sahome string
 	var homedir string
 	var err error
@@ -85,17 +81,17 @@ func forceInitRootConfig(hdir string) *SARootConfig  {
 		log.Fatal("Can't Get Home Directory")
 	}
 
-	if hdir == ""{
+	if hdir == "" {
 		viper.AutomaticEnv()
-		sahome=viper.GetString("sahome")
+		sahome = viper.GetString("sahome")
 		if sahome == "" {
-			sahome = path.Join(homedir,".sa")
+			sahome = path.Join(homedir, ".sa")
 		}
-	}else{
-		hdir=path.Clean(hdir)
-		if isroot:=path.IsAbs(hdir);!isroot{
-			sahome = path.Join(homedir,hdir)
-		}else{
+	} else {
+		hdir = path.Clean(hdir)
+		if isroot := path.IsAbs(hdir); !isroot {
+			sahome = path.Join(homedir, hdir)
+		} else {
 			sahome = hdir
 		}
 	}
@@ -105,16 +101,16 @@ func forceInitRootConfig(hdir string) *SARootConfig  {
 	}
 
 	//save homedir to .sainit file
-	rh:=Roothome{sahome}
+	rh := Roothome{sahome}
 	var brh []byte
-	if brh,err=json.MarshalIndent(rh,"","\t");err!=nil{
+	if brh, err = json.MarshalIndent(rh, "", "\t"); err != nil {
 		log.Fatal("Can't save to .sainit file")
 	}
-	tools.Save2File(brh,path.Join(homedir,".sainit"))
+	tools.Save2File(brh, path.Join(homedir, ".sainit"))
 
-	cfgdir := path.Join(sahome,"config")
+	cfgdir := path.Join(sahome, "config")
 
-	return &SARootConfig{HomeDir:sahome,CfgDir:cfgdir,CfgFileName:"sa.json"}
+	return &SARootConfig{HomeDir: sahome, CfgDir: cfgdir, CfgFileName: "sa.json"}
 }
 
 func unforceInitRootConfig(hdir string) *SARootConfig {
@@ -126,64 +122,63 @@ func unforceInitRootConfig(hdir string) *SARootConfig {
 	if homedir, err = tools.Home(); err != nil {
 		log.Fatal("Can't Get Home Directory")
 	}
-	d,err =tools.OpenAndReadAll(path.Join(homedir,".sainit"))
-	if d == nil || len(d) == 0{
+	d, err = tools.OpenAndReadAll(path.Join(homedir, ".sainit"))
+	if d == nil || len(d) == 0 {
 
-		if hdir == ""{
+		if hdir == "" {
 			viper.AutomaticEnv()
-			savedir=viper.GetString("sahome")
-			if savedir=="" {
+			savedir = viper.GetString("sahome")
+			if savedir == "" {
 				savedir = path.Join(homedir, ".sa")
 			}
-		}else{
-			if isroot:=path.IsAbs(hdir);!isroot{
-				savedir = path.Join(homedir,hdir)
-			}else{
+		} else {
+			if isroot := path.IsAbs(hdir); !isroot {
+				savedir = path.Join(homedir, hdir)
+			} else {
 				savedir = hdir
 			}
 		}
 		//save homedir to .sainit file
-		rh:=Roothome{savedir}
+		rh := Roothome{savedir}
 		var brh []byte
-		if brh,err=json.MarshalIndent(rh,"","\t");err!=nil{
+		if brh, err = json.MarshalIndent(rh, "", "\t"); err != nil {
 			log.Fatal("Can't save to .sainit file")
 		}
 
-		tools.Save2File(brh,path.Join(homedir,".sainit"))
+		tools.Save2File(brh, path.Join(homedir, ".sainit"))
 
-	}else{
-		prh:=&Roothome{}
-		if err=json.Unmarshal(d,prh);err!=nil{
+	} else {
+		prh := &Roothome{}
+		if err = json.Unmarshal(d, prh); err != nil {
 			log.Fatal("Cant recover home dir")
 		}
 
 		savedir = prh.Rootdir
 
 	}
-	if savedir == ""{
+	if savedir == "" {
 		return nil
 	}
-	return &SARootConfig{HomeDir:savedir,CfgDir:path.Join(savedir,"config"),CfgFileName:"sa.json"}
+	return &SARootConfig{HomeDir: savedir, CfgDir: path.Join(savedir, "config"), CfgFileName: "sa.json"}
 }
 
-
-func DefaultInitRootConfig(hdir string,force bool) *SARootConfig {
+func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
 	var sar *SARootConfig
-	if force{
-		sar =  forceInitRootConfig(hdir)
-	}else {
-		sar =  unforceInitRootConfig(hdir)
+	if force {
+		sar = forceInitRootConfig(hdir)
+	} else {
+		sar = unforceInitRootConfig(hdir)
 	}
 
-	log.Println("Config Root:",sar.HomeDir)
+	log.Println("Config Root:", sar.HomeDir)
 
 	return sar
 }
 
-func DefaultInitConfig() *SAConfig  {
-	sa:=&SAConfig{}
+func DefaultInitConfig() *SAConfig {
+	sa := &SAConfig{}
 
-	sa.BootstrapIPAddress = []string{"103.45.98.72:50810","174.7.124.45:50810"}
+	sa.BootstrapIPAddress = []string{"103.45.98.72:50810", "174.7.124.45:50810"}
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadDir = "download"
 	sa.EmailPath = "/public/key/refresh"
@@ -194,7 +189,7 @@ func DefaultInitConfig() *SAConfig  {
 	sa.SoftWareVersion = "0.1.0.0521"
 	sa.UpdateClientSoftwarePath = "/public/app"
 	sa.UploadDir = "upload"
-	sa.UploadMaxSize = 1000    //1g
+	sa.UploadMaxSize = 1000 //1g
 	sa.VerifyPath = "/public/keys/verify"
 	sa.TestIPAddress = "/localipaddress"
 	sa.ListIpsPath = "/public/servers/list"
@@ -203,17 +198,17 @@ func DefaultInitConfig() *SAConfig  {
 	return sa
 }
 
-func (sar *SARootConfig)LoadCfg() *SAConfig  {
+func (sar *SARootConfig) LoadCfg() *SAConfig {
 	viper.AddConfigPath(path.Join(sar.CfgDir))
-	strarr:=strings.Split(sar.CfgFileName,".")
+	strarr := strings.Split(sar.CfgFileName, ".")
 	viper.SetConfigName(strarr[0])
 
-	if err:=viper.ReadInConfig();err!=nil{
+	if err := viper.ReadInConfig(); err != nil {
 		log.Println("Read config file error")
 		os.Exit(1)
 	}
 
-	cfg:=&SAConfig{}
+	cfg := &SAConfig{}
 	viper.Unmarshal(cfg)
 
 	sar.SacInst = cfg
@@ -221,64 +216,60 @@ func (sar *SARootConfig)LoadCfg() *SAConfig  {
 	return cfg
 }
 
-
-func (sar *SARootConfig)IsInitialized() bool  {
-	cfgname := path.Join(sar.CfgDir,sar.CfgFileName)
-	if !tools.FileExists(cfgname){
+func (sar *SARootConfig) IsInitialized() bool {
+	cfgname := path.Join(sar.CfgDir, sar.CfgFileName)
+	if !tools.FileExists(cfgname) {
 		return false
 	}
 
 	return true
 }
 
-
-
-func (sar *SARootConfig)InitConfig(force bool) *SARootConfig  {
+func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 	if sar.HomeDir == "" || sar.CfgDir == "" || sar.CfgFileName == "" {
 		log.Fatal("Please Set Config Path")
 	}
 
-	if force{
+	if force {
 		os.RemoveAll(sar.HomeDir)
 	}
 
-	cfgname:=path.Join(sar.CfgDir,sar.CfgFileName)
+	cfgname := path.Join(sar.CfgDir, sar.CfgFileName)
 
-	if !tools.FileExists(cfgname){
-		if !tools.FileExists(sar.CfgDir){
-			os.MkdirAll(sar.CfgDir,0755)
+	if !tools.FileExists(cfgname) {
+		if !tools.FileExists(sar.CfgDir) {
+			os.MkdirAll(sar.CfgDir, 0755)
 		}
 		sac := DefaultInitConfig()
 		sar.SacInst = sac
-		bjson,err:=json.MarshalIndent(*sac,"","\t")
-		if err!=nil{
+		bjson, err := json.MarshalIndent(*sac, "", "\t")
+		if err != nil {
 			log.Fatal("Json module error")
 		}
-		tools.Save2File(bjson,cfgname)
-    }else{
-    	bjson,err:=tools.OpenAndReadAll(cfgname)
-    	if err!=nil{
-    		log.Fatal(err)
-		}
-
-    	sac := &SAConfig{}
-    	err = json.Unmarshal(bjson,sac)
-		if err!=nil{
+		tools.Save2File(bjson, cfgname)
+	} else {
+		bjson, err := tools.OpenAndReadAll(cfgname)
+		if err != nil {
 			log.Fatal(err)
 		}
-    	sar.SacInst = sac
+
+		sac := &SAConfig{}
+		err = json.Unmarshal(bjson, sac)
+		if err != nil {
+			log.Fatal(err)
+		}
+		sar.SacInst = sac
 	}
 
-	download:=path.Join(sar.HomeDir,sar.SacInst.DownloadDir)
-	upload:=path.Join(sar.HomeDir,sar.SacInst.UploadDir)
+	download := path.Join(sar.HomeDir, sar.SacInst.DownloadDir)
+	upload := path.Join(sar.HomeDir, sar.SacInst.UploadDir)
 
-	if !tools.FileExists(download){
-		os.MkdirAll(download,0755)
+	if !tools.FileExists(download) {
+		os.MkdirAll(download, 0755)
 	}
-	if !tools.FileExists(upload){
-		os.MkdirAll(upload,0755)
+	if !tools.FileExists(upload) {
+		os.MkdirAll(upload, 0755)
 	}
 
 	return sar
 }
-

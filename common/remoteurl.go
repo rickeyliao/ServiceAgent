@@ -2,8 +2,8 @@ package common
 
 import (
 	"strconv"
-	"sync"
 	"strings"
+	"sync"
 )
 
 type remoteurl struct {
@@ -20,11 +20,9 @@ type RemoteUrl interface {
 	GetPort() uint16
 }
 
-
 var (
 	remoteurlinst RemoteUrl
 	remoteurllock sync.Mutex
-
 )
 
 func GetRemoteUrlInst() RemoteUrl {
@@ -32,20 +30,20 @@ func GetRemoteUrlInst() RemoteUrl {
 }
 
 func NewRemoteUrl1(ipaddress string) RemoteUrl {
-	arr:=strings.Split(ipaddress,":")
-	if len(arr) != 2{
+	arr := strings.Split(ipaddress, ":")
+	if len(arr) != 2 {
 		return nil
 	}
 
-	return NewRemoteUrl(arr[0],arr[1])
+	return NewRemoteUrl(arr[0], arr[1])
 }
 
-func NewRemoteUrl(host string,port string) RemoteUrl {
-	if port == ""{
+func NewRemoteUrl(host string, port string) RemoteUrl {
+	if port == "" {
 		port = "80"
 	}
 
-	if host == ""{
+	if host == "" {
 		host = "localhost"
 	}
 
@@ -53,10 +51,10 @@ func NewRemoteUrl(host string,port string) RemoteUrl {
 		remoteurllock.Lock()
 		defer remoteurllock.Unlock()
 
-		if remoteurlinst == nil{
-			ru:=&remoteurl{}
+		if remoteurlinst == nil {
+			ru := &remoteurl{}
 			ru.host = host
-			p,_ := strconv.Atoi(port)
+			p, _ := strconv.Atoi(port)
 			ru.port = uint16(p)
 
 			remoteurlinst = ru
@@ -66,36 +64,34 @@ func NewRemoteUrl(host string,port string) RemoteUrl {
 	return remoteurlinst
 }
 
-
-func (ru *remoteurl)getHostName(path string) string  {
+func (ru *remoteurl) getHostName(path string) string {
 	var port string
-	if ru.port == 80{
+	if ru.port == 80 {
 		port = ""
-	}else{
-		port = ":"+strconv.Itoa(int(ru.port))
+	} else {
+		port = ":" + strconv.Itoa(int(ru.port))
 	}
 
-	return ru.host+port + path
+	return ru.host + port + path
 }
 
-func (ru *remoteurl)GetHostName(path string) string  {
-	return "http://"+ru.getHostName(path)
+func (ru *remoteurl) GetHostName(path string) string {
+	return "http://" + ru.getHostName(path)
 }
 
-func (ru *remoteurl)GetHostNameSSL(path string) string  {
-	return "https://"+ru.getHostName(path)
+func (ru *remoteurl) GetHostNameSSL(path string) string {
+	return "https://" + ru.getHostName(path)
 }
 
-
-func (ru *remoteurl)SetHost(host string){
+func (ru *remoteurl) SetHost(host string) {
 	ru.host = host
 }
-func (ru *remoteurl)GetHost() string{
+func (ru *remoteurl) GetHost() string {
 	return ru.host
 }
-func (ru *remoteurl)SetPort(port uint16){
+func (ru *remoteurl) SetPort(port uint16) {
 	ru.port = port
 }
-func (ru *remoteurl)GetPort() uint16{
+func (ru *remoteurl) GetPort() uint16 {
 	return ru.port
 }

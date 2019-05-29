@@ -22,7 +22,7 @@ import (
 
 var (
 	Version string
-	Build string
+	Build   string
 )
 
 // versionCmd represents the version command
@@ -36,8 +36,8 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Version:",Version)
-		fmt.Println("Build  :",Build)
+		fmt.Println("Version:", Version)
+		fmt.Println("Build  :", Build)
 	},
 }
 

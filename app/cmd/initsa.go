@@ -15,11 +15,10 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/spf13/cobra"
 	"log"
 )
-
 
 var sahome string
 var force bool
@@ -35,7 +34,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		sar:=common.GetSARootCfgHdir(sahome,force)
+		sar := common.GetSARootCfgHdir(sahome, force)
 		sar.InitConfig(force)
 		log.Println("Config initialized")
 	},
@@ -53,6 +52,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	initCmd.Flags().StringVarP(&sahome,"homedir","d","","home directory (default is $HOME/.sa/)")
-	initCmd.Flags().BoolVarP(&force,"force","f",false,"force init a default configuration ( default false)")
+	initCmd.Flags().StringVarP(&sahome, "homedir", "d", "", "home directory (default is $HOME/.sa/)")
+	initCmd.Flags().BoolVarP(&force, "force", "f", false, "force init a default configuration ( default false)")
 }

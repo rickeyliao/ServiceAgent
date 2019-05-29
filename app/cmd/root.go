@@ -18,20 +18,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
-	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/kprc/nbsnetwork/tools"
+	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/service"
+	"github.com/spf13/cobra"
 	"log"
-	"net/http"
-	"github.com/rickeyliao/ServiceAgent/agent/key"
-	"github.com/rickeyliao/ServiceAgent/agent/email"
-	"github.com/rickeyliao/ServiceAgent/agent/software"
-	"github.com/rickeyliao/ServiceAgent/service/localaddress"
-	"strconv"
-	"github.com/rickeyliao/ServiceAgent/agent/listallip"
-	"github.com/rickeyliao/ServiceAgent/service/postsocks5"
 )
-
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -45,52 +37,23 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-		Run: func(cmd *cobra.Command, args []string) {
-			sar:=common.GetSARootCfg()
-			if !sar.IsInitialized() {
-				log.Println("Please Initialize First")
-				return
-			}
-			//load config
-			sar.LoadCfg()
-			cfg:=sar.SacInst
-			//if the program started, quit
-			if tools.CheckPortUsed(cfg.ListenTyp,cfg.LocalListenPort){
-				log.Println("sa have started")
-				return
-			}
-			remotehost:=cfg.RemoteServerIP
-			remoteport:=cfg.RemoteServerPort
-
-			if remotehost == "" && remoteport == 0{
-				log.Println("Please set remote host and port")
-				return
-			}
-
-			//fmt.Println(remotehost)
-
-			ips:=remotehost + ":" + strconv.Itoa(int(remoteport))
-			common.NewRemoteUrl1(ips)
-
-			http.Handle(cfg.VerifyPath, key.NewKeyAuth())
-			http.Handle(cfg.ConsumePath,key.NewKeyImport())
-			http.Handle(cfg.EmailPath,email.NewEmailRecord())
-			http.Handle(cfg.UpdateClientSoftwarePath,software.NewUpdateSoft())
-			http.Handle(cfg.TestIPAddress,localaddress.NewLocalAddress())
-			http.Handle(cfg.ListIpsPath,listallip.NewListAllIps())
-			http.Handle(cfg.PostSocks5Path,postsocks5.NewPostSocks5())
-
-			listenportstr := ":"+strconv.Itoa(int(cfg.LocalListenPort))
-
-			log.Println("Remote Server:",common.GetRemoteUrlInst().GetHostName(""))
-			log.Println("Server Listen at:",listenportstr)
-
-			log.Fatal(http.ListenAndServe(listenportstr, nil))
-
-		},
+	Run: func(cmd *cobra.Command, args []string) {
+		sar := common.GetSARootCfg()
+		if !sar.IsInitialized() {
+			log.Println("Please Initialize First")
+			return
+		}
+		//load config
+		sar.LoadCfg()
+		cfg := sar.SacInst
+		//if the program started, quit
+		if tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
+			log.Println("sa have started")
+			return
+		}
+		service.Run(cfg)
+	},
 }
-
-
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -172,10 +135,4 @@ func initConfig() {
 	//
 	//tools.Save2File(s,"/Users/rickey/.sa/config/sa.config")
 
-
 }
-
-
-
-
-

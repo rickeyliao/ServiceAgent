@@ -18,9 +18,8 @@ import "github.com/rickeyliao/ServiceAgent/app/cmd"
 
 var (
 	Version string
-	Build string
+	Build   string
 )
-
 
 func main() {
 	cmd.Version = Version
