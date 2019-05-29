@@ -1,7 +1,8 @@
 SHELL := /bin/bash
 
 # The name of the executable (default is current directory name)
-TARGET := $(shell echo $${PWD\#\#*/})
+#TARGET := $(shell echo $${PWD\#\#*/})
+TARGET := sa
 .DEFAULT_GOAL: $(TARGET)
 
 # These will be provided to the target
