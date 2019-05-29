@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 # The name of the executable (default is current directory name)
 BASENAME := $(shell echo $${PWD\#\#*/})
-TARGET := sa
+TARGET := nbssa
 .DEFAULT_GOAL: $(TARGET)
 
 # These will be provided to the target
@@ -22,7 +22,9 @@ all: check install
 
 Test:
 	@echo $(LDFLAGS)
-	@echo $(GOBIN)
+	@echo $(eval srcname:= $(shell which ${BASENAME}))
+	@echo $(srcname)
+	@echo $$(which ${BASENAME}) $(subst ${BASENAME},$(TARGET),$(srcname))
 
 $(TARGET): $(SRC)
 	@go build $(LDFLAGS) -o $(TARGET)
@@ -35,7 +37,8 @@ clean:
 
 install:
 	@go install $(LDFLAGS)
-	@mv $$(which ${BASENAME}) $(subst $(BASENAME),$(TARGET),$$(which ${BASENAME}))
+	@$(eval srcname:= $(shell which ${BASENAME}))
+	@mv $(srcname) $(subst $(BASENAME),$(TARGET),$(srcname))
 
 uninstall: clean
 	@rm -f $$(which ${TARGET})
