@@ -23,13 +23,13 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	"log"
 	"net/http"
-	"github.com/rickeyliao/ServiceAgent/key"
-	"github.com/rickeyliao/ServiceAgent/email"
-	"github.com/rickeyliao/ServiceAgent/software"
-	"github.com/rickeyliao/ServiceAgent/localaddress"
+	"github.com/rickeyliao/ServiceAgent/agent/key"
+	"github.com/rickeyliao/ServiceAgent/agent/email"
+	"github.com/rickeyliao/ServiceAgent/agent/software"
+	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 	"strconv"
-	"github.com/rickeyliao/ServiceAgent/listallip"
-	"github.com/rickeyliao/ServiceAgent/postsocks5"
+	"github.com/rickeyliao/ServiceAgent/agent/listallip"
+	"github.com/rickeyliao/ServiceAgent/service/postsocks5"
 )
 
 

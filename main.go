@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/rickeyliao/ServiceAgent/appmain/cmd"
+import "github.com/rickeyliao/ServiceAgent/app/cmd"
 
 var (
 	Version string
