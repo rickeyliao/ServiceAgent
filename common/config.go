@@ -13,22 +13,22 @@ import (
 
 
 type SAConfig struct {
-	DownloadDir string
-	UploadDir string
-	UploadMaxSize int64
-	RemoteServerIP string
-	RemoteServerPort uint16
-	VerifyPath string
-	ConsumePath string
-	PostSocks5Path string
-	ListIpsPath string
-	EmailPath string
-	UpdateClientSoftwarePath string
-	SoftWareVersion string
-	LocalListenPort uint16
-	BootstrapIPAddress []string
-	TestIPAddress string
-	ListenTyp string
+	DownloadDir string   			`json:"downloaddir"`
+	UploadDir string     			`json:"uploaddir"`
+	UploadMaxSize int64				`json:"uploadmaxsize"`
+	RemoteServerIP string			`json:"remoteserverip"`
+	RemoteServerPort uint16			`json:"remoteserverport"`
+	VerifyPath string				`json:"verifypath"`
+	ConsumePath string				`json:"consumepath"`
+	PostSocks5Path string			`json:"postsocks5path"`
+	ListIpsPath string				`json:"listipspath"`
+	EmailPath string				`json:"emailpath"`
+	UpdateClientSoftwarePath string	`json:"updateclientsoftwarepath"`
+	SoftWareVersion string			`json:"softwareversion"`
+	LocalListenPort uint16			`json:"locallistenport"`
+	BootstrapIPAddress []string		`json:"bootstrapipaddress"`
+	TestIPAddress string			`json:"testipaddress"`
+	ListenTyp string				`json:"listentyp"`
 
 }
 
@@ -190,7 +190,7 @@ func DefaultInitConfig() *SAConfig  {
 	sa.RemoteServerIP = "207.148.9.49"
 	sa.RemoteServerPort = 80
 	sa.LocalListenPort = 50810
-	sa.ListenTyp = "udp4"
+	sa.ListenTyp = "tcp4"
 	sa.SoftWareVersion = "0.1.0.0521"
 	sa.UpdateClientSoftwarePath = "/public/app"
 	sa.UploadDir = "upload"
