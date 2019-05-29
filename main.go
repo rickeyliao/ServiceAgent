@@ -16,6 +16,14 @@ package main
 
 import "github.com/rickeyliao/ServiceAgent/appmain/cmd"
 
+var (
+	Version string
+	Build string
+)
+
+
 func main() {
+	cmd.Version = Version
+	cmd.Build = Build
 	cmd.Execute()
 }
