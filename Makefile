@@ -35,7 +35,7 @@ clean:
 
 install:
 	@go install $(LDFLAGS)
-	@mv $(GOBIN)/$(BASENAME) $(GOBIN)/$(TARGET)
+	@mv $$(which ${BASENAME}) $(subst $(BASENAME),$(TARGET),$$(which ${BASENAME}))
 
 uninstall: clean
 	@rm -f $$(which ${TARGET})
