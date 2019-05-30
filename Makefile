@@ -16,7 +16,7 @@ LDFLAGS=-race -x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
 # go source files, ignore vendor directory
 SRC = $(shell find . -type f -name '*.go' -not -path "./test/*")
 
-.PHONY: all build clean install uninstall fmt simplify check run Test
+.PHONY: all build clean install uninstall fmt simplify check run Test buildmac installmac
 
 all: check install
 
@@ -34,9 +34,14 @@ build: $(TARGET)
 
 clean:
 	@rm -f $(TARGET)
-
 install:
 	@go install $(LDFLAGS)
+	@mv $$(which ${BASENAME})  $(subst ${BASENAME},$(TARGET),$$(which ${BASENAME}))
+
+buildmac:
+	@go install $(LDFLAGS)
+
+installmac:
 	@$(eval srcname:= $(shell which ${BASENAME}))
 	@mv $(srcname) $(subst $(BASENAME),$(TARGET),$(srcname))
 
