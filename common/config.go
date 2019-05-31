@@ -14,6 +14,7 @@ import (
 type SAConfig struct {
 	DownloadDir              string   `json:"downloaddir"`
 	UploadDir                string   `json:"uploaddir"`
+	KeyDir                   string   `json:"keydir"`
 	UploadMaxSize            int64    `json:"uploadmaxsize"`
 	RemoteServerIP           string   `json:"remoteserverip"`
 	RemoteServerPort         uint16   `json:"remoteserverport"`
@@ -181,6 +182,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.BootstrapIPAddress = []string{"103.45.98.72:50810", "174.7.124.45:50810"}
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadDir = "download"
+	sa.KeyDir = "key"
 	sa.EmailPath = "/public/key/refresh"
 	sa.RemoteServerIP = "207.148.9.49"
 	sa.RemoteServerPort = 80
@@ -263,6 +265,7 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 
 	download := path.Join(sar.HomeDir, sar.SacInst.DownloadDir)
 	upload := path.Join(sar.HomeDir, sar.SacInst.UploadDir)
+	keydir := path.Join(sar.HomeDir,sar.SacInst.KeyDir)
 
 	if !tools.FileExists(download) {
 		os.MkdirAll(download, 0755)
@@ -270,6 +273,12 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 	if !tools.FileExists(upload) {
 		os.MkdirAll(upload, 0755)
 	}
+	if !tools.FileExists(keydir){
+		os.MkdirAll(keydir,0755)
+	}
 
 	return sar
 }
+
+
+
