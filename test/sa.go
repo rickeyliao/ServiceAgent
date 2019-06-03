@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 	"fmt"
-	"os"
+	"github.com/kprc/nbsnetwork/tools/crypt/nbsrsa"
 )
 
 
@@ -25,6 +25,8 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "count is %d\n", h.n)
 
 }
+
+
 
 //func main() {
 //	http.Handle("/count", new(countHandler))
@@ -54,7 +56,16 @@ func main()  {
 	//
 	//fmt.Println(*cfg.SacInst)
 
-	os.RemoveAll("/Users/rickey/xxsa")
+	//os.RemoveAll("/Users/rickey/xxsa")
+
+	priv,_:=nbsrsa.GenerateKeyPair(1024)
+
+	err:=nbsrsa.Save2FileRSAKey(".rsa/key",priv)
+	if err!=nil{
+		fmt.Println(err)
+	}
+
+	nbsrsa.LoadRSAKey("/Users/rickey/.rsa/key")
 
 
 }
