@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 	"fmt"
-	"github.com/kprc/nbsnetwork/tools/crypt/nbsrsa"
+	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 )
 
 
@@ -58,15 +58,21 @@ func main()  {
 
 	//os.RemoveAll("/Users/rickey/xxsa")
 
-	priv,_:=nbsrsa.GenerateKeyPair(1024)
+	//priv,_:= nbscrypt.GenerateKeyPair(1024)
+	//
+	//err:= nbscrypt.Save2FileRSAKey(".rsa/key",priv)
+	//if err!=nil{
+	//	fmt.Println(err)
+	//}
 
-	err:=nbsrsa.Save2FileRSAKey(".rsa/key",priv)
-	if err!=nil{
-		fmt.Println(err)
-	}
+	priv,pub,_:=nbscrypt.LoadRSAKey("/Users/rickey/.rsa/key")
 
-	nbsrsa.LoadRSAKey("/Users/rickey/.rsa/key")
+	cipertext,_:=nbscrypt.EncryptRSA([]byte("Hello World,I'm a Goland Programer"),pub)
+	fmt.Println(len(cipertext))
+	fmt.Println(string(cipertext))
 
+	plaintext,_:=nbscrypt.DecryptRsa(cipertext,priv)
+	fmt.Println(string(plaintext))
 
 }
 
