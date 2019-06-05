@@ -26,7 +26,13 @@ Test:
 	@echo $(srcname)
 	@echo $$(which ${BASENAME}) $(subst ${BASENAME},$(TARGET),$(srcname))
 
-$(TARGET): $(SRC)
+rpcservice := app/pb
+
+
+proto:
+	protoc -I=$(rpcservice)  --go_out=plugins=grpc:${rpcservice}   ${rpcservice}/*.proto
+
+$(TARGET): proto $(SRC)
 	@go build $(LDFLAGS) -o $(TARGET)
 
 build: $(TARGET)
@@ -34,11 +40,12 @@ build: $(TARGET)
 
 clean:
 	@rm -f $(TARGET)
+	@rm -f $(rpcservice)/*.pb.go
 install:
 	@go install $(LDFLAGS)
 	@mv $$(which ${BASENAME})  $(subst ${BASENAME},$(TARGET),$$(which ${BASENAME}))
 
-buildmac:
+buildmac: $(TARGET)
 	@go install $(LDFLAGS)
 
 installmac:

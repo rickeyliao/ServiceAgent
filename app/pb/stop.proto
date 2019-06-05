@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+
+service stopnbssa {
+	rpc Stopnbssa (StopRequest) returns (DefaultResp) {}
+}
+
+
+message StopRequest{
+
+}
+
+
+message DefaultResp{
+	string message = 1;
+}
