@@ -29,6 +29,7 @@ func Run(cfg *common.SAConfig) {
 		return
 	}
 
+
 	//fmt.Println(remotehost)
 
 	mux := http.NewServeMux()
@@ -59,3 +60,4 @@ func Stop() {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)
 }
+

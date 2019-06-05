@@ -20,9 +20,10 @@ import (
 
 	"github.com/kprc/nbsnetwork/tools"
 	"github.com/rickeyliao/ServiceAgent/common"
-	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/spf13/cobra"
 	"log"
+	"github.com/rickeyliao/ServiceAgent/service"
+	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -47,7 +48,8 @@ var rootCmd = &cobra.Command{
 			log.Println("nbssa have started")
 			return
 		}
-		service.Run(cfg)
+		go service.Run(cfg)
+		cmdservice.StartCmdService()
 	},
 }
 

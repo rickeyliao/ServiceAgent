@@ -22,6 +22,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/sevlyar/go-daemon"
 	"path"
+	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 )
 
 // daemonCmd represents the daemon command
@@ -66,7 +67,8 @@ var daemonCmd = &cobra.Command{
 
 		log.Println("nbssa daemon started")
 
-		service.Run(cfg)
+		go service.Run(cfg)
+		cmdservice.StartCmdService()
 
 	},
 }

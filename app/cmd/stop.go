@@ -15,9 +15,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	pb "github.com/rickeyliao/ServiceAgent/app/pb"
+	"log"
 )
 
 // stopCmd represents the stop command
@@ -26,7 +26,7 @@ var stopCmd = &cobra.Command{
 	Short: "stop a nbssa daemon",
 	Long: `stop a nbssa daemon`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("stop called")
+		stop()
 	},
 }
 
@@ -42,4 +42,17 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// stopCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func stop()  {
+	request := &pb.StopRequest{}
+
+	conn := DialToCmdService()
+	defer conn.Close()
+
+	client := pb.NewStopnbssaClient(conn.c)
+
+	response, err := client.Stopnbssa(conn.ctx, request)
+
+	log.Println(response, err)
 }
