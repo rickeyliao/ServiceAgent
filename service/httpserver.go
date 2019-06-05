@@ -48,6 +48,7 @@ func Run(cfg *common.SAConfig) {
 
 	log.Println("Remote Server:", common.GetRemoteUrlInst().GetHostName(""))
 	log.Println("Server Listen at:", listenportstr)
+	log.Println("LocalNbsAddress: ", cfg.NbsRsaAddr)
 
 	httpserver = &http.Server{Addr: listenportstr, Handler: mux}
 
