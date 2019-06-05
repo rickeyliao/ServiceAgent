@@ -17,9 +17,9 @@ LDFLAGS=-x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
 # go source files, ignore vendor directory
 SRC = $(shell find . -type f -name '*.go' -not -path "./test/*")
 
-.PHONY: all build clean install uninstall fmt simplify check run Test buildmac installmac
+.PHONY: all build clean install uninstall fmt simplify check run Test preinstmac installmac
 
-all: check install
+all: check build
 
 Test:
 	@echo $(LDFLAGS)
@@ -46,10 +46,10 @@ install:
 	@go install $(LDFLAGS)
 	@mv $$(which ${BASENAME})  $(subst ${BASENAME},$(TARGET),$$(which ${BASENAME}))
 
-buildmac: $(TARGET)
+preinstmac: $(TARGET)
 	@go install $(LDFLAGS)
 
-installmac:
+installmac: preinstmac
 	@$(eval srcname:= $(shell which ${BASENAME}))
 	@mv $(srcname) $(subst $(BASENAME),$(TARGET),$(srcname))
 
@@ -65,7 +65,7 @@ simplify:
 check:
 	@test -z $(shell gofmt -l main.go | tee /dev/stderr) || echo "[WARN] Fix formatting issues with 'make fmt'"
 	@for d in $$(go list ./... | grep -v /test/); do golint $${d}; done
-	@go tool vet ${SRC}
+	#@go vet ${SRC}
 
 run: install
 	@$(TARGET)

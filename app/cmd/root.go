@@ -32,9 +32,10 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		if !CheckProcessReady() {
+		if !CheckProcessCanStarted(){
 			return
 		}
+
 		cfg:=common.GetSAConfig()
 		go service.Run(cfg)
 		cmdservice.StartCmdService()

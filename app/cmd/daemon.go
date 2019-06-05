@@ -18,7 +18,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"log"
-	"github.com/kprc/nbsnetwork/tools"
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/sevlyar/go-daemon"
 	"path"
@@ -31,20 +30,11 @@ var daemonCmd = &cobra.Command{
 	Short: "nbssa start as daemon",
 	Long: `nbssa start as daemon`,
 	Run: func(cmd *cobra.Command, args []string) {
-		sar := common.GetSARootCfg()
-		if !sar.IsInitialized() {
-			log.Println("Please Initialize First")
+		if !CheckProcessCanStarted(){
 			return
 		}
-		//load config
-		sar.LoadCfg()
-		sar.LoadRsaKey()
-		cfg := sar.SacInst
-		//if the program started, quit
-		if tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
-			log.Println("sa have started")
-			return
-		}
+		sar:=common.GetSARootCfg()
+		cfg:=common.GetSAConfig()
 		daemondir:=path.Join(sar.HomeDir,cfg.PidDir)
 		cntxt:=daemon.Context{
 			PidFileName: path.Join(daemondir,"nbssa.pid"),

@@ -76,3 +76,22 @@ func CheckProcessReady() bool {
 
 	return true
 }
+
+func CheckProcessCanStarted() bool {
+	sar := common.GetSARootCfg()
+	if !sar.IsInitialized() {
+		log.Println("Please Initialize First")
+		return false
+	}
+	//load config
+	sar.LoadCfg()
+	sar.LoadRsaKey()
+	cfg := sar.SacInst
+	//if the program started, quit
+	if tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
+		log.Println("sa have started")
+		return false
+	}
+
+	return true
+}
