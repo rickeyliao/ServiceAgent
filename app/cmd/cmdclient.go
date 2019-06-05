@@ -7,6 +7,8 @@ import (
 	"strconv"
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"fmt"
+	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/kprc/nbsnetwork/tools"
 )
 
 
@@ -54,4 +56,23 @@ func DefaultCmdSend(cmd int32)  {
 		fmt.Println(response.Message)
 	}
 
+}
+
+func CheckProcessReady() bool {
+	sar := common.GetSARootCfg()
+	if !sar.IsInitialized() {
+		log.Println("Please Initialize First")
+		return false
+	}
+	//load config
+	sar.LoadCfg()
+	sar.LoadRsaKey()
+	cfg := sar.SacInst
+	//if the program started, quit
+	if !tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
+		log.Println("nbssa not started")
+		return false
+	}
+
+	return true
 }

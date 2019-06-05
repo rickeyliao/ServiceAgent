@@ -29,9 +29,6 @@ func Run(cfg *common.SAConfig) {
 		return
 	}
 
-
-	//fmt.Println(remotehost)
-
 	mux := http.NewServeMux()
 
 	ips := remotehost + ":" + strconv.Itoa(int(remoteport))

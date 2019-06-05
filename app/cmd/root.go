@@ -18,36 +18,24 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kprc/nbsnetwork/tools"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/spf13/cobra"
-	"log"
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "sa",
+	Use:   "nbssa",
 	Short: "start nbssa in command line",
 	Long: `start nbssa in command line`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		sar := common.GetSARootCfg()
-		if !sar.IsInitialized() {
-			log.Println("Please Initialize First")
+		if !CheckProcessReady() {
 			return
 		}
-		//load config
-		sar.LoadCfg()
-		sar.LoadRsaKey()
-		cfg := sar.SacInst
-		//if the program started, quit
-		if tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
-			log.Println("nbssa have started")
-			return
-		}
+		cfg:=common.GetSAConfig()
 		go service.Run(cfg)
 		cmdservice.StartCmdService()
 	},

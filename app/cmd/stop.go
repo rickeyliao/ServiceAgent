@@ -16,9 +16,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"log"
-	"github.com/rickeyliao/ServiceAgent/common"
-	"github.com/kprc/nbsnetwork/tools"
 	"github.com/rickeyliao/ServiceAgent/app"
 )
 
@@ -28,18 +25,7 @@ var stopCmd = &cobra.Command{
 	Short: "stop a nbssa daemon",
 	Long: `stop a nbssa daemon`,
 	Run: func(cmd *cobra.Command, args []string) {
-		sar := common.GetSARootCfg()
-		if !sar.IsInitialized() {
-			log.Println("Please Initialize First")
-			return
-		}
-		//load config
-		sar.LoadCfg()
-		//sar.LoadRsaKey()
-		cfg := sar.SacInst
-		//if the program started, quit
-		if !tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
-			log.Println("nbssa not started")
+		if !CheckProcessReady() {
 			return
 		}
 		DefaultCmdSend(app.CMD_STOP_REQ)

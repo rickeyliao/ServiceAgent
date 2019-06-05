@@ -26,7 +26,9 @@ var configCmd = &cobra.Command{
 	Short:   "config any parameter in nbssa",
 	Long: `config any parameter in nbssa`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//viper.InConfig()
+		if !CheckProcessReady() {
+			return
+		}
 		fmt.Println("config cmd called")
 	},
 }
