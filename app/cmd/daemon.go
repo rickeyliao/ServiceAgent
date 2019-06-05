@@ -59,6 +59,7 @@ var daemonCmd = &cobra.Command{
 			log.Fatal("Unable to run: ", err)
 		}
 		if d != nil {
+			log.Println("nbssa starting, please check log at:",path.Join(daemondir,"nbssa.log"))
 			return
 		}
 		defer cntxt.Release()
