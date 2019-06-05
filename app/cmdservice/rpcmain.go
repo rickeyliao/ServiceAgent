@@ -22,6 +22,7 @@ func StartCmdService()  {
 	grpcServer = grpc.NewServer()
 
 	pb.RegisterDefaultnbssasrvServer(grpcServer,&api.CmdDefaultServer{StopCmdService})
+	pb.RegisterConfigchangeServer(grpcServer,&api.CmdConfigServer{})
 	reflection.Register(grpcServer)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)

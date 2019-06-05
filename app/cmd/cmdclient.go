@@ -58,6 +58,22 @@ func DefaultCmdSend(cmd int32)  {
 
 }
 
+func DefaultCmdSendStr(msg string)  {
+	request := &pb.DefaultRequestMsg{}
+	request.Message = msg
+
+	conn := DialToCmdService()
+	defer conn.Close()
+
+	client := pb.NewConfigchangeClient(conn.c)
+
+	if response, err := client.ChangeConfig(conn.ctx, request);err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(response.Message)
+	}
+}
+
 func CheckProcessReady() bool {
 	sar := common.GetSARootCfg()
 	if !sar.IsInitialized() {

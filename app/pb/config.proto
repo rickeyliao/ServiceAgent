@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+import "default.proto";
+
+service configchange{
+    rpc ChangeConfig (DefaultRequestMsg) returns (DefaultResp) {}
+}

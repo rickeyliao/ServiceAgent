@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"fmt"
 )
 
 // configCmd represents the config command
@@ -29,7 +28,7 @@ var configCmd = &cobra.Command{
 		if !CheckProcessReady() {
 			return
 		}
-		fmt.Println("config cmd called")
+		DefaultCmdSendStr(args[0])
 	},
 }
 
