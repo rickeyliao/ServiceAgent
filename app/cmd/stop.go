@@ -16,10 +16,10 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"log"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/kprc/nbsnetwork/tools"
+	"github.com/rickeyliao/ServiceAgent/app"
 )
 
 // stopCmd represents the stop command
@@ -42,7 +42,7 @@ var stopCmd = &cobra.Command{
 			log.Println("nbssa not started")
 			return
 		}
-		stop()
+		DefaultCmdSend(app.CMD_STOP_REQ)
 	},
 }
 
@@ -50,15 +50,3 @@ func init() {
 	rootCmd.AddCommand(stopCmd)
 }
 
-func stop()  {
-	request := &pb.StopRequest{}
-
-	conn := DialToCmdService()
-	defer conn.Close()
-
-	client := pb.NewStopnbssaClient(conn.c)
-
-	response, err := client.Stopnbssa(conn.ctx, request)
-
-	log.Println(response, err)
-}

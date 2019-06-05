@@ -2,17 +2,10 @@ syntax = "proto3";
 
 package rpccmdservice;
 
+import "default.proto";
 
-service stopnbssa {
-	rpc Stopnbssa (StopRequest) returns (DefaultResp) {}
+service defaultnbssasrv {
+	rpc DefaultNbssa (DefaultRequest) returns (DefaultResp) {}
 }
 
 
-message StopRequest{
-
-}
-
-
-message DefaultResp{
-	string message = 1;
-}

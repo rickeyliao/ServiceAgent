@@ -5,6 +5,8 @@ import (
 	"context"
 	"log"
 	"strconv"
+	pb "github.com/rickeyliao/ServiceAgent/app/pb"
+	"fmt"
 )
 
 
@@ -37,3 +39,19 @@ func (conn *CmdConnection) Close() {
 	conn.cancel()
 }
 
+func DefaultCmdSend(cmd int32)  {
+	request := &pb.DefaultRequest{}
+	request.Reqid = cmd
+
+	conn := DialToCmdService()
+	defer conn.Close()
+
+	client := pb.NewDefaultnbssasrvClient(conn.c)
+
+	if response, err := client.DefaultNbssa(conn.ctx, request);err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(response)
+	}
+
+}

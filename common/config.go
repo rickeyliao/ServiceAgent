@@ -82,6 +82,10 @@ func GetSARootCfg() *SARootConfig {
 	return sarInst
 }
 
+func GetSAConfig() *SAConfig {
+	return GetSARootCfg().SacInst
+}
+
 func forceInitRootConfig(hdir string) *SARootConfig {
 	var sahome string
 	var homedir string
@@ -180,7 +184,7 @@ func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
 		sar = unforceInitRootConfig(hdir)
 	}
 
-	log.Println("Config Root:", sar.HomeDir)
+	//log.Println("Config Root:", sar.HomeDir)
 
 	return sar
 }
