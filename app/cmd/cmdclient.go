@@ -51,7 +51,7 @@ func DefaultCmdSend(cmd int32)  {
 	if response, err := client.DefaultNbssa(conn.ctx, request);err!=nil{
 		fmt.Println(err)
 	}else {
-		fmt.Println(response)
+		fmt.Println(response.Message)
 	}
 
 }

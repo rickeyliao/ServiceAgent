@@ -7,6 +7,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/app"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"encoding/json"
+	"strconv"
 )
 
 type CmdDefaultServer struct {
@@ -21,6 +22,12 @@ func (ss *CmdDefaultServer)DefaultNbssa(ctx context.Context, in *pb.DefaultReque
 	if in.Reqid == app.CMD_CONFIG_SHOW_REQ{
 		return ss.configshow()
 	}
+
+	if in.Reqid == app.CMD_REMOTE_SHOW_REQ{
+		return ss.remoteshow()
+	}
+
+
 	resp := &pb.DefaultResp{}
 	resp.Message = "no cmd found"
 
@@ -51,4 +58,14 @@ func (ss *CmdDefaultServer)configshow() (*pb.DefaultResp,error) {
 
 	return resp,nil
 
+}
+
+func (ss *CmdDefaultServer)remoteshow() (*pb.DefaultResp,error) {
+	sac:=common.GetSAConfig()
+
+	resp:=&pb.DefaultResp{}
+
+	resp.Message = sac.RemoteServerIP + ":" + strconv.Itoa(int(sac.RemoteServerPort))
+
+	return resp,nil
 }
