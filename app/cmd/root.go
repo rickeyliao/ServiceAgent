@@ -44,7 +44,7 @@ var rootCmd = &cobra.Command{
 		cfg := sar.SacInst
 		//if the program started, quit
 		if tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
-			log.Println("sa have started")
+			log.Println("nbssa have started")
 			return
 		}
 		service.Run(cfg)
