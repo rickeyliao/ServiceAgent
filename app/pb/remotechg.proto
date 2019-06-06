@@ -5,6 +5,8 @@ package rpccmdservice;
 
 import "default.proto";
 
+
 service remotechange{
     rpc RemoteChange (DefaultRequestMsg) returns (DefaultResp) {}
 }
+
