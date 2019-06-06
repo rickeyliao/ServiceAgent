@@ -10,8 +10,6 @@ import (
 	"encoding/json"
 	"github.com/kprc/nbsnetwork/tools"
 	"path"
-
-	"log"
 )
 
 type RemoteConfig struct {
@@ -21,7 +19,7 @@ type RemoteConfig struct {
 
 
 func (ccs *RemoteConfig) RemoteChange(ctx context.Context,req *pb.DefaultRequestMsg) (*pb.DefaultResp, error) {
-	log.Println(req.Message)
+	
 	param:=strings.Split(req.Message,":")
 	if len(param) != 2 {
 		return encResp("config format error"),nil
