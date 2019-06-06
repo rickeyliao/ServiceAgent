@@ -27,7 +27,7 @@ var remoteCmd = &cobra.Command{
 		if !CheckProcessReady() {
 			return
 		}
-		DefaultCmdSendStr(args[0])
+		RemoteCmdSendStr(args[0])
 	},
 }
 

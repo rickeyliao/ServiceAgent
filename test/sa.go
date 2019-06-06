@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"sync"
 	"fmt"
-	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
+	"strings"
+	"net"
+	"strconv"
 )
 
 
@@ -65,14 +67,27 @@ func main()  {
 	//	fmt.Println(err)
 	//}
 
-	priv,pub,_:=nbscrypt.LoadRSAKey("/Users/rickey/.rsa/key")
+	//priv,pub,_:=nbscrypt.LoadRSAKey("/Users/rickey/.rsa/key")
+	//
+	//cipertext,_:=nbscrypt.EncryptRSA([]byte("Hello World,I'm a Goland Programer"),pub)
+	//fmt.Println(len(cipertext))
+	//fmt.Println(string(cipertext))
+	//
+	//plaintext,_:=nbscrypt.DecryptRsa(cipertext,priv)
+	//fmt.Println(string(plaintext))
 
-	cipertext,_:=nbscrypt.EncryptRSA([]byte("Hello World,I'm a Goland Programer"),pub)
-	fmt.Println(len(cipertext))
-	fmt.Println(string(cipertext))
+	fmt.Println(len(strings.Split(":11223",":")))
 
-	plaintext,_:=nbscrypt.DecryptRsa(cipertext,priv)
-	fmt.Println(string(plaintext))
+	s,err:=net.ResolveIPAddr("ip4", "")
+	if err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(s.String())
+	}
+
+	if _,err1:=strconv.Atoi("5544");err1!=nil{
+		fmt.Println(err1)
+	}
 
 }
 

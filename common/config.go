@@ -215,12 +215,16 @@ func DefaultInitConfig() *SAConfig {
 }
 
 func (sar *SARootConfig) LoadCfg() *SAConfig {
-	viper.AddConfigPath(path.Join(sar.CfgDir))
+	viper.AddConfigPath(sar.CfgDir)
+	//fmt.Println(sar.CfgDir)
+
 	strarr := strings.Split(sar.CfgFileName, ".")
 	viper.SetConfigName(strarr[0])
 
+	//fmt.Println(strarr[0])
+
 	if err := viper.ReadInConfig(); err != nil {
-		log.Println("Read config file error")
+		log.Println("Read config file error",err)
 		os.Exit(1)
 	}
 
