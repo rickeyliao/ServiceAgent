@@ -17,7 +17,7 @@ LDFLAGS=-x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
 # go source files, ignore vendor directory
 SRC = $(shell find . -type f -name '*.go' -not -path "./test/*")
 
-.PHONY: all build clean install uninstall fmt simplify check run Test preinstmac installmac
+.PHONY: all build clean install uninstall fmt simplify check run Test preinst
 
 all: check build
 
@@ -42,14 +42,14 @@ build: $(TARGET)
 clean:
 	@rm -f $(TARGET)
 	@rm -f $(rpcservice)/*.pb.go
-install:
-	@go install $(LDFLAGS)
-	@mv $$(which ${BASENAME})  $(subst ${BASENAME},$(TARGET),$$(which ${BASENAME}))
+#install: preinst
+#	#@go install $(LDFLAGS)
+#	@mv $$(which ${BASENAME})  $(subst ${BASENAME},$(TARGET),$$(which ${BASENAME}))
 
-preinstmac: $(TARGET)
+preinst: $(TARGET)
 	@go install $(LDFLAGS)
 
-installmac: preinstmac
+install: preinst
 	@$(eval srcname:= $(shell which ${BASENAME}))
 	@mv $(srcname) $(subst $(BASENAME),$(TARGET),$(srcname))
 
