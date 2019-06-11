@@ -91,7 +91,7 @@ func (cbs *CmdBootstrapServer)ChangeBootstrap(ctx context.Context, req *pb.Boots
 	straddrs:=make([]string,0)
 
 	for _,bsa:=range addrs{
-		straddrs = append(straddrs,bsa.addr+":"+strconv.Itoa(int(bsa.port)))
+		straddrs = append(straddrs,bsa.String())
 	}
 
 	sac.BootstrapIPAddress = straddrs
