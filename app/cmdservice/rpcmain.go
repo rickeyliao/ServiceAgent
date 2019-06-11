@@ -24,6 +24,7 @@ func StartCmdService()  {
 	pb.RegisterDefaultnbssasrvServer(grpcServer,&api.CmdDefaultServer{StopCmdService})
 	pb.RegisterConfigchangeServer(grpcServer,&api.CmdConfigServer{})
 	pb.RegisterRemotechangeServer(grpcServer,&api.RemoteConfig{})
+	pb.RegisterBootstrapCHGServer(grpcServer,&api.CmdBootstrapServer{})
 	reflection.Register(grpcServer)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)

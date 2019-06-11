@@ -128,3 +128,18 @@ func CheckProcessCanStarted() bool {
 
 	return true
 }
+
+func BootstrapCmdSend(op bool,req string)  {
+	request := &pb.BootstrapCHGReq{Op:op,Address:req}
+	conn := DialToCmdService()
+	defer conn.Close()
+
+	client:=pb.NewBootstrapCHGClient(conn.c)
+
+	if response, err := client.ChangeBootstrap(conn.ctx, request);err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(response.Message)
+	}
+
+}

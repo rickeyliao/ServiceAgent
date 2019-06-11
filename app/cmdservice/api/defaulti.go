@@ -78,7 +78,6 @@ func (ss *CmdDefaultServer)bootstrapshow() (*pb.DefaultResp,error)  {
 	sac:=common.GetSAConfig()
 	resp:=&pb.DefaultResp{}
 
-	//resp.Message = sac.bo
 	message := ""
 	for _,v:=range sac.BootstrapIPAddress{
 		if message != ""{

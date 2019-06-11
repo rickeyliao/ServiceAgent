@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+import "default.proto";
+
+
+message BootstrapCHGReq{
+    bool op = 1;                //true add, false remove
+    string address = 2;
+}
+
+
+
+service BootstrapCHG{
+    rpc ChangeBootstrap (BootstrapCHGReq) returns (DefaultResp) {}
+}

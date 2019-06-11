@@ -15,8 +15,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +24,10 @@ var addCmd = &cobra.Command{
 	Short: "add a bootstrap address",
 	Long: `add a bootstrap address`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		if !CheckProcessReady(){
+			return
+		}
+		BootstrapCmdSend(true,args[0])
 	},
 }
 
