@@ -17,7 +17,6 @@ type RemoteConfig struct {
 }
 
 
-
 func (ccs *RemoteConfig) RemoteChange(ctx context.Context,req *pb.DefaultRequestMsg) (*pb.DefaultResp, error) {
 	
 	param:=strings.Split(req.Message,":")

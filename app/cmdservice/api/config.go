@@ -32,8 +32,6 @@ func (ccs *CmdConfigServer) ChangeConfig(ctx context.Context,req *pb.DefaultRequ
 		return encResp("read config file error"),nil
 	}
 
-	//fmt.Println(param)
-
 	if !viper.InConfig(param[0]){
 		return encResp("no set key"),nil
 	}

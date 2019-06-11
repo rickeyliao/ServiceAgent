@@ -12,9 +12,9 @@ import (
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"crypto/rsa"
 	"github.com/pkg/errors"
-	"crypto/sha1"
 	"crypto/x509"
-	"encoding/hex"
+	"github.com/minio/sha256-simd"
+	"github.com/mr-tron/base58"
 )
 
 type SAConfig struct {
@@ -322,21 +322,14 @@ func (sac *SAConfig)GenNbsRsaAddr()  {
 		log.Fatal(errors.New("No Private Key Found"))
 	}
 
-	//sac.NbsRsaAddr = sha1.
 	pubkeybytes := x509.MarshalPKCS1PublicKey(&sac.PrivKey.PublicKey)
 
-	//sac.NbsRsaAddr = sha1.New().Write(pubkeybytes)
-
-	s:=sha1.New()
+	s:=sha256.New()
 	s.Write(pubkeybytes)
 
-
 	sum:=s.Sum(nil)
-	var hexdata []byte = make([]byte,2*len(sum))
 
-	n:=hex.Encode(hexdata,sum)
-
-	sac.NbsRsaAddr = string(hexdata[:n])
+	sac.NbsRsaAddr = "91"+base58.Encode(sum)
 }
 
 
