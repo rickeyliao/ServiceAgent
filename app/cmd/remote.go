@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"fmt"
 )
 
 // remoteCmd represents the remote command
@@ -25,6 +26,10 @@ var remoteCmd = &cobra.Command{
 	Long: `change remote address`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
+			return
+		}
+		if args == nil || len(args) == 0{
+			fmt.Println("Please enter the parameter")
 			return
 		}
 		RemoteCmdSendStr(args[0])
