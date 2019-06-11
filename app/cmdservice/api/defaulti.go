@@ -27,6 +27,10 @@ func (ss *CmdDefaultServer)DefaultNbssa(ctx context.Context, in *pb.DefaultReque
 		return ss.remoteshow()
 	}
 
+	if in.Reqid == app.CMD_BOOTSTRAP_SHOW_REQ{
+		return ss.bootstrapshow()
+	}
+
 
 	resp := &pb.DefaultResp{}
 	resp.Message = "no cmd found"
@@ -66,6 +70,25 @@ func (ss *CmdDefaultServer)remoteshow() (*pb.DefaultResp,error) {
 	resp:=&pb.DefaultResp{}
 
 	resp.Message = sac.RemoteServerIP + ":" + strconv.Itoa(int(sac.RemoteServerPort))
+
+	return resp,nil
+}
+
+func (ss *CmdDefaultServer)bootstrapshow() (*pb.DefaultResp,error)  {
+	sac:=common.GetSAConfig()
+	resp:=&pb.DefaultResp{}
+
+	//resp.Message = sac.bo
+	message := ""
+	for _,v:=range sac.BootstrapIPAddress{
+		if message != ""{
+			message += "\r\n"
+		}
+		message += v
+
+	}
+
+	resp.Message = message
 
 	return resp,nil
 }
