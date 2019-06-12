@@ -23,6 +23,7 @@ import (
 var (
 	Version string
 	Build   string
+	BuildTime string
 )
 
 // versionCmd represents the version command
@@ -31,8 +32,9 @@ var versionCmd = &cobra.Command{
 	Short: "show nbssa version",
 	Long: `show nbssa version`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Version:", Version)
-		fmt.Println("Build  :", Build)
+		fmt.Println("Version    :", Version)
+		fmt.Println("Build      :", Build)
+		fmt.Println("Build Time :",BuildTime)
 	},
 }
 

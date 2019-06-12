@@ -8,11 +8,12 @@ TARGET := nbssa
 # These will be provided to the target
 VERSION := 1.0.1
 BUILD := `git rev-parse HEAD`
+BUILDTIME := `date "+%Y-%m-%d/%H:%M:%S/%Z"`
 
 # Use linker flags to provide version/build settings to the target
-#LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -linkmode=external -v"
-LDFLAGS=-x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)" 
-#LDFLAGS=-race -x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)" 
+#LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -X=main.BuildTime=$(BUILDTIME) -linkmode=external -v"
+LDFLAGS=-x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -X=main.BuildTime=$(BUILDTIME)"
+#LDFLAGS=-race -x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -X=main.BuildTime=$(BUILDTIME)"
 
 # go source files, ignore vendor directory
 SRC = $(shell find . -type f -name '*.go' -not -path "./test/*")
@@ -24,7 +25,7 @@ all: check build
 Test:
 	@echo $(LDFLAGS)
 	@echo $(eval srcname:= $(shell which ${BASENAME}))
-	@echo $(srcname)
+	@echo $(BUILDTIME)
 	@echo $$(which ${BASENAME}) $(subst ${BASENAME},$(TARGET),$(srcname))
 
 rpcservice := app/pb

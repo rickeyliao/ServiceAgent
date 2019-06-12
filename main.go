@@ -19,10 +19,12 @@ import "github.com/rickeyliao/ServiceAgent/app/cmd"
 var (
 	Version string
 	Build   string
+	BuildTime string
 )
 
 func main() {
 	cmd.Version = Version
 	cmd.Build = Build
+	cmd.BuildTime = BuildTime
 	cmd.Execute()
 }

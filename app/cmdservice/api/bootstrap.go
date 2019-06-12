@@ -49,7 +49,6 @@ func (cbs *CmdBootstrapServer)ChangeBootstrap(ctx context.Context, req *pb.Boots
 	addrs := make([]*bootstrapaddr,0)
 
 	addflag:=false
-	n:=0
 
 	for _,v:=range addrarr{
 		ipport:=strings.Split(v,":")
@@ -77,14 +76,12 @@ func (cbs *CmdBootstrapServer)ChangeBootstrap(ctx context.Context, req *pb.Boots
 				continue
 			}
 		}
-		n++
 		addrs = append(addrs,bsa)
 	}
 	if req.Op && !addflag{
 		bsa:=&bootstrapaddr{}
 		bsa.port = paramport
 		bsa.addr = paramip
-		n++
 		addrs = append(addrs,bsa)
 	}
 
