@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"strings"
 	"sync"
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"crypto/rsa"
@@ -31,13 +30,12 @@ type SAConfig struct {
 	ListIpsPath              string   			`json:"listipspath"`
 	EmailPath                string   			`json:"emailpath"`
 	UpdateClientSoftwarePath string   			`json:"updateclientsoftwarepath"`
-	SoftWareVersion          string   			`json:"softwareversion"`
 	LocalListenPort          uint16   			`json:"locallistenport"`
 	BootstrapIPAddress       []string 			`json:"bootstrapipaddress"`
 	TestIPAddress            string   			`json:"testipaddress"`
 	ListenTyp                string   			`json:"listentyp"`
-	PrivKey                  *rsa.PrivateKey	`json:"-"`
 	NbsRsaAddr				 string             `json:"nbsaddr"`
+	PrivKey                  *rsa.PrivateKey	`json:"-"`
 }
 
 type SARootConfig struct {
@@ -202,7 +200,6 @@ func DefaultInitConfig() *SAConfig {
 	sa.RemoteServerPort = 80
 	sa.LocalListenPort = 50810
 	sa.ListenTyp = "tcp4"
-	sa.SoftWareVersion = "0.1.0.0521"
 	sa.UpdateClientSoftwarePath = "/public/app"
 	sa.UploadDir = "upload"
 	sa.UploadMaxSize = 1000 //1g
@@ -214,27 +211,29 @@ func DefaultInitConfig() *SAConfig {
 	return sa
 }
 
-func (sar *SARootConfig) LoadCfg() *SAConfig {
-	viper.AddConfigPath(sar.CfgDir)
-	//fmt.Println(sar.CfgDir)
 
-	strarr := strings.Split(sar.CfgFileName, ".")
-	viper.SetConfigName(strarr[0])
+func (sar *SARootConfig) LoadCfg() *SAConfig{
 
-	//fmt.Println(strarr[0])
+	data,err:=tools.OpenAndReadAll(path.Join(sar.CfgDir,sar.CfgFileName))
 
-	if err := viper.ReadInConfig(); err != nil {
-		log.Println("Read config file error",err)
-		os.Exit(1)
+	if err!=nil{
+		return nil
 	}
 
-	cfg := &SAConfig{}
-	viper.Unmarshal(cfg)
+	cfg:=&SAConfig{}
+
+	if err = json.Unmarshal(data,cfg);err!=nil{
+		return nil
+	}
 
 	sar.SacInst = cfg
 
+	//fmt.Println(cfg)
+
 	return cfg
+
 }
+
 
 func (sar *SARootConfig) IsInitialized() bool {
 	cfgname := path.Join(sar.CfgDir, sar.CfgFileName)
@@ -327,6 +326,7 @@ func (sac *SAConfig)GenNbsRsaAddr()  {
 	s:=sha256.New()
 	s.Write(pubkeybytes)
 
+
 	sum:=s.Sum(nil)
 
 	sac.NbsRsaAddr = "91"+base58.Encode(sum)
@@ -353,8 +353,9 @@ func (sar *SARootConfig)LoadRsaKey()  {
 		bjson, err := json.MarshalIndent(*sar.SacInst, "", "\t")
 		if err != nil {
 			log.Fatal("Json module error")
+		}else{
+			tools.Save2File(bjson, path.Join(sar.CfgDir,sar.CfgFileName))
 		}
-		tools.Save2File(bjson, path.Join(sar.CfgDir,sar.CfgFileName))
 	}
 
 }
