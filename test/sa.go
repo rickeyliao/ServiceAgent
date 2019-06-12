@@ -4,9 +4,8 @@ import (
 	"net/http"
 	"sync"
 	"fmt"
-	"strings"
-	"net"
-	"strconv"
+	"crypto/sha1"
+	"gx/ipfs/QmWFAMPqsEyUX7gDUsRVmMWz59FxSpJ1b2v6bJ1yYzo7jY/go-base58-fast/base58"
 )
 
 
@@ -25,6 +24,8 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	h.n++
 	fmt.Fprintf(w, "count is %d\n", h.n)
+
+
 
 }
 
@@ -76,18 +77,24 @@ func main()  {
 	//plaintext,_:=nbscrypt.DecryptRsa(cipertext,priv)
 	//fmt.Println(string(plaintext))
 
-	fmt.Println(len(strings.Split(":11223",":")))
+	s:=sha1.New()
+	s.Write([]byte("hello world"))
+	result := s.Sum(nil)
 
-	s,err:=net.ResolveIPAddr("ip4", "")
-	if err!=nil{
-		fmt.Println(err)
-	}else {
-		fmt.Println(s.String())
-	}
+	fmt.Println(len(result),base58.Encode(result))
 
-	if _,err1:=strconv.Atoi("5544");err1!=nil{
-		fmt.Println(err1)
-	}
+	//fmt.Println(len(strings.Split(":11223",":")))
+	//
+	//s,err:=net.ResolveIPAddr("ip4", "")
+	//if err!=nil{
+	//	fmt.Println(err)
+	//}else {
+	//	fmt.Println(s.String())
+	//}
+	//
+	//if _,err1:=strconv.Atoi("5544");err1!=nil{
+	//	fmt.Println(err1)
+	//}
 
 }
 

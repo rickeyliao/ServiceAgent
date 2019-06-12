@@ -12,8 +12,8 @@ import (
 	"crypto/rsa"
 	"github.com/pkg/errors"
 	"crypto/x509"
-	"github.com/minio/sha256-simd"
 	"github.com/mr-tron/base58"
+	"crypto/sha256"
 )
 
 type SAConfig struct {
@@ -228,8 +228,6 @@ func (sar *SARootConfig) LoadCfg() *SAConfig{
 
 	sar.SacInst = cfg
 
-	//fmt.Println(cfg)
-
 	return cfg
 
 }
@@ -357,9 +355,7 @@ func (sar *SARootConfig)LoadRsaKey()  {
 			tools.Save2File(bjson, path.Join(sar.CfgDir,sar.CfgFileName))
 		}
 	}
-
 }
-
 
 
 
