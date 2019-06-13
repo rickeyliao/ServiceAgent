@@ -32,9 +32,9 @@ var versionCmd = &cobra.Command{
 	Short: "show nbssa version",
 	Long: `show nbssa version`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Version    :", Version)
-		fmt.Println("Build      :", Build)
-		fmt.Println("Build Time :",BuildTime)
+		fmt.Println("Version      :", Version)
+		fmt.Println("Build commit :", Build)
+		fmt.Println("Build Time   :",BuildTime)
 	},
 }
 
