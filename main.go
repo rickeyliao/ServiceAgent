@@ -14,7 +14,14 @@
 
 package main
 
-import "github.com/rickeyliao/ServiceAgent/app/cmd"
+import (
+	"github.com/rickeyliao/ServiceAgent/app/cmd"
+	"os/exec"
+	"os"
+	"path/filepath"
+	"strings"
+	"errors"
+)
 
 var (
 	Version string
@@ -26,5 +33,25 @@ func main() {
 	cmd.Version = Version
 	cmd.Build = Build
 	cmd.BuildTime = BuildTime
+	cmd.RunPath,_=GetCurrentPath()
+
 	cmd.Execute()
+}
+func GetCurrentPath() (string, error) {
+	file, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		return "", err
+	}
+	path, err := filepath.Abs(file)
+	if err != nil {
+		return "", err
+	}
+	i := strings.LastIndex(path, "/")
+	if i < 0 {
+		i = strings.LastIndex(path, "\\")
+	}
+	if i < 0 {
+		return "", errors.New(`error: Can't find "/" or "\".`)
+	}
+	return string(path[0 : i+1]), nil
 }

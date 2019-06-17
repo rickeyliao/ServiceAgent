@@ -29,10 +29,11 @@ Test:
 	@echo $$(which ${BASENAME}) $(subst ${BASENAME},$(TARGET),$(srcname))
 
 rpcservice := app/pb
-
+dhtrpc := dht/pb
 
 proto:
 	protoc -I=$(rpcservice)  --go_out=plugins=grpc:${rpcservice}   ${rpcservice}/*.proto
+	protoc -I=$(dhtrpc)  --go_out=plugins=grpc:${dhtrpc}   ${dhtrpc}/*.proto
 
 $(TARGET): proto $(SRC)
 	@go build $(LDFLAGS) -o $(TARGET)

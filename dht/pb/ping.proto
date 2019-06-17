@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pbdht;
+
+
+message pingreq{
+    uint64 sn = 1;
+    uint32 msgtyp=2;
+    bytes nbsaddr=3;
+}
+
+message pingresp{
+    uint64 rcvsn=1;
+    uint32 msgtype=2;
+    bytes nbsaddr=3;
+}
+
