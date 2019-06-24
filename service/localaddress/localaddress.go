@@ -28,4 +28,5 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, arr[0])
 
+
 }

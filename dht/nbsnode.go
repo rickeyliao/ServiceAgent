@@ -58,7 +58,7 @@ func (node *NbsNode)Ping() (bool,error)  {
 	}
 	defer conn.Close()
 
-	data:=node.encPingData()
+	sn,data:=node.encPingData()
 	if data == nil{
 		return false,errors.New("enc Ping Request Failed")
 	}
@@ -69,7 +69,6 @@ func (node *NbsNode)Ping() (bool,error)  {
 		return false,errors.New("Send Ping Request Failed")
 	}
 
-
 	conn.SetReadDeadline(time.Now().Add(time.Second*2))
 
 	buf :=make([]byte,1024)
@@ -79,11 +78,21 @@ func (node *NbsNode)Ping() (bool,error)  {
 		return false,err
 	}
 
+	if err=node.updateByPingResp(buf,sn);err!=nil{
+		return false,err
+	}
+
 	return true,nil
 }
 
-func (node *NbsNode) Store(key []byte,v []byte) error {
-	
+func (node *NbsNode) Store(key []byte,dv *DhtValue) error {
+	if node.AddrCmp(GetLocalNode().NbsAddr){
+		//save local db
+
+		return nil
+	}
+
+	//send to remote
 
 	return nil
 }
@@ -92,6 +101,6 @@ func (node *NbsNode)FindNode(key []byte) (list.List,error)  {
 	return nil,nil
 }
 
-func (node *NbsNode)FindValue(key []byte) (list.List,[]byte,error)  {
+func (node *NbsNode)FindValue(key []byte) (list.List,*DhtValue,error)  {
 	return nil,nil,nil
 }

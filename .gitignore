@@ -1,3 +1,5 @@
 ServiceAgent
 nbssa
 main
+test/
+.DS_Store

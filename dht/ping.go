@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (node *NbsNode)encPingData() []byte {
+func (node *NbsNode)encPingData() (uint64,[]byte) {
 	req:=&pbdht.Pingreq{}
 
 	req.Sn = GetNextMsgCnt()
@@ -18,9 +18,9 @@ func (node *NbsNode)encPingData() []byte {
 
 	if data,err:=proto.Marshal(req);err!=nil{
 		log.Fatal("Marshall Ping Request Message Failed")
-		return nil
+		return 0,nil
 	}else {
-		return data
+		return req.Sn,data
 	}
 }
 

@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"path"
+	"github.com/rickeyliao/ServiceAgent/service/file"
 )
 
 var (
@@ -41,6 +43,7 @@ func Run(cfg *common.SAConfig) {
 	mux.Handle(cfg.TestIPAddress, localaddress.NewLocalAddress())
 	mux.Handle(cfg.ListIpsPath, listallip.NewListAllIps())
 	mux.Handle(cfg.PostSocks5Path, postsocks5.NewPostSocks5())
+	mux.Handle(path.Join("/",cfg.UploadDir),file.NewFileUpLoad())
 
 	listenportstr := ":" + strconv.Itoa(int(cfg.LocalListenPort))
 
