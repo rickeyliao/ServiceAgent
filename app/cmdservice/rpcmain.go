@@ -9,13 +9,14 @@ import (
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"google.golang.org/grpc/reflection"
 	"github.com/rickeyliao/ServiceAgent/service"
+	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 var grpcServer *grpc.Server
 
 func StartCmdService()  {
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", 50811))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", common.GetSAConfig().CmdListenIP,common.GetSAConfig().CmdListenPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

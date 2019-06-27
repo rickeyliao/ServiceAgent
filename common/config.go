@@ -30,11 +30,14 @@ type SAConfig struct {
 	ListIpsPath              string   			`json:"listipspath"`
 	EmailPath                string   			`json:"emailpath"`
 	UpdateClientSoftwarePath string   			`json:"updateclientsoftwarepath"`
-	LocalListenPort          uint16   			`json:"locallistenport"`
+	HttpListenPort           uint16   			`json:"httplistenport"`
 	BootstrapIPAddress       []string 			`json:"bootstrapipaddress"`
 	TestIPAddress            string   			`json:"testipaddress"`
 	ListenTyp                string   			`json:"listentyp"`
 	NbsRsaAddr				 string             `json:"nbsaddr"`
+	CmdListenIP              string             `json:"cmdlistenip"`
+	CmdListenPort            uint16             `json:"cmdlistenport"`
+	DhtListenPort            uint16             `json:"dhtlistenport"`
 	PrivKey                  *rsa.PrivateKey	`json:"-"`
 }
 
@@ -198,7 +201,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.EmailPath = "/public/key/refresh"
 	sa.RemoteServerIP = "207.148.9.49"
 	sa.RemoteServerPort = 80
-	sa.LocalListenPort = 50810
+	sa.HttpListenPort = 50810
 	sa.ListenTyp = "tcp4"
 	sa.UpdateClientSoftwarePath = "/public/app"
 	sa.UploadDir = "upload"
@@ -207,6 +210,9 @@ func DefaultInitConfig() *SAConfig {
 	sa.TestIPAddress = "/localipaddress"
 	sa.ListIpsPath = "/public/servers/list"
 	sa.PostSocks5Path = "/postsocks5"
+	sa.CmdListenIP = "127.0.0.1"
+	sa.CmdListenPort = 50811
+	sa.DhtListenPort = 50812
 
 	return sa
 }

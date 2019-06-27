@@ -19,7 +19,7 @@ type CmdConnection struct {
 }
 
 func DialToCmdService() *CmdConnection {
-	var address = "127.0.0.1:" + strconv.Itoa(50811)
+	var address = "127.0.0.1:" + strconv.Itoa(int(common.GetSAConfig().CmdListenPort))
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
@@ -102,7 +102,7 @@ func CheckProcessReady() bool {
 	sar.LoadRsaKey()
 	cfg := sar.SacInst
 	//if the program started, quit
-	if !tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
+	if !tools.CheckPortUsed(cfg.ListenTyp, cfg.CmdListenPort) {
 		log.Println("nbssa not started")
 		return false
 	}
@@ -121,7 +121,7 @@ func CheckProcessCanStarted() bool {
 	sar.LoadRsaKey()
 	cfg := sar.SacInst
 	//if the program started, quit
-	if tools.CheckPortUsed(cfg.ListenTyp, cfg.LocalListenPort) {
+	if tools.CheckPortUsed(cfg.ListenTyp, cfg.CmdListenPort) {
 		log.Println("nbssa have started")
 		return false
 	}

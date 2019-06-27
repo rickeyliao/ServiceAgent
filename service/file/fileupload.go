@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	maxUploadSize=10*1024*1024   //10M
+	maxUploadSize=1<<20   //1M
 )
 
 
@@ -21,15 +21,15 @@ func NewFileUpLoad()  http.Handler {
 }
 
 func (fu *fileupload)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
-	r.ParseMultipartForm(32<<20)
+	r.ParseMultipartForm(maxUploadSize)
+	defer r.MultipartForm.RemoveAll()
 	file,h,err:=r.FormFile("filename")
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer file.Close()
-	fmt.Fprintf(w, "%v", h.Header)
-	f, err := os.OpenFile("./test/"+h.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	//fmt.Fprintf(w, "%v", h.Header)
+	f, err := os.OpenFile("./"+h.Filename, os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -38,4 +38,5 @@ func (fu *fileupload)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 	io.Copy(f, file)
 
 	w.Write([]byte("success"))
+	fmt.Println("save file",h.Filename,"success")
 }

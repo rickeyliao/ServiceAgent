@@ -45,7 +45,7 @@ func Run(cfg *common.SAConfig) {
 	mux.Handle(cfg.PostSocks5Path, postsocks5.NewPostSocks5())
 	mux.Handle(path.Join("/",cfg.UploadDir),file.NewFileUpLoad())
 
-	listenportstr := ":" + strconv.Itoa(int(cfg.LocalListenPort))
+	listenportstr := ":" + strconv.Itoa(int(cfg.HttpListenPort))
 
 	log.Println("Remote Server:", common.GetRemoteUrlInst().GetHostName(""))
 	log.Println("Server Listen at:", listenportstr)
