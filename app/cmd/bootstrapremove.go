@@ -15,24 +15,24 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"fmt"
+	"github.com/spf13/cobra"
 )
 
 // removeCmd represents the remove command
 var removeCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "remove a bootstrap address",
-	Long: `remove a bootstrap address`,
+	Long:  `remove a bootstrap address`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !CheckProcessReady(){
+		if !CheckProcessReady() {
 			return
 		}
-		if args == nil || len(args) == 0{
+		if args == nil || len(args) == 0 {
 			fmt.Println("Please enter the parameter")
 			return
 		}
-		BootstrapCmdSend(false,args[0])
+		BootstrapCmdSend(false, args[0])
 	},
 }
 

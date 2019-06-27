@@ -1,45 +1,44 @@
 package db
 
 import (
-	"os"
-	"log"
+	"bufio"
+	"encoding/json"
 	"github.com/kprc/nbsnetwork/tools"
 	"github.com/pkg/errors"
-	"bufio"
 	"io"
-	"encoding/json"
+	"log"
+	"os"
 	"reflect"
 )
 
 type filedbkev struct {
-	Key string   `json:"k"`
-	Value string  `json:"v"`
+	Key   string `json:"k"`
+	Value string `json:"v"`
 }
 
 type filedb struct {
 	filepath string
-	f *os.File
-	mkey map[string]string
-
+	f        *os.File
+	mkey     map[string]string
 }
 
-func NewFileDb(filepath string)  *filedb  {
-	return &filedb{filepath:filepath,mkey:make(map[string]string)}
+func NewFileDb(filepath string) *filedb {
+	return &filedb{filepath: filepath, mkey: make(map[string]string)}
 }
 
-func (fdb *filedb)Open() NbsDbInter  {
-	if fdb.filepath =="" {
+func (fdb *filedb) Open() NbsDbInter {
+	if fdb.filepath == "" {
 		log.Fatal("No Fill ")
 	}
 
-	flag:=os.O_RDWR|os.O_APPEND
+	flag := os.O_RDWR | os.O_APPEND
 
-	if !tools.FileExists(fdb.filepath){
+	if !tools.FileExists(fdb.filepath) {
 		flag |= os.O_CREATE
 	}
-	if f,err:= os.OpenFile(fdb.filepath,flag,0755);err!=nil{
+	if f, err := os.OpenFile(fdb.filepath, flag, 0755); err != nil {
 		log.Fatal("Can't open file")
-	}else{
+	} else {
 		fdb.f = f
 	}
 
@@ -49,19 +48,18 @@ func (fdb *filedb)Open() NbsDbInter  {
 
 	fdb.f = nil
 
-
 	return fdb
 }
 
-func (fdb *filedb)load()  {
-	if fdb.f == nil{
+func (fdb *filedb) load() {
+	if fdb.f == nil {
 		return
 	}
 	bf := bufio.NewReader(fdb.f)
 
 	for {
-		if line,_,err:=bf.ReadLine();err!=nil{
-			if err == io.EOF{
+		if line, _, err := bf.ReadLine(); err != nil {
+			if err == io.EOF {
 				break
 			}
 
@@ -70,68 +68,68 @@ func (fdb *filedb)load()  {
 				break
 			}
 
-			if len(line)>0{
+			if len(line) > 0 {
 				//pending drop it
 				log.Fatal("Reading pending")
 				break
 			}
 
-		}else{
-			if len(line) > 0{
+		} else {
+			if len(line) > 0 {
 				fdb.tomap(line)
 			}
 		}
 	}
 }
 
-func (fdb *filedb)tomap(line []byte)  {
+func (fdb *filedb) tomap(line []byte) {
 
-	k:=&filedbkev{}
+	k := &filedbkev{}
 
-	if err:=json.Unmarshal(line,k);err!=nil{
+	if err := json.Unmarshal(line, k); err != nil {
 		return
-	}else{
-		fdb.Insert(k.Key,k.Value)
+	} else {
+		fdb.Insert(k.Key, k.Value)
 	}
 }
 
-func (fdb *filedb)Insert(key string, value string) error {
-	if _,ok:=fdb.mkey[key];!ok{
+func (fdb *filedb) Insert(key string, value string) error {
+	if _, ok := fdb.mkey[key]; !ok {
 		fdb.mkey[key] = value
-	}else{
+	} else {
 		return errors.New("Duplicate key")
 	}
 
 	return nil
 }
 
-func (fdb *filedb)Delete(key string) {
-	delete(fdb.mkey,key)
+func (fdb *filedb) Delete(key string) {
+	delete(fdb.mkey, key)
 }
 
-func (fdb *filedb)Find(key string) (string,error) {
-	if v,ok:=fdb.mkey[key];ok{
-		return v,nil
+func (fdb *filedb) Find(key string) (string, error) {
+	if v, ok := fdb.mkey[key]; ok {
+		return v, nil
 	}
-	return "",errors.New("Not Found")
+	return "", errors.New("Not Found")
 }
 
-func (fdb *filedb)Update(key string,value string)  {
+func (fdb *filedb) Update(key string, value string) {
 
-	fdb.mkey[key]=value
+	fdb.mkey[key] = value
 }
 
-func (fdb *filedb)write(data []byte)  {
-	if fdb.f == nil || fdb.filepath == ""{
-		flag:=os.O_WRONLY|os.O_TRUNC
+func (fdb *filedb) write(data []byte) {
+	if fdb.f == nil || fdb.filepath == "" {
+		flag := os.O_WRONLY | os.O_TRUNC
 
-		if !tools.FileExists(fdb.filepath){
+		if !tools.FileExists(fdb.filepath) {
 			flag |= os.O_CREATE
 		}
-		if f,err:= os.OpenFile(fdb.filepath,flag,0755);err!=nil{
+		if f, err := os.OpenFile(fdb.filepath, flag, 0755); err != nil {
 			log.Fatal("Can't open file")
 			return
-		}else{
+		} else {
 			fdb.f = f
 		}
 	}
@@ -139,27 +137,26 @@ func (fdb *filedb)write(data []byte)  {
 	fdb.f.Write(data)
 }
 
+func (fdb *filedb) Save() {
 
-func (fdb *filedb)Save()   {
-
-	listkey:=reflect.ValueOf(fdb.mkey).MapKeys()
-	for _,key:=range listkey{
-		k:=key.Interface().(string)
+	listkey := reflect.ValueOf(fdb.mkey).MapKeys()
+	for _, key := range listkey {
+		k := key.Interface().(string)
 
 		fk := &filedbkev{}
 
 		fk.Key = k
 		fk.Value = fdb.mkey[k]
 
-		if bj,err:=json.Marshal(fk);err!=nil{
-			log.Println("save error",k,fk.Value)
-		}else{
+		if bj, err := json.Marshal(fk); err != nil {
+			log.Println("save error", k, fk.Value)
+		} else {
 			fdb.write(bj)
 		}
 
 	}
 
-	if fdb.f != nil{
+	if fdb.f != nil {
 		fdb.f.Close()
 	}
 

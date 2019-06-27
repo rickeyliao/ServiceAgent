@@ -1,14 +1,14 @@
 package dht
 
 import (
-	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"github.com/gogo/protobuf/proto"
-	"log"
 	"github.com/pkg/errors"
+	"github.com/rickeyliao/ServiceAgent/dht/pb"
+	"log"
 )
 
-func (node *NbsNode)encPingData() (uint64,[]byte) {
-	req:=&pbdht.Pingreq{}
+func (node *NbsNode) encPingData() (uint64, []byte) {
+	req := &pbdht.Pingreq{}
 
 	req.Sn = GetNextMsgCnt()
 
@@ -16,27 +16,27 @@ func (node *NbsNode)encPingData() (uint64,[]byte) {
 
 	req.Nbsaddr = GetLocalNode().NbsAddr
 
-	if data,err:=proto.Marshal(req);err!=nil{
+	if data, err := proto.Marshal(req); err != nil {
 		log.Fatal("Marshall Ping Request Message Failed")
-		return 0,nil
-	}else {
-		return req.Sn,data
+		return 0, nil
+	} else {
+		return req.Sn, data
 	}
 }
 
-func (node *NbsNode)updateByPingResp(buf []byte,reqsn uint64) error  {
+func (node *NbsNode) updateByPingResp(buf []byte, reqsn uint64) error {
 
-	resp:=&pbdht.Pingresp{}
+	resp := &pbdht.Pingresp{}
 
-	if err:=proto.Unmarshal(buf,resp);err!=nil{
+	if err := proto.Unmarshal(buf, resp); err != nil {
 		return err
 	}
 
-	if reqsn != resp.Rcvsn{
+	if reqsn != resp.Rcvsn {
 		return errors.New("SerialNumber not Corrected!")
 	}
 
-	if !node.AddrCmp(resp.Nbsaddr){
+	if !node.AddrCmp(resp.Nbsaddr) {
 		//todo update
 	}
 

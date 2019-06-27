@@ -15,17 +15,17 @@
 package main
 
 import (
+	"errors"
 	"github.com/rickeyliao/ServiceAgent/app/cmd"
-	"os/exec"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
-	"errors"
 )
 
 var (
-	Version string
-	Build   string
+	Version   string
+	Build     string
 	BuildTime string
 )
 
@@ -33,7 +33,7 @@ func main() {
 	cmd.Version = Version
 	cmd.Build = Build
 	cmd.BuildTime = BuildTime
-	cmd.RunPath,_=GetCurrentPath()
+	cmd.RunPath, _ = GetCurrentPath()
 
 	cmd.Execute()
 }

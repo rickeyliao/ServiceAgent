@@ -1,20 +1,19 @@
 package dht
 
 import (
-	"sync"
-	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/mr-tron/base58"
+	"github.com/rickeyliao/ServiceAgent/common"
+	"sync"
 )
 
 var (
-	localNode *NbsNode
+	localNode      *NbsNode
 	localNode_lock sync.Mutex
 )
 
 func GetLocalNode() *NbsNode {
-	if localNode == nil{
+	if localNode == nil {
 		localNode_lock.Lock()
-
 
 		localNode = newLocalNode()
 
@@ -25,17 +24,17 @@ func GetLocalNode() *NbsNode {
 	return localNode
 }
 
-func newLocalNode() *NbsNode  {
+func newLocalNode() *NbsNode {
 
-	sac:=common.GetSAConfig()
+	sac := common.GetSAConfig()
 
-	nbsAddr:=sac.NbsRsaAddr
+	nbsAddr := sac.NbsRsaAddr
 
-	node:=&NbsNode{}
+	node := &NbsNode{}
 
-	if addr,err:=base58.Decode(nbsAddr[2:]);err!=nil{
+	if addr, err := base58.Decode(nbsAddr[2:]); err != nil {
 		return nil
-	}else{
+	} else {
 		node.NbsAddr = addr
 		node.Port = NbsAddr2Port(node.NbsAddr)
 	}
@@ -43,7 +42,3 @@ func newLocalNode() *NbsNode  {
 	return node
 
 }
-
-
-
-

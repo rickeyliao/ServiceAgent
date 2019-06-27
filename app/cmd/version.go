@@ -21,21 +21,21 @@ import (
 )
 
 var (
-	Version string
-	Build   string
+	Version   string
+	Build     string
 	BuildTime string
-	RunPath string
+	RunPath   string
 )
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show nbssa version",
-	Long: `show nbssa version`,
+	Long:  `show nbssa version`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Version      :", Version)
 		fmt.Println("Build commit :", Build)
-		fmt.Println("Build Time   :",BuildTime)
+		fmt.Println("Build Time   :", BuildTime)
 		//fmt.Println("Run Path     :",RunPath)
 	},
 }

@@ -1,29 +1,27 @@
 package file
 
 import (
-	"net/http"
 	"fmt"
-	"os"
 	"io"
+	"net/http"
+	"os"
 )
 
 const (
-	maxUploadSize=1<<20   //1M
+	maxUploadSize = 1 << 20 //1M
 )
 
-
 type fileupload struct {
-
 }
 
-func NewFileUpLoad()  http.Handler {
+func NewFileUpLoad() http.Handler {
 	return &fileupload{}
 }
 
-func (fu *fileupload)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
+func (fu *fileupload) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(maxUploadSize)
 	defer r.MultipartForm.RemoveAll()
-	file,h,err:=r.FormFile("filename")
+	file, h, err := r.FormFile("filename")
 	if err != nil {
 		return
 	}
@@ -38,5 +36,5 @@ func (fu *fileupload)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 	io.Copy(f, file)
 
 	w.Write([]byte("success"))
-	fmt.Println("save file",h.Filename,"success")
+	fmt.Println("save file", h.Filename, "success")
 }

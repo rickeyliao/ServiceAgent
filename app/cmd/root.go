@@ -18,25 +18,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rickeyliao/ServiceAgent/common"
-	"github.com/spf13/cobra"
-	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
+	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/service"
+	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "nbssa",
 	Short: "start nbssa in command line",
-	Long: `start nbssa in command line`,
+	Long:  `start nbssa in command line`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		if !CheckProcessCanStarted(){
+		if !CheckProcessCanStarted() {
 			return
 		}
 
-		cfg:=common.GetSAConfig()
+		cfg := common.GetSAConfig()
 		go service.Run(cfg)
 		cmdservice.StartCmdService()
 	},

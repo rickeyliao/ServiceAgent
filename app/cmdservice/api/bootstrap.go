@@ -2,66 +2,63 @@ package api
 
 import (
 	"context"
-	pb "github.com/rickeyliao/ServiceAgent/app/pb"
-	"github.com/rickeyliao/ServiceAgent/common"
-	"strings"
-	"strconv"
 	"encoding/json"
 	"github.com/kprc/nbsnetwork/tools"
+	pb "github.com/rickeyliao/ServiceAgent/app/pb"
+	"github.com/rickeyliao/ServiceAgent/common"
 	"path"
+	"strconv"
+	"strings"
 )
 
 type CmdBootstrapServer struct {
-
 }
-
 
 type bootstrapaddr struct {
 	addr string
 	port uint16
 }
 
-func (bsa *bootstrapaddr)String() string {
-	return bsa.addr +":" + strconv.Itoa(int(bsa.port))
+func (bsa *bootstrapaddr) String() string {
+	return bsa.addr + ":" + strconv.Itoa(int(bsa.port))
 }
 
+func (cbs *CmdBootstrapServer) ChangeBootstrap(ctx context.Context, req *pb.BootstrapCHGReq) (*pb.DefaultResp, error) {
 
-func (cbs *CmdBootstrapServer)ChangeBootstrap(ctx context.Context, req *pb.BootstrapCHGReq) (*pb.DefaultResp, error){
-
-	arrparam:=strings.Split(req.Address,":")
-	if len(arrparam)!=2 {
-		return encResp("address error"),nil
+	arrparam := strings.Split(req.Address, ":")
+	if len(arrparam) != 2 {
+		return encResp("address error"), nil
 	}
-	paramip:=arrparam[0]
+	paramip := arrparam[0]
 
 	var p int
 	var e error
 
-	if p,e=strconv.Atoi(arrparam[1]);e!=nil{
-		return encResp("address error"),nil
+	if p, e = strconv.Atoi(arrparam[1]); e != nil {
+		return encResp("address error"), nil
 	}
-	paramport :=uint16(p)
+	paramport := uint16(p)
 
-	sac:=common.GetSAConfig()
+	sac := common.GetSAConfig()
 
-	addrarr:=sac.BootstrapIPAddress
+	addrarr := sac.BootstrapIPAddress
 
-	addrs := make([]*bootstrapaddr,0)
+	addrs := make([]*bootstrapaddr, 0)
 
-	addflag:=false
+	addflag := false
 
-	for _,v:=range addrarr{
-		ipport:=strings.Split(v,":")
+	for _, v := range addrarr {
+		ipport := strings.Split(v, ":")
 
-		if len(ipport) != 2{
+		if len(ipport) != 2 {
 			continue
 		}
 
-		bsa:=&bootstrapaddr{}
+		bsa := &bootstrapaddr{}
 		bsa.addr = ipport[0]
-		if port,err := strconv.Atoi(ipport[1]);err!=nil{
+		if port, err := strconv.Atoi(ipport[1]); err != nil {
 			continue
-		}else {
+		} else {
 			bsa.port = uint16(port)
 		}
 
@@ -70,34 +67,34 @@ func (cbs *CmdBootstrapServer)ChangeBootstrap(ctx context.Context, req *pb.Boots
 				bsa.port = paramport
 				addflag = true
 			}
-		}else{
+		} else {
 			//remove
-			if bsa.port == paramport && bsa.addr == paramip{
+			if bsa.port == paramport && bsa.addr == paramip {
 				continue
 			}
 		}
-		addrs = append(addrs,bsa)
+		addrs = append(addrs, bsa)
 	}
-	if req.Op && !addflag{
-		bsa:=&bootstrapaddr{}
+	if req.Op && !addflag {
+		bsa := &bootstrapaddr{}
 		bsa.port = paramport
 		bsa.addr = paramip
-		addrs = append(addrs,bsa)
+		addrs = append(addrs, bsa)
 	}
 
-	straddrs:=make([]string,0)
+	straddrs := make([]string, 0)
 
-	for _,bsa:=range addrs{
-		straddrs = append(straddrs,bsa.String())
+	for _, bsa := range addrs {
+		straddrs = append(straddrs, bsa.String())
 	}
 
 	sac.BootstrapIPAddress = straddrs
 
-	jstr,_:=json.MarshalIndent(sac,"","\t")
+	jstr, _ := json.MarshalIndent(sac, "", "\t")
 
-	sar:=common.GetSARootCfg()
-	tools.Save2File(jstr,path.Join(sar.CfgDir,sar.CfgFileName))
+	sar := common.GetSARootCfg()
+	tools.Save2File(jstr, path.Join(sar.CfgDir, sar.CfgFileName))
 
-	return encResp("success"),nil
+	return encResp("success"), nil
 
 }

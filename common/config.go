@@ -1,44 +1,44 @@
 package common
 
 import (
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
 	"encoding/json"
 	"github.com/kprc/nbsnetwork/tools"
+	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
+	"github.com/mr-tron/base58"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"log"
 	"os"
 	"path"
 	"sync"
-	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
-	"crypto/rsa"
-	"github.com/pkg/errors"
-	"crypto/x509"
-	"github.com/mr-tron/base58"
-	"crypto/sha256"
 )
 
 type SAConfig struct {
-	DownloadDir              string   			`json:"downloaddir"`
-	UploadDir                string   			`json:"uploaddir"`
-	KeyDir                   string   			`json:"keydir"`
-	PidDir                   string             `json:"piddir"`
-	UploadMaxSize            int64    			`json:"uploadmaxsize"`
-	RemoteServerIP           string   			`json:"remoteserverip"`
-	RemoteServerPort         uint16   			`json:"remoteserverport"`
-	VerifyPath               string   			`json:"verifypath"`
-	ConsumePath              string   			`json:"consumepath"`
-	PostSocks5Path           string   			`json:"postsocks5path"`
-	ListIpsPath              string   			`json:"listipspath"`
-	EmailPath                string   			`json:"emailpath"`
-	UpdateClientSoftwarePath string   			`json:"updateclientsoftwarepath"`
-	HttpListenPort           uint16   			`json:"httplistenport"`
-	BootstrapIPAddress       []string 			`json:"bootstrapipaddress"`
-	TestIPAddress            string   			`json:"testipaddress"`
-	ListenTyp                string   			`json:"listentyp"`
-	NbsRsaAddr				 string             `json:"nbsaddr"`
-	CmdListenIP              string             `json:"cmdlistenip"`
-	CmdListenPort            uint16             `json:"cmdlistenport"`
-	DhtListenPort            uint16             `json:"dhtlistenport"`
-	PrivKey                  *rsa.PrivateKey	`json:"-"`
+	DownloadDir              string          `json:"downloaddir"`
+	UploadDir                string          `json:"uploaddir"`
+	KeyDir                   string          `json:"keydir"`
+	PidDir                   string          `json:"piddir"`
+	UploadMaxSize            int64           `json:"uploadmaxsize"`
+	RemoteServerIP           string          `json:"remoteserverip"`
+	RemoteServerPort         uint16          `json:"remoteserverport"`
+	VerifyPath               string          `json:"verifypath"`
+	ConsumePath              string          `json:"consumepath"`
+	PostSocks5Path           string          `json:"postsocks5path"`
+	ListIpsPath              string          `json:"listipspath"`
+	EmailPath                string          `json:"emailpath"`
+	UpdateClientSoftwarePath string          `json:"updateclientsoftwarepath"`
+	HttpListenPort           uint16          `json:"httplistenport"`
+	BootstrapIPAddress       []string        `json:"bootstrapipaddress"`
+	TestIPAddress            string          `json:"testipaddress"`
+	ListenTyp                string          `json:"listentyp"`
+	NbsRsaAddr               string          `json:"nbsaddr"`
+	CmdListenIP              string          `json:"cmdlistenip"`
+	CmdListenPort            uint16          `json:"cmdlistenport"`
+	DhtListenPort            uint16          `json:"dhtlistenport"`
+	PrivKey                  *rsa.PrivateKey `json:"-"`
 }
 
 type SARootConfig struct {
@@ -217,18 +217,17 @@ func DefaultInitConfig() *SAConfig {
 	return sa
 }
 
+func (sar *SARootConfig) LoadCfg() *SAConfig {
 
-func (sar *SARootConfig) LoadCfg() *SAConfig{
+	data, err := tools.OpenAndReadAll(path.Join(sar.CfgDir, sar.CfgFileName))
 
-	data,err:=tools.OpenAndReadAll(path.Join(sar.CfgDir,sar.CfgFileName))
-
-	if err!=nil{
+	if err != nil {
 		return nil
 	}
 
-	cfg:=&SAConfig{}
+	cfg := &SAConfig{}
 
-	if err = json.Unmarshal(data,cfg);err!=nil{
+	if err = json.Unmarshal(data, cfg); err != nil {
 		return nil
 	}
 
@@ -237,7 +236,6 @@ func (sar *SARootConfig) LoadCfg() *SAConfig{
 	return cfg
 
 }
-
 
 func (sar *SARootConfig) IsInitialized() bool {
 	cfgname := path.Join(sar.CfgDir, sar.CfgFileName)
@@ -286,8 +284,8 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 
 	download := path.Join(sar.HomeDir, sar.SacInst.DownloadDir)
 	upload := path.Join(sar.HomeDir, sar.SacInst.UploadDir)
-	keydir := path.Join(sar.HomeDir,sar.SacInst.KeyDir)
-	piddir := path.Join(sar.HomeDir,sar.SacInst.PidDir)
+	keydir := path.Join(sar.HomeDir, sar.SacInst.KeyDir)
+	piddir := path.Join(sar.HomeDir, sar.SacInst.PidDir)
 
 	if !tools.FileExists(download) {
 		os.MkdirAll(download, 0755)
@@ -295,24 +293,23 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 	if !tools.FileExists(upload) {
 		os.MkdirAll(upload, 0755)
 	}
-	if !tools.FileExists(keydir){
-		os.MkdirAll(keydir,0755)
+	if !tools.FileExists(keydir) {
+		os.MkdirAll(keydir, 0755)
 	}
-	if !tools.FileExists(piddir){
-		os.MkdirAll(piddir,0755)
+	if !tools.FileExists(piddir) {
+		os.MkdirAll(piddir, 0755)
 	}
-
 
 	return sar
 }
 
-func (sar *SARootConfig)InitRSAKey(force bool) *SARootConfig   {
+func (sar *SARootConfig) InitRSAKey(force bool) *SARootConfig {
 
-	rsakeypath := path.Join(sar.HomeDir,"key")
+	rsakeypath := path.Join(sar.HomeDir, "key")
 
-	if !nbscrypt.RsaKeyIsExists(rsakeypath) || force{
-		priv,_:=nbscrypt.GenerateKeyPair(2048)
-		if err:=nbscrypt.Save2FileRSAKey(rsakeypath,priv);err!=nil{
+	if !nbscrypt.RsaKeyIsExists(rsakeypath) || force {
+		priv, _ := nbscrypt.GenerateKeyPair(2048)
+		if err := nbscrypt.Save2FileRSAKey(rsakeypath, priv); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -320,48 +317,43 @@ func (sar *SARootConfig)InitRSAKey(force bool) *SARootConfig   {
 	return sar
 }
 
-func (sac *SAConfig)GenNbsRsaAddr()  {
-	if sac.PrivKey == nil{
+func (sac *SAConfig) GenNbsRsaAddr() {
+	if sac.PrivKey == nil {
 		log.Fatal(errors.New("No Private Key Found"))
 	}
 
 	pubkeybytes := x509.MarshalPKCS1PublicKey(&sac.PrivKey.PublicKey)
 
-	s:=sha256.New()
+	s := sha256.New()
 	s.Write(pubkeybytes)
 
+	sum := s.Sum(nil)
 
-	sum:=s.Sum(nil)
-
-	sac.NbsRsaAddr = "91"+base58.Encode(sum)
+	sac.NbsRsaAddr = "91" + base58.Encode(sum)
 }
 
+func (sar *SARootConfig) LoadRsaKey() {
 
-func (sar *SARootConfig)LoadRsaKey()  {
-
-	if sar.SacInst == nil{
+	if sar.SacInst == nil {
 		log.Fatal(errors.New("No config instance"))
 	}
 
-	rsakeypath := path.Join(sar.HomeDir,"key")
+	rsakeypath := path.Join(sar.HomeDir, "key")
 
-	priv,_,err:=nbscrypt.LoadRSAKey(rsakeypath)
-	if err!=nil {
+	priv, _, err := nbscrypt.LoadRSAKey(rsakeypath)
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	sar.SacInst.PrivKey = priv
 
-	if sar.SacInst.NbsRsaAddr == ""{
+	if sar.SacInst.NbsRsaAddr == "" {
 		sar.SacInst.GenNbsRsaAddr()
 		bjson, err := json.MarshalIndent(*sar.SacInst, "", "\t")
 		if err != nil {
 			log.Fatal("Json module error")
-		}else{
-			tools.Save2File(bjson, path.Join(sar.CfgDir,sar.CfgFileName))
+		} else {
+			tools.Save2File(bjson, path.Join(sar.CfgDir, sar.CfgFileName))
 		}
 	}
 }
-
-
-

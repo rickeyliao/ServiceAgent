@@ -15,31 +15,31 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 	"github.com/rickeyliao/ServiceAgent/common"
-	"log"
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/sevlyar/go-daemon"
+	"github.com/spf13/cobra"
+	"log"
 	"path"
-	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 )
 
 // daemonCmd represents the daemon command
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "nbssa start as daemon",
-	Long: `nbssa start as daemon`,
+	Long:  `nbssa start as daemon`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !CheckProcessCanStarted(){
+		if !CheckProcessCanStarted() {
 			return
 		}
-		sar:=common.GetSARootCfg()
-		cfg:=common.GetSAConfig()
-		daemondir:=path.Join(sar.HomeDir,cfg.PidDir)
-		cntxt:=daemon.Context{
-			PidFileName: path.Join(daemondir,"nbssa.pid"),
+		sar := common.GetSARootCfg()
+		cfg := common.GetSAConfig()
+		daemondir := path.Join(sar.HomeDir, cfg.PidDir)
+		cntxt := daemon.Context{
+			PidFileName: path.Join(daemondir, "nbssa.pid"),
 			PidFilePerm: 0644,
-			LogFileName: path.Join(daemondir,"nbssa.log"),
+			LogFileName: path.Join(daemondir, "nbssa.log"),
 			LogFilePerm: 0640,
 			WorkDir:     daemondir,
 			Umask:       027,
@@ -50,7 +50,7 @@ var daemonCmd = &cobra.Command{
 			log.Fatal("Unable to run: ", err)
 		}
 		if d != nil {
-			log.Println("nbssa starting, please check log at:",path.Join(daemondir,"nbssa.log"))
+			log.Println("nbssa starting, please check log at:", path.Join(daemondir, "nbssa.log"))
 			return
 		}
 		defer cntxt.Release()

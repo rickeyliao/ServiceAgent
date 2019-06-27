@@ -15,8 +15,8 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"fmt"
+	"github.com/spf13/cobra"
 )
 
 // configCmd represents the config command
@@ -24,12 +24,12 @@ var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg", "config"},
 	Short:   "config any parameter in nbssa",
-	Long: `config any parameter in nbssa`,
+	Long:    `config any parameter in nbssa`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return
 		}
-		if args == nil || len(args) == 0{
+		if args == nil || len(args) == 0 {
 			fmt.Println("Please enter the parameter")
 			return
 		}

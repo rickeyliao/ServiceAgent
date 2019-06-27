@@ -1,43 +1,42 @@
 package cmdservice
 
 import (
-	"net"
 	"fmt"
-	"google.golang.org/grpc"
-	"log"
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice/api"
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
-	"google.golang.org/grpc/reflection"
-	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/service"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"log"
+	"net"
 )
 
 var grpcServer *grpc.Server
 
-func StartCmdService()  {
+func StartCmdService() {
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", common.GetSAConfig().CmdListenIP,common.GetSAConfig().CmdListenPort))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", common.GetSAConfig().CmdListenIP, common.GetSAConfig().CmdListenPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer = grpc.NewServer()
 
-	pb.RegisterDefaultnbssasrvServer(grpcServer,&api.CmdDefaultServer{StopCmdService})
-	pb.RegisterConfigchangeServer(grpcServer,&api.CmdConfigServer{})
-	pb.RegisterRemotechangeServer(grpcServer,&api.RemoteConfig{})
-	pb.RegisterBootstrapCHGServer(grpcServer,&api.CmdBootstrapServer{})
+	pb.RegisterDefaultnbssasrvServer(grpcServer, &api.CmdDefaultServer{StopCmdService})
+	pb.RegisterConfigchangeServer(grpcServer, &api.CmdConfigServer{})
+	pb.RegisterRemotechangeServer(grpcServer, &api.RemoteConfig{})
+	pb.RegisterBootstrapCHGServer(grpcServer, &api.CmdBootstrapServer{})
 	reflection.Register(grpcServer)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)
 	}
 }
 
-
-func StopCmdService()  {
+func StopCmdService() {
 
 	service.Stop()
 
-	if grpcServer == nil{
+	if grpcServer == nil {
 		return
 	}
 

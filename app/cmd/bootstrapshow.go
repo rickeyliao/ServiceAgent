@@ -15,15 +15,15 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
 )
 
 // bootstrapCmd represents the bootstrap command
 var bootstrapCmd = &cobra.Command{
 	Use:   "bootstrap",
 	Short: "show all bootstrap address",
-	Long: `show all bootstrap address`,
+	Long:  `show all bootstrap address`,
 	Run: func(cmd *cobra.Command, args []string) {
 		DefaultCmdSend(app.CMD_BOOTSTRAP_SHOW_REQ)
 	},

@@ -1,16 +1,15 @@
 package cmd
 
 import (
-	"google.golang.org/grpc"
 	"context"
+	"fmt"
+	"github.com/kprc/nbsnetwork/tools"
+	pb "github.com/rickeyliao/ServiceAgent/app/pb"
+	"github.com/rickeyliao/ServiceAgent/common"
+	"google.golang.org/grpc"
 	"log"
 	"strconv"
-	pb "github.com/rickeyliao/ServiceAgent/app/pb"
-	"fmt"
-	"github.com/rickeyliao/ServiceAgent/common"
-	"github.com/kprc/nbsnetwork/tools"
 )
-
 
 type CmdConnection struct {
 	c      *grpc.ClientConn
@@ -41,7 +40,7 @@ func (conn *CmdConnection) Close() {
 	conn.cancel()
 }
 
-func DefaultCmdSend(cmd int32)  {
+func DefaultCmdSend(cmd int32) {
 	request := &pb.DefaultRequest{}
 	request.Reqid = cmd
 
@@ -50,15 +49,15 @@ func DefaultCmdSend(cmd int32)  {
 
 	client := pb.NewDefaultnbssasrvClient(conn.c)
 
-	if response, err := client.DefaultNbssa(conn.ctx, request);err!=nil{
+	if response, err := client.DefaultNbssa(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(response.Message)
 	}
 
 }
 
-func DefaultCmdSendStr(msg string)  {
+func DefaultCmdSendStr(msg string) {
 	request := &pb.DefaultRequestMsg{}
 	request.Message = msg
 
@@ -67,14 +66,14 @@ func DefaultCmdSendStr(msg string)  {
 
 	client := pb.NewConfigchangeClient(conn.c)
 
-	if response, err := client.ChangeConfig(conn.ctx, request);err!=nil{
+	if response, err := client.ChangeConfig(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(response.Message)
 	}
 }
 
-func RemoteCmdSendStr(msg string)  {
+func RemoteCmdSendStr(msg string) {
 	request := &pb.DefaultRequestMsg{}
 	request.Message = msg
 
@@ -83,9 +82,9 @@ func RemoteCmdSendStr(msg string)  {
 
 	client := pb.NewRemotechangeClient(conn.c)
 
-	if response, err := client.RemoteChange(conn.ctx, request);err!=nil{
+	if response, err := client.RemoteChange(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(response.Message)
 	}
 
@@ -129,16 +128,16 @@ func CheckProcessCanStarted() bool {
 	return true
 }
 
-func BootstrapCmdSend(op bool,req string)  {
-	request := &pb.BootstrapCHGReq{Op:op,Address:req}
+func BootstrapCmdSend(op bool, req string) {
+	request := &pb.BootstrapCHGReq{Op: op, Address: req}
 	conn := DialToCmdService()
 	defer conn.Close()
 
-	client:=pb.NewBootstrapCHGClient(conn.c)
+	client := pb.NewBootstrapCHGClient(conn.c)
 
-	if response, err := client.ChangeBootstrap(conn.ctx, request);err!=nil{
+	if response, err := client.ChangeBootstrap(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(response.Message)
 	}
 

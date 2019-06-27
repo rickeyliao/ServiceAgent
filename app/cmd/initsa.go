@@ -27,7 +27,7 @@ var force bool
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "init nbssa start environment",
-	Long: `init nbssa start environment`,
+	Long:  `init nbssa start environment`,
 	Run: func(cmd *cobra.Command, args []string) {
 		sar := common.GetSARootCfgHdir(sahome, force)
 		sar.InitConfig(force)

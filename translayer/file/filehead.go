@@ -13,18 +13,7 @@ type FileTransReq struct {
 	control.NbsControlHead
 }
 
-
 type FileTransResp struct {
 	FileHead
 	startpos int64
 }
-
-
-
-
-
-
-
-
-
-

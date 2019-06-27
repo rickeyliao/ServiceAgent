@@ -15,15 +15,15 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
 )
 
 // stopCmd represents the stop command
 var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "stop a nbssa daemon",
-	Long: `stop a nbssa daemon`,
+	Long:  `stop a nbssa daemon`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return
@@ -35,4 +35,3 @@ var stopCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(stopCmd)
 }
-

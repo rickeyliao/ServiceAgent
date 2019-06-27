@@ -15,15 +15,15 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
 )
 
 // showCmd represents the show command
 var showCmd = &cobra.Command{
 	Use:   "show",
 	Short: "show remote address",
-	Long: `show remote address`,
+	Long:  `show remote address`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return

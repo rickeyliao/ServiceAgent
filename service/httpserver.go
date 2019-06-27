@@ -7,14 +7,14 @@ import (
 	"github.com/rickeyliao/ServiceAgent/agent/listallip"
 	"github.com/rickeyliao/ServiceAgent/agent/software"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/service/file"
 	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 	"github.com/rickeyliao/ServiceAgent/service/postsocks5"
 	"log"
 	"net/http"
+	"path"
 	"strconv"
 	"time"
-	"path"
-	"github.com/rickeyliao/ServiceAgent/service/file"
 )
 
 var (
@@ -43,7 +43,7 @@ func Run(cfg *common.SAConfig) {
 	mux.Handle(cfg.TestIPAddress, localaddress.NewLocalAddress())
 	mux.Handle(cfg.ListIpsPath, listallip.NewListAllIps())
 	mux.Handle(cfg.PostSocks5Path, postsocks5.NewPostSocks5())
-	mux.Handle(path.Join("/",cfg.UploadDir),file.NewFileUpLoad())
+	mux.Handle(path.Join("/", cfg.UploadDir), file.NewFileUpLoad())
 
 	listenportstr := ":" + strconv.Itoa(int(cfg.HttpListenPort))
 
@@ -60,4 +60,3 @@ func Stop() {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)
 }
-
