@@ -14,6 +14,7 @@ import (
 	"os"
 	"path"
 	"sync"
+	"github.com/rickeyliao/ServiceAgent/htmlfile"
 )
 
 type SAConfig struct {
@@ -38,6 +39,10 @@ type SAConfig struct {
 	CmdListenIP              string          `json:"cmdlistenip"`
 	CmdListenPort            uint16          `json:"cmdlistenport"`
 	DhtListenPort            uint16          `json:"dhtlistenport"`
+	StaticFileDir            string			 `json:"staticfiledir"`
+	LoginDir                 string          `json:"logindir""`
+	Loginfile                string          `json:"loginfile"`
+	LicenseAdminUser         [][]string      `json:"licenseadminuser`
 	PrivKey                  *rsa.PrivateKey `json:"-"`
 }
 
@@ -213,6 +218,12 @@ func DefaultInitConfig() *SAConfig {
 	sa.CmdListenIP = "127.0.0.1"
 	sa.CmdListenPort = 50811
 	sa.DhtListenPort = 50812
+	sa.StaticFileDir = "staticfile"
+	sa.LoginDir = "login"
+	sa.Loginfile = "login.gptl"
+	sa.LicenseAdminUser = [][]string{{"sofaadmin","J1jdNR8vQb"},}
+
+
 
 	return sa
 }
@@ -286,6 +297,7 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 	upload := path.Join(sar.HomeDir, sar.SacInst.UploadDir)
 	keydir := path.Join(sar.HomeDir, sar.SacInst.KeyDir)
 	piddir := path.Join(sar.HomeDir, sar.SacInst.PidDir)
+	staticfile:=path.Join(sar.HomeDir,sar.SacInst.StaticFileDir)
 
 	if !tools.FileExists(download) {
 		os.MkdirAll(download, 0755)
@@ -298,6 +310,16 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 	}
 	if !tools.FileExists(piddir) {
 		os.MkdirAll(piddir, 0755)
+	}
+
+	if !tools.FileExists(staticfile) {
+		os.MkdirAll(staticfile, 0755)
+	}
+
+	loginfilename:=path.Join(staticfile,sar.SacInst.Loginfile)
+
+	if !tools.FileExists(loginfilename){
+		htmlfile.NewLoginFile(loginfilename)
 	}
 
 	return sar
@@ -357,3 +379,19 @@ func (sar *SARootConfig) LoadRsaKey() {
 		}
 	}
 }
+
+func CheckUserPassword(username string,password string) bool {
+	sac:=GetSAConfig()
+
+	for _,authpair:=range sac.LicenseAdminUser{
+		if len(authpair) == 2{
+			if username == authpair[0] && password == authpair[1]{
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+
