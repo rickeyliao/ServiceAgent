@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"crypto/sha1"
 	"gx/ipfs/QmWFAMPqsEyUX7gDUsRVmMWz59FxSpJ1b2v6bJ1yYzo7jY/go-base58-fast/base58"
+	"time"
 )
 
 
@@ -49,6 +50,9 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //}
 
 func main()  {
+
+
+
 	//cfg:=common.GetSARootCfg()
 	//
 	//fmt.Println(cfg)
@@ -83,6 +87,31 @@ func main()  {
 
 	fmt.Println(len(result),base58.Encode(result))
 
+
+
+	var i int
+	var j int
+
+	wg :=&sync.WaitGroup{}
+
+	wg.Add(1)
+
+	go func() {
+		for{
+			i++
+			j++
+			time.Sleep(time.Second*1)
+			if i==20{
+				break
+			}
+		}
+		wg.Done()
+	}()
+
+
+	//http.ServeFile()
+	http.ServeContent()
+
 	//fmt.Println(len(strings.Split(":11223",":")))
 	//
 	//s,err:=net.ResolveIPAddr("ip4", "")
@@ -95,6 +124,17 @@ func main()  {
 	//if _,err1:=strconv.Atoi("5544");err1!=nil{
 	//	fmt.Println(err1)
 	//}
+
+	for{
+		fmt.Printf("\033[1ALeft Second:%d,%d\033[K\n",i,j)
+
+		if i>=20{
+			break
+		}
+		time.Sleep(time.Second*2)
+	}
+
+	wg.Wait()
 
 }
 
