@@ -5,8 +5,7 @@ import (
 	"html/template"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"path"
-
-	"github.com/rickeyliao/go-manager/tools"
+	"github.com/ribencong/go-manager/kingkey"
 )
 
 type LoginInfo struct {
@@ -52,7 +51,7 @@ func (li *LoginInfo)ServeHTTP(w http.ResponseWriter, r *http.Request)   {
 			return
 		}
 
-		if l,err:=tools.GenLicense("YouPipe2019",r.Form["pubaddr"][0],"",30);err!=nil{
+		if l,err:=kingkey.GenLicense("YouPipe2019",r.Form["pubaddr"][0],"",30);err!=nil{
 			w.Write([]byte("Address not correct"))
 		}else {
 			w.Write([]byte(l))
