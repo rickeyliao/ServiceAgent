@@ -45,6 +45,7 @@ func Run(cfg *common.SAConfig) {
 	mux.Handle(cfg.ListIpsPath, listallip.NewListAllIps())
 	mux.Handle(cfg.PostSocks5Path, postsocks5.NewPostSocks5())
 	mux.Handle(path.Join("/", cfg.UploadDir), file.NewFileUpLoad())
+	mux.Handle(path.Join("/", cfg.DownloadDir), file.NewFileDownLoad())
 	mux.Handle(path.Join("/",cfg.LoginDir),login.NewLoginInfo())
 
 	listenportstr := ":" + strconv.Itoa(int(cfg.HttpListenPort))
