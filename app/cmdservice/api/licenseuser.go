@@ -33,7 +33,7 @@ func (clus *CmdLicenseUserServer)ChgLicenseUser(ctx context.Context, req *pb.Lic
 		return encResp("user error"),nil
 	}
 
-	if len(user) < 4 && len(passwd) < 6 {
+	if len(user) < 4 || len(passwd) < 6 {
 		return encResp("error: user name length > 4, passwd length > 6"),nil
 	}
 
@@ -99,7 +99,6 @@ func getRandPasswd() string  {
 	s1:=sha1.New()
 	s1.Write(buf)
 	b:=s1.Sum(nil)
-
 
 	passwd := base58.Encode(b)
 	l := len(passwd)
