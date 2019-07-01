@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"path"
-	"github.com/ribencong/go-manager/kingkey"
+	"github.com/rickeyliao/go-manager/kingkey"
 )
 
 type LoginInfo struct {

@@ -20,7 +20,7 @@ import (
 )
 
 // removeCmd represents the remove command
-var removeCmd = &cobra.Command{
+var bsremoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "remove a bootstrap address",
 	Long:  `remove a bootstrap address`,
@@ -37,7 +37,7 @@ var removeCmd = &cobra.Command{
 }
 
 func init() {
-	bootstrapCmd.AddCommand(removeCmd)
+	bootstrapCmd.AddCommand(bsremoveCmd)
 
 	// Here you will define your flags and configuration settings.
 

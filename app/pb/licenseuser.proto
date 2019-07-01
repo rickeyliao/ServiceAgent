@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+import "default.proto";
+
+
+message LicenseUserChgReq{
+    bool op = 1;
+    string user= 2;
+}
+
+
+service LicenseUserChg{
+    rpc ChgLicenseUser (LicenseUserChgReq) returns (DefaultResp) {}
+}

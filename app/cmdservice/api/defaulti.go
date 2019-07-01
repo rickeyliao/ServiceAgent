@@ -31,6 +31,10 @@ func (ss *CmdDefaultServer) DefaultNbssa(ctx context.Context, in *pb.DefaultRequ
 		return ss.bootstrapshow()
 	}
 
+	if in.Reqid == app.CMD_LICENSE_USER_SHOW_REQ{
+		return ss.licenseusershow()
+	}
+
 	resp := &pb.DefaultResp{}
 	resp.Message = "no cmd found"
 
@@ -87,6 +91,20 @@ func (ss *CmdDefaultServer) bootstrapshow() (*pb.DefaultResp, error) {
 	}
 
 	resp.Message = message
+
+	return resp, nil
+}
+
+func (ss *CmdDefaultServer)licenseusershow() (*pb.DefaultResp, error) {
+	sac := common.GetSAConfig()
+	resp := &pb.DefaultResp{}
+
+	message := ""
+	for idx, userpair := range sac.LicenseAdminUser {
+		message += strconv.Itoa(idx+1)+". user: "+userpair[0]+"\t passwd: "+userpair[1] +"\r\n"
+	}
+
+	resp.Message = message[0:len(message)-2]
 
 	return resp, nil
 }

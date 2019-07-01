@@ -16,14 +16,15 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
-// addCmd represents the add command
-var bsaddCmd = &cobra.Command{
-	Use:   "add",
-	Short: "add a bootstrap address",
-	Long:  `add a bootstrap address`,
+// removeCmd represents the remove command
+var luremoveCmd = &cobra.Command{
+	Use:   "remove",
+	Short: "remove a license user",
+	Long: `remove a license user`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return
@@ -32,20 +33,20 @@ var bsaddCmd = &cobra.Command{
 			fmt.Println("Please enter the parameter")
 			return
 		}
-		BootstrapCmdSend(true, args[0])
+		LicenseUserCmdSend(false, args[0])
 	},
 }
 
 func init() {
-	bootstrapCmd.AddCommand(bsaddCmd)
+	licenseuserCmd.AddCommand(luremoveCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// removeCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// removeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

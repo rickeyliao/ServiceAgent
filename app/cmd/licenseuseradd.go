@@ -16,14 +16,15 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
 // addCmd represents the add command
-var bsaddCmd = &cobra.Command{
+var luaddCmd = &cobra.Command{
 	Use:   "add",
-	Short: "add a bootstrap address",
-	Long:  `add a bootstrap address`,
+	Short: "add a license user",
+	Long: `add a license user`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return
@@ -32,12 +33,12 @@ var bsaddCmd = &cobra.Command{
 			fmt.Println("Please enter the parameter")
 			return
 		}
-		BootstrapCmdSend(true, args[0])
+		LicenseUserCmdSend(true, args[0])
 	},
 }
 
 func init() {
-	bootstrapCmd.AddCommand(bsaddCmd)
+	licenseuserCmd.AddCommand(luaddCmd)
 
 	// Here you will define your flags and configuration settings.
 

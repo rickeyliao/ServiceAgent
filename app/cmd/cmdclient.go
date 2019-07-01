@@ -41,6 +41,11 @@ func (conn *CmdConnection) Close() {
 }
 
 func DefaultCmdSend(cmd int32) {
+
+	if !CheckProcessReady(){
+		return
+	}
+
 	request := &pb.DefaultRequest{}
 	request.Reqid = cmd
 
@@ -136,6 +141,21 @@ func BootstrapCmdSend(op bool, req string) {
 	client := pb.NewBootstrapCHGClient(conn.c)
 
 	if response, err := client.ChangeBootstrap(conn.ctx, request); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(response.Message)
+	}
+
+}
+
+func LicenseUserCmdSend(op bool, req string) {
+	request := &pb.LicenseUserChgReq{Op: op, User: req}
+	conn := DialToCmdService()
+	defer conn.Close()
+
+	client := pb.NewLicenseUserChgClient(conn.c)
+
+	if response, err := client.ChgLicenseUser(conn.ctx, request); err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println(response.Message)
