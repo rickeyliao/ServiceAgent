@@ -22,6 +22,7 @@ import (
 // removeCmd represents the remove command
 var bsremoveCmd = &cobra.Command{
 	Use:   "remove",
+	Aliases: []string{"del","drop"},
 	Short: "remove a bootstrap address",
 	Long:  `remove a bootstrap address`,
 	Run: func(cmd *cobra.Command, args []string) {

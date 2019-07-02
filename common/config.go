@@ -18,32 +18,34 @@ import (
 )
 
 type SAConfig struct {
-	DownloadDir              string          `json:"downloaddir"`
-	UploadDir                string          `json:"uploaddir"`
-	KeyDir                   string          `json:"keydir"`
-	PidDir                   string          `json:"piddir"`
-	UploadMaxSize            int64           `json:"uploadmaxsize"`
-	RemoteServerIP           string          `json:"remoteserverip"`
-	RemoteServerPort         uint16          `json:"remoteserverport"`
+	DownloadPath             string          `json:"downloadpath"`
+	Uploadpath               string          `json:"uploadpath"`
+	TestIPAddressPath        string          `json:"testipaddress"`
+	PostSocks5Path           string          `json:"postsocks5path"`
 	VerifyPath               string          `json:"verifypath"`
 	ConsumePath              string          `json:"consumepath"`
-	PostSocks5Path           string          `json:"postsocks5path"`
 	ListIpsPath              string          `json:"listipspath"`
 	EmailPath                string          `json:"emailpath"`
 	UpdateClientSoftwarePath string          `json:"updateclientsoftwarepath"`
-	HttpListenPort           uint16          `json:"httplistenport"`
+	KeyDir                   string          `json:"keydir"`
+	PidDir                   string          `json:"piddir"`
+	FileDBDir                string          `json:"filedbdir"`
+	FileStoreDir             string          `json:"filestoredir"`
+	RemoteServerIP           string          `json:"remoteserverip"`
+	RemoteServerPort         uint16          `json:"remoteserverport"`
+	HttpListenPort           uint16          `json:"httplistenport"`		//50810 tcp/http for file transfer
 	BootstrapIPAddress       []string        `json:"bootstrapipaddress"`
-	TestIPAddress            string          `json:"testipaddress"`
 	ListenTyp                string          `json:"listentyp"`
 	NbsRsaAddr               string          `json:"nbsaddr"`
 	CmdListenIP              string          `json:"cmdlistenip"`
-	CmdListenPort            uint16          `json:"cmdlistenport"`
-	DhtListenPort            uint16          `json:"dhtlistenport"`
+	CmdListenPort            uint16          `json:"cmdlistenport"`   //50811 tcp for cmd
+	DhtListenPort            uint16          `json:"dhtlistenport"`	  //50811 udp for control message
 	StaticFileDir            string			 `json:"staticfiledir"`
-	LoginDir                 string          `json:"logindir""`
+	LoginDir                 string          `json:"logindir"`
 	Loginfile                string          `json:"loginfile"`
-	LicenseAdminUser         [][]string      `json:"licenseadminuser`
+	LicenseAdminUser         [][]string      `json:"licenseadminuser"`
 	PrivKey                  *rsa.PrivateKey `json:"-"`
+	Root					 *SARootConfig   `json:"-"`
 }
 
 type SARootConfig struct {
@@ -198,32 +200,32 @@ func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
 func DefaultInitConfig() *SAConfig {
 	sa := &SAConfig{}
 
-	sa.BootstrapIPAddress = []string{"103.45.98.72:50810", "174.7.124.45:50810"}
+	sa.BootstrapIPAddress = []string{"103.45.98.72:50811", "174.7.124.45:50811"}
 	sa.ConsumePath = "/public/keys/consume"
-	sa.DownloadDir = "download"
+	sa.DownloadPath = "/download"
+	sa.EmailPath = "/public/key/refresh"
+
+	sa.UpdateClientSoftwarePath = "/public/app"
+	sa.Uploadpath = "/upload"
+	sa.TestIPAddressPath = "/localipaddress"
+	sa.ListIpsPath = "/public/servers/list"
+	sa.PostSocks5Path = "/postsocks5"
 	sa.KeyDir = "key"
 	sa.PidDir = "piddir"
-	sa.EmailPath = "/public/key/refresh"
+	sa.FileDBDir = "filedb"
+	sa.FileStoreDir = "filestore"
+	sa.VerifyPath = "/public/keys/verify"
 	sa.RemoteServerIP = "207.148.9.49"
 	sa.RemoteServerPort = 80
 	sa.HttpListenPort = 50810
-	sa.ListenTyp = "tcp4"
-	sa.UpdateClientSoftwarePath = "/public/app"
-	sa.UploadDir = "upload"
-	sa.UploadMaxSize = 1000 //1g
-	sa.VerifyPath = "/public/keys/verify"
-	sa.TestIPAddress = "/localipaddress"
-	sa.ListIpsPath = "/public/servers/list"
-	sa.PostSocks5Path = "/postsocks5"
 	sa.CmdListenIP = "127.0.0.1"
 	sa.CmdListenPort = 50811
-	sa.DhtListenPort = 50812
+	sa.DhtListenPort = 50811
+	sa.ListenTyp = "tcp4"
 	sa.StaticFileDir = "staticfile"
 	sa.LoginDir = "login"
 	sa.Loginfile = "login.gptl"
-	sa.LicenseAdminUser = [][]string{{"sofaadmin","J1jdNR8vQb"},}
-
-
+	sa.LicenseAdminUser = [][]string{{"sofaadmin","J1jdNR8vQb"},{"nbsadmin","Dkf44u3Ad8"},}
 
 	return sa
 }
@@ -243,6 +245,8 @@ func (sar *SARootConfig) LoadCfg() *SAConfig {
 	}
 
 	sar.SacInst = cfg
+
+	cfg.Root = sar
 
 	return cfg
 
@@ -293,17 +297,37 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 		sar.SacInst = sac
 	}
 
-	download := path.Join(sar.HomeDir, sar.SacInst.DownloadDir)
-	upload := path.Join(sar.HomeDir, sar.SacInst.UploadDir)
+	filedbdir :=""
+
+	if sar.SacInst.FileDBDir[0] == '/'{
+		filedbdir = sar.SacInst.FileDBDir
+	}else{
+		filedbdir = path.Join(sar.HomeDir, sar.SacInst.FileDBDir)
+	}
+
+	filestoredir := ""
+	if sar.SacInst.FileStoreDir[0] == '/'{
+		filestoredir = sar.SacInst.FileStoreDir
+	}else{
+		filestoredir = path.Join(sar.HomeDir, sar.SacInst.FileStoreDir)
+	}
+
 	keydir := path.Join(sar.HomeDir, sar.SacInst.KeyDir)
-	piddir := path.Join(sar.HomeDir, sar.SacInst.PidDir)
+
+	piddir := ""
+	if sar.SacInst.PidDir[0] == '/'{
+		piddir = sar.SacInst.PidDir
+	}else{
+		piddir = path.Join(sar.HomeDir, sar.SacInst.PidDir)
+	}
+
 	staticfile:=path.Join(sar.HomeDir,sar.SacInst.StaticFileDir)
 
-	if !tools.FileExists(download) {
-		os.MkdirAll(download, 0755)
+	if !tools.FileExists(filedbdir) {
+		os.MkdirAll(filedbdir, 0755)
 	}
-	if !tools.FileExists(upload) {
-		os.MkdirAll(upload, 0755)
+	if !tools.FileExists(filestoredir) {
+		os.MkdirAll(filestoredir, 0755)
 	}
 	if !tools.FileExists(keydir) {
 		os.MkdirAll(keydir, 0755)
@@ -322,6 +346,8 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 		htmlfile.NewLoginFile(loginfilename)
 	}
 
+	sar.SacInst.Root = sar
+
 	return sar
 }
 
@@ -337,6 +363,30 @@ func (sar *SARootConfig) InitRSAKey(force bool) *SARootConfig {
 	}
 
 	return sar
+}
+
+func (sac *SAConfig)GetPidDir() string  {
+	if sac.PidDir[0] == '/'{
+		return sac.PidDir
+	}
+
+	return  path.Join(sac.Root.HomeDir,sac.PidDir)
+}
+
+func (sac *SAConfig)GetFileDbDir() string  {
+	if sac.FileDBDir[0] == '/'{
+		return sac.FileDBDir
+	}
+
+	return  path.Join(sac.Root.HomeDir,sac.FileDBDir)
+}
+
+func (sac *SAConfig)GetFileStoreDir() string  {
+	if sac.FileStoreDir[0] == '/'{
+		return sac.FileStoreDir
+	}
+
+	return  path.Join(sac.Root.HomeDir,sac.FileStoreDir)
 }
 
 func (sac *SAConfig) GenNbsRsaAddr() {

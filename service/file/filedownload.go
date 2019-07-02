@@ -27,6 +27,7 @@ func (fdl *filedownload) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	http.ServeFile(w,r,"/Users/rickey/Downloads/android-studio-ide-173.4819257-mac.dmg")
 
+	//http.ServeContent()
 
 	fmt.Println("end download..")
 

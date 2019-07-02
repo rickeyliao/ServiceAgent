@@ -33,9 +33,8 @@ var daemonCmd = &cobra.Command{
 		if !CheckProcessCanStarted() {
 			return
 		}
-		sar := common.GetSARootCfg()
 		cfg := common.GetSAConfig()
-		daemondir := path.Join(sar.HomeDir, cfg.PidDir)
+		daemondir := cfg.GetPidDir()
 		cntxt := daemon.Context{
 			PidFileName: path.Join(daemondir, "nbssa.pid"),
 			PidFilePerm: 0644,
@@ -58,8 +57,8 @@ var daemonCmd = &cobra.Command{
 		log.Println("nbssa daemon started")
 
 		go service.Run(cfg)
-		cmdservice.StartCmdService()
 
+		cmdservice.StartCmdService()
 	},
 }
 

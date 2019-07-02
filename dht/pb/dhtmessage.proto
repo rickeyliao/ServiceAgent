@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pbdht;
+
+
+message dhtmessage{
+    uint64 sn = 1;
+    uint32 msgtyp=2;
+    bytes nbsaddr=3;
+    bytes data = 4;
+}

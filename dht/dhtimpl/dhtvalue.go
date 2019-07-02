@@ -1,4 +1,4 @@
-package dht
+package dhtimpl
 
 import "github.com/gogo/protobuf/io"
 

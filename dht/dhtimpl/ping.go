@@ -1,20 +1,22 @@
-package dht
+package dhtimpl
 
 import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
+	"github.com/rickeyliao/ServiceAgent/dht"
 	"log"
+	"github.com/rickeyliao/ServiceAgent/dht/dhtserver"
 )
 
 func (node *NbsNode) encPingData() (uint64, []byte) {
-	req := &pbdht.Pingreq{}
+	req := &pbdht.Dhtmessage{}
 
-	req.Sn = GetNextMsgCnt()
+	req.Sn = dht.GetNextMsgCnt()
 
-	req.Msgtyp = PING_REQ
+	req.Msgtyp = dht.PING_REQ
 
-	req.Nbsaddr = GetLocalNode().NbsAddr
+	req.Nbsaddr = dhtserver.GetLocalNode().NbsAddr
 
 	if data, err := proto.Marshal(req); err != nil {
 		log.Fatal("Marshall Ping Request Message Failed")
@@ -26,13 +28,13 @@ func (node *NbsNode) encPingData() (uint64, []byte) {
 
 func (node *NbsNode) updateByPingResp(buf []byte, reqsn uint64) error {
 
-	resp := &pbdht.Pingresp{}
+	resp := &pbdht.Dhtmessage{}
 
 	if err := proto.Unmarshal(buf, resp); err != nil {
 		return err
 	}
 
-	if reqsn != resp.Rcvsn {
+	if reqsn != resp.Sn {
 		return errors.New("SerialNumber not Corrected!")
 	}
 

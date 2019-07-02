@@ -1,10 +1,11 @@
-package dht
+package dhtimpl
 
 import (
 	"github.com/kprc/nbsnetwork/common/list"
 	"github.com/pkg/errors"
 	"net"
 	"time"
+	"github.com/rickeyliao/ServiceAgent/dht/dhtserver"
 )
 
 type NbsNode struct {
@@ -86,7 +87,7 @@ func (node *NbsNode) Ping() (bool, error) {
 }
 
 func (node *NbsNode) Store(key []byte, dv *DhtValue) error {
-	if node.AddrCmp(GetLocalNode().NbsAddr) {
+	if node.AddrCmp(dhtserver.GetLocalNode().NbsAddr) {
 		//save local db
 
 		return nil

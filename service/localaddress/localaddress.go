@@ -8,6 +8,7 @@ import (
 )
 
 type localaddress struct {
+
 }
 
 func NewLocalAddress() http.Handler {

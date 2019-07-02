@@ -23,6 +23,7 @@ import (
 // removeCmd represents the remove command
 var luremoveCmd = &cobra.Command{
 	Use:   "remove",
+	Aliases: []string{"del","drop"},
 	Short: "remove a license user",
 	Long: `remove a license user`,
 	Run: func(cmd *cobra.Command, args []string) {

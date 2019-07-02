@@ -22,7 +22,7 @@ type filedb struct {
 	mkey     map[string]string
 }
 
-func NewFileDb(filepath string) *filedb {
+func NewFileDb(filepath string) NbsDbInter {
 	return &filedb{filepath: filepath, mkey: make(map[string]string)}
 }
 
