@@ -21,7 +21,7 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(r.RemoteAddr)
+	log.Println(r.RemoteAddr,r.Header.Get("nbsaddress"))
 
 	ra := r.RemoteAddr
 

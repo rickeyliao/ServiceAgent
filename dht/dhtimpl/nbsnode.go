@@ -6,6 +6,7 @@ import (
 	"net"
 	"time"
 	"github.com/rickeyliao/ServiceAgent/dht/dhtserver"
+	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
 )
 
 type NbsNode struct {
@@ -86,7 +87,7 @@ func (node *NbsNode) Ping() (bool, error) {
 	return true, nil
 }
 
-func (node *NbsNode) Store(key []byte, dv *DhtValue) error {
+func (node *NbsNode) Store(key []byte, dv *dhttable.DhtNode) error {
 	if node.AddrCmp(dhtserver.GetLocalNode().NbsAddr) {
 		//save local db
 
@@ -102,6 +103,6 @@ func (node *NbsNode) FindNode(key []byte) (list.List, error) {
 	return nil, nil
 }
 
-func (node *NbsNode) FindValue(key []byte) (list.List, *DhtValue, error) {
+func (node *NbsNode) FindValue(key []byte) (list.List, *dhttable.DhtNode, error) {
 	return nil, nil, nil
 }

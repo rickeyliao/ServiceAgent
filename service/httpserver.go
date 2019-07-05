@@ -16,10 +16,13 @@ import (
 	"strconv"
 	"time"
 	"github.com/rickeyliao/ServiceAgent/service/login"
+	"sync"
 )
 
 var (
 	httpserver *http.Server
+	quit chan int
+	wg sync.WaitGroup
 )
 
 func Run(cfg *common.SAConfig) {
@@ -54,12 +57,56 @@ func Run(cfg *common.SAConfig) {
 	log.Println("Server Listen at:", listenportstr)
 	log.Println("LocalNbsAddress:", cfg.NbsRsaAddr)
 
+	wg.Add(1)
+	go reportAddress()
+
+
 	httpserver = &http.Server{Addr: listenportstr, Handler: mux}
 
 	log.Fatal(httpserver.ListenAndServe())
 }
 
 func Stop() {
+	quit<-1
+	wg.Wait()
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)
+}
+
+func reportAddress()  {
+	var count int64
+
+	for {
+		count++
+		if count %100 == 0{
+			c:=&http.Client{}
+
+			if req,err:=http.NewRequest("GET","http://103.45.98.72:50810/localipaddress",nil);err!=nil{
+				//fmt.Println(err)
+				continue
+			}else{
+
+				req.Header.Add("nbsaddress",common.GetSAConfig().NbsRsaAddr)
+				//req.Header.Add("FileName","foo.txt")
+
+				if resp,errresp:=c.Do(req);errresp != nil{
+					log.Println(errresp)
+					continue
+				}else {
+					log.Println(resp)
+				}
+
+
+
+			}
+		}
+		time.Sleep(time.Second*1)
+		select {
+		case <-quit:
+			wg.Done()
+			return
+		default:
+			//todo...
+		}
+	}
 }
