@@ -89,14 +89,13 @@ func reportAddress()  {
 				req.Header.Add("nbsaddress",common.GetSAConfig().NbsRsaAddr)
 				//req.Header.Add("FileName","foo.txt")
 
-				if _,errresp:=c.Do(req);errresp != nil{
+				if resp,errresp:=c.Do(req);errresp != nil{
 					log.Println(errresp)
 					continue
 				}else {
+					resp.Body.Close()
 					//log.Println(resp)
 				}
-
-
 
 			}
 		}
