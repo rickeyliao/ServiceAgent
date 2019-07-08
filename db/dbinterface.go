@@ -28,6 +28,8 @@ func (dbc *DBCusor)Next() (k,v string){
 
 	v,_ = dbc.db.Find(k)
 
+	dbc.cursor++
+
 	return
 
 }
