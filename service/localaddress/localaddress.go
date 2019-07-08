@@ -21,12 +21,14 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(r.RemoteAddr,r.Header.Get("nbsaddress"))
-
 	ra := r.RemoteAddr
 
 	arr := strings.Split(ra, ":")
 
+	log.Println(r.RemoteAddr,arr[0],r.Header.Get("nbsaddress"))
+
+	w.Header().Add("Connection","close")
 	fmt.Fprintf(w, arr[0])
+
 
 }

@@ -79,8 +79,10 @@ func reportAddress()  {
 
 	for {
 		count++
-		if count %100 == 0{
-			c:=&http.Client{}
+		if count %300 == 0{
+
+			tp:=http.Transport{DisableKeepAlives:true}
+			c:=&http.Client{Transport:&tp}
 
 			if req,err:=http.NewRequest("GET","http://103.45.98.72:50810/localipaddress",nil);err!=nil{
 				//fmt.Println(err)
@@ -88,7 +90,7 @@ func reportAddress()  {
 			}else{
 
 				req.Header.Add("nbsaddress",common.GetSAConfig().NbsRsaAddr)
-				//req.Header.Add("FileName","foo.txt")
+
 
 				if resp,errresp:=c.Do(req);errresp != nil{
 					log.Println(errresp)
