@@ -162,3 +162,18 @@ func LicenseUserCmdSend(op bool, req string) {
 	}
 
 }
+
+func HomeIPShowCmdSend(req string)  {
+	request:=&pb.HomeIPShowReq{Nbsaddr:req}
+	conn:=DialToCmdService()
+	defer conn.Close()
+
+	client:=pb.NewHomeIPShowSrvClient(conn.c)
+
+	if resp,err:=client.ShowHomeIP(conn.ctx,request);err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(resp.Message)
+	}
+
+}

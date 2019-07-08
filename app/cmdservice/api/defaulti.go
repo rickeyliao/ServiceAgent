@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"strconv"
 	"time"
+	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 )
 
 type CmdDefaultServer struct {
@@ -33,6 +34,10 @@ func (ss *CmdDefaultServer) DefaultNbssa(ctx context.Context, in *pb.DefaultRequ
 
 	if in.Reqid == app.CMD_LICENSE_USER_SHOW_REQ{
 		return ss.licenseusershow()
+	}
+
+	if in.Reqid == app.CMD_HOMEIP_SAVE_REQ{
+		return ss.savehomeip()
 	}
 
 	resp := &pb.DefaultResp{}
@@ -97,6 +102,8 @@ func (ss *CmdDefaultServer) bootstrapshow() (*pb.DefaultResp, error) {
 	return resp, nil
 }
 
+
+
 func (ss *CmdDefaultServer)licenseusershow() (*pb.DefaultResp, error) {
 	sac := common.GetSAConfig()
 	resp := &pb.DefaultResp{}
@@ -109,4 +116,14 @@ func (ss *CmdDefaultServer)licenseusershow() (*pb.DefaultResp, error) {
 	resp.Message = message[0:len(message)-2]
 
 	return resp, nil
+}
+
+func (ss *CmdDefaultServer)savehomeip() (*pb.DefaultResp, error)   {
+	localaddress.Save()
+
+	resp:=&pb.DefaultResp{}
+
+	resp.Message = "save success"
+
+	return resp,nil
 }

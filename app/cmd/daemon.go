@@ -22,6 +22,12 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"path"
+	"github.com/rickeyliao/ServiceAgent/service/localaddress"
+)
+
+var (
+	hostname *string
+	role *int64
 )
 
 // daemonCmd represents the daemon command
@@ -33,6 +39,7 @@ var daemonCmd = &cobra.Command{
 		if !CheckProcessCanStarted() {
 			return
 		}
+
 		cfg := common.GetSAConfig()
 		daemondir := cfg.GetPidDir()
 		cntxt := daemon.Context{
@@ -56,6 +63,10 @@ var daemonCmd = &cobra.Command{
 
 		log.Println("nbssa daemon started")
 
+		localaddress.SetMachineName(*hostname)
+		cfg.Role = *role
+		
+
 		go service.Run(cfg)
 
 		cmdservice.StartCmdService()
@@ -70,8 +81,8 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// daemonCmd.PersistentFlags().String("foo", "", "A help for foo")
-	daemonCmd.Flags().StringP("username","u","","Set User Name, Usually set to email address")
-	daemonCmd.Flags().Int64P("role","r",0,"Set nbssa role")
+	hostname=daemonCmd.Flags().StringP("username","u","","Set User Name, Usually set to email address")
+	role=daemonCmd.Flags().Int64P("role","r",0,"Set nbssa role")
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// daemonCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")

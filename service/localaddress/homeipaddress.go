@@ -8,12 +8,15 @@ import (
 	"encoding/json"
 	"github.com/pkg/errors"
 	"strings"
+	"time"
 )
 
 var (
 	homeipdb db.NbsDbInter
 	homeipdblock sync.Mutex
 	machineName string
+	quit chan int
+	wg sync.WaitGroup
 )
 
 func GetHomeIPDB() db.NbsDbInter {
@@ -59,7 +62,7 @@ func LocalIPArr2string(iparr []string) string {
 }
 
 
-func Insert(nbsaddress string,interAddress string,natAddress string) error {
+func Insert(nbsaddress string,mn string,interAddress string,natAddress string) error {
 
 	if interAddress == "" || len(interAddress) == 0{
 		return errors.New("No Internat address")
@@ -69,7 +72,7 @@ func Insert(nbsaddress string,interAddress string,natAddress string) error {
 		return errors.New("nbsaddress not found")
 	}
 
-	hid:=&Homeipdesc{MachineName:machineName,InternetAddress:interAddress,NatAddress:String2arr(natAddress)}
+	hid:=&Homeipdesc{MachineName:mn,InternetAddress:interAddress,NatAddress:String2arr(natAddress)}
 
 	if bhid,err:=json.Marshal(hid);err!=nil{
 		return err
@@ -137,7 +140,35 @@ func SetMachineName(mn string)  {
 	machineName = mn
 }
 
+func GetMachineName() string {
+	return machineName
+}
 
 func Save()  {
 	GetHomeIPDB().Save()
+}
+
+func IntervalSave()  {
+	wg.Add(1)
+	var count int64=0
+	for{
+		count ++
+		if count%300 == 0{
+			Save()
+		}
+
+		select {
+		case <-quit:
+			return
+		default:
+		}
+		time.Sleep(time.Second*1)
+	}
+	wg.Done()
+}
+
+func Destroy()  {
+	quit<-1
+	Save()
+	wg.Wait()
 }

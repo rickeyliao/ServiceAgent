@@ -27,7 +27,6 @@ var (
 
 func Run(cfg *common.SAConfig) {
 
-	quit = make(chan int,0)
 	remotehost := cfg.RemoteServerIP
 	remoteport := cfg.RemoteServerPort
 
@@ -58,9 +57,15 @@ func Run(cfg *common.SAConfig) {
 	log.Println("Server Listen at:", listenportstr)
 	log.Println("LocalNbsAddress:", cfg.NbsRsaAddr)
 
-	wg.Add(1)
-	go reportAddress()
+	if cfg.Role == 0 {
+		quit = make(chan int,0)
+		wg.Add(1)
+		go reportAddress()
+	}
 
+	if cfg.Role == 1{
+		go localaddress.IntervalSave()
+	}
 
 	httpserver = &http.Server{Addr: listenportstr, Handler: mux}
 
@@ -68,9 +73,13 @@ func Run(cfg *common.SAConfig) {
 }
 
 func Stop() {
-	quit<-1
-	wg.Wait()
-	localaddress.Save()
+	if common.GetSAConfig().Role==0{
+		quit<-1
+		wg.Wait()
+	}
+	if common.GetSAConfig().Role == 1{
+		localaddress.Destroy()
+	}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)
 }
@@ -91,7 +100,9 @@ func reportAddress()  {
 			}else{
 
 				req.Header.Add("nbsaddress",common.GetSAConfig().NbsRsaAddr)
-
+				ips:=common.GetAllLocalIpAddr()
+				req.Header.Add("nataddrs",localaddress.LocalIPArr2string(ips))
+				req.Header.Add("hostname",localaddress.GetMachineName())
 
 				if resp,errresp:=c.Do(req);errresp != nil{
 					log.Println(errresp)

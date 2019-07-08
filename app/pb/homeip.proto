@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+import "default.proto";
+
+message HomeIPShowReq{
+    string nbsaddr=1;
+}
+
+
+service HomeIPShowSrv{
+    rpc ShowHomeIP (HomeIPShowReq) returns (DefaultResp) {}
+}

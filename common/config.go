@@ -45,6 +45,7 @@ type SAConfig struct {
 	LoginDir                 string          `json:"logindir"`
 	Loginfile                string          `json:"loginfile"`
 	LicenseAdminUser         [][]string      `json:"licenseadminuser"`
+	Role                     int64           `json:"-"`
 	PrivKey                  *rsa.PrivateKey `json:"-"`
 	Root					 *SARootConfig   `json:"-"`
 }

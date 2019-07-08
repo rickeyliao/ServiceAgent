@@ -2,7 +2,6 @@ package localaddress
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -25,13 +24,14 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	arr := strings.Split(ra, ":")
 
-	log.Println(r.RemoteAddr,r.Header.Get("nbsaddress"))
+	//log.Println(r.RemoteAddr,r.Header.Get("nbsaddress"))
 
 	nataddrs:=r.Header.Get("nataddrs")
+	hostname:=r.Header.Get("hostname")
 
 	nbsaddr := r.Header.Get("nbsaddress")
 	if len(nbsaddr) >0{
-		Insert(nbsaddr,arr[0],nataddrs)
+		Insert(nbsaddr,hostname,arr[0],nataddrs)
 	}
 
 
