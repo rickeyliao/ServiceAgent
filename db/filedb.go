@@ -27,6 +27,12 @@ func NewFileDb(filepath string) NbsDbInter {
 	return &filedb{filepath: filepath, mkey: make(map[string]string)}
 }
 
+func (fdb *filedb)Print()  {
+	for k,v:=range fdb.mkey{
+		fmt.Println(k,v)
+	}
+}
+
 func (fdb *filedb) Load() NbsDbInter {
 	if fdb.filepath == "" {
 		log.Fatal("No Fill ")
@@ -155,7 +161,7 @@ func (fdb *filedb) Save() {
 			log.Println("save error", k, fk.Value)
 		} else {
 			fdb.write(bj)
-			fdb.write([]byte("\n"))
+			fdb.write([]byte("\r\n"))
 		}
 
 	}

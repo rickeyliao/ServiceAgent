@@ -25,7 +25,7 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	arr := strings.Split(ra, ":")
 
-	log.Println(r.RemoteAddr,arr[0],r.Header.Get("nbsaddress"))
+	log.Println(r.RemoteAddr,r.Header.Get("nbsaddress"))
 
 	w.Header().Add("Connection","close")
 	fmt.Fprintf(w, arr[0])

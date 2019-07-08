@@ -30,6 +30,7 @@ type SAConfig struct {
 	KeyDir                   string          `json:"keydir"`
 	PidDir                   string          `json:"piddir"`
 	FileDBDir                string          `json:"filedbdir"`
+	HomeIPDBFile             string          `json:"homeipdbfile"`
 	FileStoreDir             string          `json:"filestoredir"`
 	RemoteServerIP           string          `json:"remoteserverip"`
 	RemoteServerPort         uint16          `json:"remoteserverport"`
@@ -213,6 +214,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.KeyDir = "key"
 	sa.PidDir = "piddir"
 	sa.FileDBDir = "filedb"
+	sa.HomeIPDBFile = "homeipdbaddress"
 	sa.FileStoreDir = "filestore"
 	sa.VerifyPath = "/public/keys/verify"
 	sa.RemoteServerIP = "207.148.9.49"

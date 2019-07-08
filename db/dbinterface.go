@@ -7,4 +7,5 @@ type NbsDbInter interface {
 	Find(key string) (string, error)
 	Update(key string, value string)
 	Save()
+	Print()
 }
