@@ -70,7 +70,8 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// daemonCmd.PersistentFlags().String("foo", "", "A help for foo")
-
+	daemonCmd.Flags().StringP("username","u","","Set User Name, Usually set to email address")
+	daemonCmd.Flags().Int64P("role","r",0,"Set nbssa role")
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// daemonCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
