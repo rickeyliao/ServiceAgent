@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"fmt"
 )
 
 type filedbkev struct {
@@ -26,7 +27,7 @@ func NewFileDb(filepath string) NbsDbInter {
 	return &filedb{filepath: filepath, mkey: make(map[string]string)}
 }
 
-func (fdb *filedb) Open() NbsDbInter {
+func (fdb *filedb) Load() NbsDbInter {
 	if fdb.filepath == "" {
 		log.Fatal("No Fill ")
 	}
@@ -142,16 +143,19 @@ func (fdb *filedb) Save() {
 	listkey := reflect.ValueOf(fdb.mkey).MapKeys()
 	for _, key := range listkey {
 		k := key.Interface().(string)
+		fmt.Println(k)
 
 		fk := &filedbkev{}
 
 		fk.Key = k
 		fk.Value = fdb.mkey[k]
 
+		fmt.Println(fk)
 		if bj, err := json.Marshal(fk); err != nil {
 			log.Println("save error", k, fk.Value)
 		} else {
 			fdb.write(bj)
+			fdb.write([]byte("\n"))
 		}
 
 	}

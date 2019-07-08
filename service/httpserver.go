@@ -27,6 +27,7 @@ var (
 
 func Run(cfg *common.SAConfig) {
 
+	quit = make(chan int,0)
 	remotehost := cfg.RemoteServerIP
 	remoteport := cfg.RemoteServerPort
 
