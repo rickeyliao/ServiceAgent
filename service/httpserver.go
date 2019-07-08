@@ -70,6 +70,7 @@ func Run(cfg *common.SAConfig) {
 func Stop() {
 	quit<-1
 	wg.Wait()
+	localaddress.Save()
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)
 }

@@ -5,11 +5,15 @@ import (
 	"sync"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"path"
+	"encoding/json"
+	"github.com/pkg/errors"
+	"strings"
 )
 
 var (
 	homeipdb db.NbsDbInter
 	homeipdblock sync.Mutex
+	machineName string
 )
 
 func GetHomeIPDB() db.NbsDbInter {
@@ -34,13 +38,106 @@ type Homeipdesc struct {
 	MachineName string `json:"MachineName"`
 	NbsAddress  string `json:"-"`
 	InternetAddress string `json:"IAddress"`
-	NatAddress string `json:"nAddress"`
+	NatAddress []string `json:"nAddress"`
 }
 
-func Insert(nbsaddress string,machineName string,InterAddress string,natAddress string)  {
-	//hid:=&Homeipdesc{MachineName:machineName,InternetAddress:InterAddress,NatAddress:natAddress}
+func String2arr(ips string)  []string{
+	return strings.Split(ips,"=>")
+}
 
-	//if bhid,err:=json.Marshal(hid);err!=nil{
-	//
-	//}
+func LocalIPArr2string(iparr []string) string {
+	ips:=""
+	for _,ip :=range iparr{
+		if ips !=""{
+			ips+="=>"
+		}
+
+		ips+=ip
+	}
+
+	return ips
+}
+
+
+func Insert(nbsaddress string,interAddress string,natAddress string) error {
+
+	if interAddress == "" || len(interAddress) == 0{
+		return errors.New("No Internat address")
+	}
+
+	if nbsaddress == "" || len(nbsaddress) == 0{
+		return errors.New("nbsaddress not found")
+	}
+
+	hid:=&Homeipdesc{MachineName:machineName,InternetAddress:interAddress,NatAddress:String2arr(natAddress)}
+
+	if bhid,err:=json.Marshal(hid);err!=nil{
+		return err
+	}else {
+		GetHomeIPDB().Update(nbsaddress,string(bhid))
+	}
+
+	return nil
+}
+
+func CmdShowAddress(nbsaddr string) string  {
+	v,err:=GetHomeIPDB().Find(nbsaddr)
+	if err!=nil{
+		return "Not found"
+	}
+	hid:=&Homeipdesc{}
+
+	err=json.Unmarshal([]byte(v),hid)
+
+	if  err!=nil{
+		return "Internal error"
+	}
+
+	r:="NbsAddr:"+nbsaddr
+	r+="\r\n"
+	r+="MachineName:"+hid.MachineName
+	r+="\r\n"
+	r+="InternetAddress:"+hid.InternetAddress
+	r+="\r\n"
+
+	nataddrs:=""
+	for _,nip:=range hid.NatAddress{
+		if nataddrs!=""{
+			nataddrs += "\t"
+		}
+		nataddrs+=nip
+	}
+
+	r+="InternalAddress:"+nataddrs
+
+	return r
+}
+
+func CmdShowAddressAll() string {
+	dbcusor:=GetHomeIPDB().DBIterator()
+
+	alls:=""
+
+	for{
+		k,_:=dbcusor.Next()
+		if k==""{
+			break
+		}
+		if alls==""{
+			alls+="\r\n"
+		}
+		alls +=CmdShowAddress(k)
+	}
+
+	return alls
+}
+
+
+func SetMachineName(mn string)  {
+	machineName = mn
+}
+
+
+func Save()  {
+	GetHomeIPDB().Save()
 }

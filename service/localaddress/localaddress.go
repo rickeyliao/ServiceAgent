@@ -27,6 +27,14 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(r.RemoteAddr,r.Header.Get("nbsaddress"))
 
+	nataddrs:=r.Header.Get("nataddrs")
+
+	nbsaddr := r.Header.Get("nbsaddress")
+	if len(nbsaddr) >0{
+		Insert(nbsaddr,arr[0],nataddrs)
+	}
+
+
 	w.Header().Add("Connection","close")
 	fmt.Fprintf(w, arr[0])
 

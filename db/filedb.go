@@ -33,6 +33,10 @@ func (fdb *filedb)Print()  {
 	}
 }
 
+func (fdb *filedb)DBIterator() *DBCusor {
+	return &DBCusor{keys:reflect.ValueOf(fdb.mkey).MapKeys(),db:fdb}
+}
+
 func (fdb *filedb) Load() NbsDbInter {
 	if fdb.filepath == "" {
 		log.Fatal("No Fill ")
