@@ -27,6 +27,7 @@ func StartCmdService() {
 	pb.RegisterRemotechangeServer(grpcServer, &api.RemoteConfig{})
 	pb.RegisterBootstrapCHGServer(grpcServer, &api.CmdBootstrapServer{})
 	pb.RegisterLicenseUserChgServer(grpcServer,&api.CmdLicenseUserServer{})
+	pb.RegisterHomeIPShowSrvServer(grpcServer,&api.CmdHomeShow{})
 	reflection.Register(grpcServer)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)
