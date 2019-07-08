@@ -8,7 +8,6 @@ import (
 	"golang.org/x/net/context"
 	"strconv"
 	"time"
-	"sync"
 )
 
 type CmdDefaultServer struct {
@@ -43,15 +42,13 @@ func (ss *CmdDefaultServer) DefaultNbssa(ctx context.Context, in *pb.DefaultRequ
 }
 
 func (ss *CmdDefaultServer) stop() (*pb.DefaultResp, error) {
-	wg:=&sync.WaitGroup{}
-	wg.Add(1)
+
 	go func() {
 
 		time.Sleep(time.Second * 2)
 		ss.Stop()
-		wg.Done()
 	}()
-	wg.Wait()
+
 	resp := &pb.DefaultResp{}
 	resp.Message = "nbssa server stoped"
 	return resp, nil
