@@ -59,13 +59,13 @@ func main()  {
 	}
 	license.GetLicenseDB()
 
-	license.Insert("aaa","rickey",30,"test license")
-	license.Insert("aaa","rickey",30,"test license2")
-	license.Insert("aaa","rickey",30,"test license3")
+	license.Insert("aaa","rickey",30,"111","test license")
+	license.Insert("aaa","rickey",30,"111","test license2")
+	license.Insert("aaa","rickey",30,"111","test license3")
 
-	license.Insert("bbb","rickey",30,"test license")
-	license.Insert("ccc","rickey",30,"test license2")
-	license.Insert("bbb","rickey",30,"test license3")
+	license.Insert("bbb","rickey",30,"111","test license")
+	license.Insert("ccc","rickey",30,"111","test license2")
+	license.Insert("bbb","rickey",30,"111","test license3")
 	fmt.Println(license.CmdLicenseShow("bbb"))
 
 	fmt.Println(license.CmdShowLicenseStatistic())

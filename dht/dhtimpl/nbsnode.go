@@ -6,6 +6,7 @@ import (
 	"net"
 	"time"
 	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
+	"math/big"
 )
 
 type NbsNode struct {
@@ -104,4 +105,32 @@ func (node *NbsNode) FindNode(key []byte) (list.List, error) {
 
 func (node *NbsNode) FindValue(key []byte) (list.List, *dhttable.DhtNode, error) {
 	return nil, nil, nil
+}
+
+
+func (nn *NbsNode) GetBigInt() *big.Int {
+	bgi:=big.NewInt(0)
+
+	return bgi.SetBytes(nn.NbsAddr)
+}
+
+func (nn *NbsNode) Clone() *NbsNode {
+	newnode:=&NbsNode{Port: nn.Port}
+	ipv:=make([]byte,0)
+	for _,b:=range nn.Ipv4Addr{
+		ipv=append(ipv,b)
+	}
+	addr:=make([]byte,0)
+	for _,b:=range nn.NbsAddr  {
+		addr=append(addr,b)
+	}
+
+	newnode.NbsAddr = addr
+	newnode.Ipv4Addr = ipv
+
+	return newnode
+}
+
+func (nn *NbsNode)GetLastAccessTime() int64  {
+	//todo...
 }

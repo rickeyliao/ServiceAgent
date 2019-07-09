@@ -1,18 +1,19 @@
-package dhtserver
+package dhtimpl
 
 import (
 	"github.com/mr-tron/base58"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"sync"
-	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
+
+	"math/big"
 )
 
 var (
-	localNode      *dhtimpl.NbsNode
+	localNode      *NbsNode
 	localNode_lock sync.Mutex
 )
 
-func GetLocalNode() *dhtimpl.NbsNode {
+func GetLocalNode() *NbsNode {
 	if localNode == nil {
 		localNode_lock.Lock()
 
@@ -25,19 +26,19 @@ func GetLocalNode() *dhtimpl.NbsNode {
 	return localNode
 }
 
-func newLocalNode() *dhtimpl.NbsNode {
+func newLocalNode() *NbsNode {
 
 	sac := common.GetSAConfig()
 
 	nbsAddr := sac.NbsRsaAddr
 
-	node := &dhtimpl.NbsNode{}
+	node := &NbsNode{}
 
 	if addr, err := base58.Decode(nbsAddr[2:]); err != nil {
 		return nil
 	} else {
 		node.NbsAddr = addr
-		node.Port = dhtimpl.NbsAddr2Port(node.NbsAddr)
+		node.Port = NbsAddr2Port(node.NbsAddr)
 	}
 
 	return node
