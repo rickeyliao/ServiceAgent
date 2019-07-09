@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+import "default.proto";
+
+
+message LicenseReq{
+    int32 op= 1;   //0 stat 1 showall 2 save 3 summary
+    string sofaaddress = 2;
+}
+
+
+service LicenseSrv{
+    rpc OpLicense (LicenseReq) returns (DefaultResp) {}
+}

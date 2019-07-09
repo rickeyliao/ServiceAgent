@@ -7,7 +7,8 @@ import (
 	"crypto/sha1"
 	"gx/ipfs/QmWFAMPqsEyUX7gDUsRVmMWz59FxSpJ1b2v6bJ1yYzo7jY/go-base58-fast/base58"
 	"time"
-	"os"
+	"github.com/rickeyliao/ServiceAgent/service/license"
+	"github.com/rickeyliao/ServiceAgent/app/cmd"
 )
 
 
@@ -52,9 +53,27 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main()  {
 
-	hn,_:=os.Hostname()
 
-	fmt.Println(hn)
+	if !cmd.CheckProcessCanStarted() {
+		return
+	}
+	license.GetLicenseDB()
+
+	license.Insert("aaa","rickey",30,"test license")
+	license.Insert("aaa","rickey",30,"test license2")
+	license.Insert("aaa","rickey",30,"test license3")
+
+	license.Insert("bbb","rickey",30,"test license")
+	license.Insert("ccc","rickey",30,"test license2")
+	license.Insert("bbb","rickey",30,"test license3")
+	fmt.Println(license.CmdLicenseShow("bbb"))
+
+	fmt.Println(license.CmdShowLicenseStatistic())
+
+
+	fmt.Println(license.CmdShowLicenseSimple())
+	license.Save()
+
 
 	return
 

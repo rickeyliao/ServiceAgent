@@ -177,3 +177,17 @@ func HomeIPShowCmdSend(req string)  {
 	}
 
 }
+
+func LicenseCmdSend(op int32,req string)  {
+	request:=&pb.LicenseReq{Op:op,Sofaaddress:req}
+	conn:=DialToCmdService()
+	defer conn.Close()
+
+	client:=pb.NewLicenseSrvClient(conn.c)
+	if resp,err:=client.OpLicense(conn.ctx,request);err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(resp.Message)
+	}
+
+}

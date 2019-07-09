@@ -16,32 +16,36 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/rickeyliao/ServiceAgent/app"
 )
 
-// saveCmd represents the save command
-var homeipsaveCmd = &cobra.Command{
-	Use:   "save",
-	Short: "Save home ip address table",
-	Long: `Save home ip address table`,
+// summaryCmd represents the summary command
+var licensesummaryCmd = &cobra.Command{
+	Use:   "summary",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return
 		}
-		DefaultCmdSend(app.CMD_HOMEIP_SAVE_REQ)
+		LicenseCmdSend(3,"")
 	},
 }
 
 func init() {
-	homeipCmd.AddCommand(homeipsaveCmd)
+	licenseCmd.AddCommand(licensesummaryCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// saveCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// summaryCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// saveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// summaryCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

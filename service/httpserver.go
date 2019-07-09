@@ -17,6 +17,7 @@ import (
 	"time"
 	"github.com/rickeyliao/ServiceAgent/service/login"
 	"sync"
+	"github.com/rickeyliao/ServiceAgent/service/license"
 )
 
 var (
@@ -67,6 +68,8 @@ func Run(cfg *common.SAConfig) {
 		go localaddress.IntervalSave()
 	}
 
+	go license.IntervalSave()
+
 	httpserver = &http.Server{Addr: listenportstr, Handler: mux}
 
 	log.Fatal(httpserver.ListenAndServe())
@@ -81,6 +84,9 @@ func Stop() {
 	if common.GetSAConfig().Role == 1{
 		localaddress.Destroy()
 	}
+
+	license.Destroy()
+
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)
 }
