@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"strings"
 	"time"
+	"os"
 )
 
 var (
@@ -72,6 +73,13 @@ func Insert(nbsaddress string,mn string,interAddress string,natAddress string) e
 
 	if nbsaddress == "" || len(nbsaddress) == 0{
 		return errors.New("nbsaddress not found")
+	}
+
+	if mn==""{
+		mn,_ = os.Hostname()
+		if mn==""{
+			mn="nbsmachinename"
+		}
 	}
 
 	hid:=&Homeipdesc{MachineName:mn,InternetAddress:interAddress,NatAddress:String2arr(natAddress)}

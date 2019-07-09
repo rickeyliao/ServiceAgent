@@ -153,14 +153,12 @@ func (fdb *filedb) Save() {
 	listkey := reflect.ValueOf(fdb.mkey).MapKeys()
 	for _, key := range listkey {
 		k := key.Interface().(string)
-		fmt.Println(k)
 
 		fk := &filedbkev{}
 
 		fk.Key = k
 		fk.Value = fdb.mkey[k]
 
-		fmt.Println(fk)
 		if bj, err := json.Marshal(fk); err != nil {
 			log.Println("save error", k, fk.Value)
 		} else {

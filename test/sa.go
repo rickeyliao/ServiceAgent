@@ -7,9 +7,7 @@ import (
 	"crypto/sha1"
 	"gx/ipfs/QmWFAMPqsEyUX7gDUsRVmMWz59FxSpJ1b2v6bJ1yYzo7jY/go-base58-fast/base58"
 	"time"
-	"github.com/kprc/nbsnetwork/common/list"
-	"math/big"
-	"github.com/rickeyliao/ServiceAgent/dht"
+	"os"
 )
 
 
@@ -53,6 +51,13 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //}
 
 func main()  {
+
+	hn,_:=os.Hostname()
+
+	fmt.Println(hn)
+
+	return
+
 	testlist()
 
 	return
@@ -147,75 +152,75 @@ func main()  {
 }
 
 func testlist()  {
-	l:=list.NewList(list.Cmp)
-	l.SetCloneFunc(func(v1 interface{}) (r interface{}) {
-		var v2 int
-		v2 =v1.(int)
-		return v2
-	})
-	l.SetDistance(func(v1 interface{}) *big.Int {
-		v2:=v1.(int)
-
-		z:=big.NewInt(1000)
-
-		return z.Sub(big.NewInt(int64(v2)),z)
-
-	})
-
-
-	l.AddValueSort(int(1))
-	l.AddValueSort(int(2))
-	l.AddValueSort(int(100))
-	l.AddValueSort(int(100))
-	l.AddValueSort(int(1002))
-	l.AddValueSort(int(10002))
-	l.AddValueSort(int(1009))
-	l.AddValueSort(int(89))
-	l.AddValueSort(int(64))
-	l.AddValueSort(int(77))
-
-	//l.Traverse("==>",list.Print)
-	lnew,_:=l.DeepClone()
-	//lnew.Traverse("++>",list.Print)
-
-	l.DeepConCat(lnew,true)
-
-	//l.Traverse("==++>",list.Print)
-
-
-
-
-
-	fmt.Println(dht.GetDhtHashV(0))
-	fmt.Println(dht.GetDhtHashV(1))
-	fmt.Println(dht.GetDhtHashV(2))
-	fmt.Println(dht.GetDhtHashV(3))
-	fmt.Println(dht.GetDhtHashV(4))
-	fmt.Println(dht.GetDhtHashV(6))
-	fmt.Println(dht.GetDhtHashV(8))
-	fmt.Println(dht.GetDhtHashV(31))
-	fmt.Println(dht.GetDhtHashV(32))
-	fmt.Println(dht.GetDhtHashV(69))
-	fmt.Println(dht.GetDhtHashV(112))
-	fmt.Println(dht.GetDhtHashV(123))
-	fmt.Println(dht.GetDhtHashV(233))
-	fmt.Println(dht.GetDhtHashV(0x20151031))
-
-
-	fmt.Println(dht.GetDhtHashV1(0))
-	fmt.Println(dht.GetDhtHashV1(1))
-	fmt.Println(dht.GetDhtHashV1(2))
-	fmt.Println(dht.GetDhtHashV1(3))
-	fmt.Println(dht.GetDhtHashV1(4))
-	fmt.Println(dht.GetDhtHashV1(6))
-	fmt.Println(dht.GetDhtHashV1(8))
-	fmt.Println(dht.GetDhtHashV1(31))
-	fmt.Println(dht.GetDhtHashV1(32))
-	fmt.Println(dht.GetDhtHashV1(69))
-	fmt.Println(dht.GetDhtHashV1(112))
-	fmt.Println(dht.GetDhtHashV1(123))
-	fmt.Println(dht.GetDhtHashV1(233))
-	fmt.Println(dht.GetDhtHashV1(0x20151031))
+	//l:=list.NewList(list.Cmp)
+	//l.SetCloneFunc(func(v1 interface{}) (r interface{}) {
+	//	var v2 int
+	//	v2 =v1.(int)
+	//	return v2
+	//})
+	//l.SetDistance(func(v1 interface{}) *big.Int {
+	//	v2:=v1.(int)
+	//
+	//	z:=big.NewInt(1000)
+	//
+	//	return z.Sub(big.NewInt(int64(v2)),z)
+	//
+	//})
+	//
+	//
+	//l.AddValueSort(int(1))
+	//l.AddValueSort(int(2))
+	//l.AddValueSort(int(100))
+	//l.AddValueSort(int(100))
+	//l.AddValueSort(int(1002))
+	//l.AddValueSort(int(10002))
+	//l.AddValueSort(int(1009))
+	//l.AddValueSort(int(89))
+	//l.AddValueSort(int(64))
+	//l.AddValueSort(int(77))
+	//
+	////l.Traverse("==>",list.Print)
+	//lnew,_:=l.DeepClone()
+	////lnew.Traverse("++>",list.Print)
+	//
+	//l.DeepConCat(lnew,true)
+	//
+	////l.Traverse("==++>",list.Print)
+	//
+	//
+	//
+	//
+	//
+	//fmt.Println(dht.GetDhtHashV(0))
+	//fmt.Println(dht.GetDhtHashV(1))
+	//fmt.Println(dht.GetDhtHashV(2))
+	//fmt.Println(dht.GetDhtHashV(3))
+	//fmt.Println(dht.GetDhtHashV(4))
+	//fmt.Println(dht.GetDhtHashV(6))
+	//fmt.Println(dht.GetDhtHashV(8))
+	//fmt.Println(dht.GetDhtHashV(31))
+	//fmt.Println(dht.GetDhtHashV(32))
+	//fmt.Println(dht.GetDhtHashV(69))
+	//fmt.Println(dht.GetDhtHashV(112))
+	//fmt.Println(dht.GetDhtHashV(123))
+	//fmt.Println(dht.GetDhtHashV(233))
+	//fmt.Println(dht.GetDhtHashV(0x20151031))
+	//
+	//
+	//fmt.Println(dht.GetDhtHashV1(0))
+	//fmt.Println(dht.GetDhtHashV1(1))
+	//fmt.Println(dht.GetDhtHashV1(2))
+	//fmt.Println(dht.GetDhtHashV1(3))
+	//fmt.Println(dht.GetDhtHashV1(4))
+	//fmt.Println(dht.GetDhtHashV1(6))
+	//fmt.Println(dht.GetDhtHashV1(8))
+	//fmt.Println(dht.GetDhtHashV1(31))
+	//fmt.Println(dht.GetDhtHashV1(32))
+	//fmt.Println(dht.GetDhtHashV1(69))
+	//fmt.Println(dht.GetDhtHashV1(112))
+	//fmt.Println(dht.GetDhtHashV1(123))
+	//fmt.Println(dht.GetDhtHashV1(233))
+	//fmt.Println(dht.GetDhtHashV1(0x20151031))
 
 
 }

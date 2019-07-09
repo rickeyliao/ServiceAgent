@@ -77,9 +77,8 @@ func Stop() {
 		quit<-1
 		wg.Wait()
 	}
-	
-	if common.GetSAConfig().Role == 1{
 
+	if common.GetSAConfig().Role == 1{
 		localaddress.Destroy()
 	}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -97,7 +96,6 @@ func reportAddress()  {
 			c:=&http.Client{Transport:&tp}
 
 			if req,err:=http.NewRequest("GET","http://103.45.98.72:50810/localipaddress",nil);err!=nil{
-				//fmt.Println(err)
 				continue
 			}else{
 
