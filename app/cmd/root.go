@@ -25,6 +25,8 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 )
 
+
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "nbssa",
@@ -68,8 +70,8 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	hostname=daemonCmd.Flags().StringP("username","u","","Set User Name, Usually set to email address")
-	role=daemonCmd.Flags().Int64P("role","r",0,"Set nbssa role")
+	hostname=rootCmd.Flags().StringP("username","u","","Set User Name, Usually set to email address")
+	role=rootCmd.Flags().Int64P("role","r",0,"Set nbssa role")
 }
 
 // initConfig reads in config file and ENV variables if set.
