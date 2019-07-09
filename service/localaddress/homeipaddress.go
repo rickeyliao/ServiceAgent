@@ -128,7 +128,7 @@ func CmdShowAddressAll() string {
 		if k==""{
 			break
 		}
-		if alls==""{
+		if alls!=""{
 			alls+="\r\n"
 		}
 		alls +=CmdShowAddress(k)
