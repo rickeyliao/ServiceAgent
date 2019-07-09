@@ -47,12 +47,12 @@ func (fdb *filedb) Load() NbsDbInter {
 	if !tools.FileExists(fdb.filepath) {
 		flag |= os.O_CREATE
 	}
+
 	if f, err := os.OpenFile(fdb.filepath, flag, 0755); err != nil {
 		log.Fatal("Can't open file")
 	} else {
 		fdb.f = f
 	}
-
 	fdb.load()
 
 	fdb.f.Close()
