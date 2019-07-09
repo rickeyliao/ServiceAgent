@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"net"
 	"time"
-	"github.com/rickeyliao/ServiceAgent/dht/dhtserver"
 	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
 )
 
@@ -88,11 +87,11 @@ func (node *NbsNode) Ping() (bool, error) {
 }
 
 func (node *NbsNode) Store(key []byte, dv *dhttable.DhtNode) error {
-	if node.AddrCmp(dhtserver.GetLocalNode().NbsAddr) {
-		//save local db
-
-		return nil
-	}
+	//if node.AddrCmp(dhtserver.GetLocalNode().NbsAddr) {
+	//	//save local db
+	//
+	//	return nil
+	//}
 
 	//send to remote
 

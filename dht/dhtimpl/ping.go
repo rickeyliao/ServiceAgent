@@ -6,7 +6,6 @@ import (
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"github.com/rickeyliao/ServiceAgent/dht"
 	"log"
-	"github.com/rickeyliao/ServiceAgent/dht/dhtserver"
 )
 
 func (node *NbsNode) encPingData() (uint64, []byte) {
@@ -16,7 +15,7 @@ func (node *NbsNode) encPingData() (uint64, []byte) {
 
 	req.Msgtyp = dht.PING_REQ
 
-	req.Nbsaddr = dhtserver.GetLocalNode().NbsAddr
+	//req.Nbsaddr = dhtserver.GetLocalNode().NbsAddr
 
 	if data, err := proto.Marshal(req); err != nil {
 		log.Fatal("Marshall Ping Request Message Failed")

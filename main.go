@@ -33,11 +33,11 @@ func main() {
 	cmd.Version = Version
 	cmd.Build = Build
 	cmd.BuildTime = BuildTime
-	cmd.RunPath, _ = GetCurrentPath()
+	cmd.RunPath, _ = getCurrentPath()
 
 	cmd.Execute()
 }
-func GetCurrentPath() (string, error) {
+func getCurrentPath() (string, error) {
 	file, err := exec.LookPath(os.Args[0])
 	if err != nil {
 		return "", err
@@ -51,7 +51,7 @@ func GetCurrentPath() (string, error) {
 		i = strings.LastIndex(path, "\\")
 	}
 	if i < 0 {
-		return "", errors.New(`error: Can't find "/" or "\".`)
+		return "", errors.New("error: can't find / or \\ ")
 	}
 	return string(path[0 : i+1]), nil
 }

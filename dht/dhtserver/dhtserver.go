@@ -1,12 +1,13 @@
 package dhtserver
 
 import (
-	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
+
 	"net"
 	"sync"
 	"log"
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"github.com/gogo/protobuf/proto"
+	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
 )
 
 type DhtServer struct {
