@@ -13,6 +13,9 @@ type CmdHomeShow struct {
 func (chs *CmdHomeShow)ShowHomeIP(cxt context.Context,hi *pb.HomeIPShowReq) (*pb.DefaultResp, error) {
 	if hi.Nbsaddr == ""{
 		message:=localaddress.CmdShowAddressAll()
+		if message==""{
+			message = "No home ip"
+		}
 		return encResp(message),nil
 	}else{
 		message:=localaddress.CmdShowAddress(hi.Nbsaddr)
