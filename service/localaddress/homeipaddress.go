@@ -16,7 +16,7 @@ var (
 	homeipdblock sync.Mutex
 	machineName string
 	quit chan int
-	wg sync.WaitGroup
+	wg *sync.WaitGroup
 )
 
 func GetHomeIPDB() db.NbsDbInter {
@@ -33,6 +33,8 @@ func GetHomeIPDB() db.NbsDbInter {
 }
 
 func newHomeIPDB() db.NbsDbInter {
+	quit = make(chan int,0)
+	wg=&sync.WaitGroup{}
 	cfg:=common.GetSAConfig()
 	return db.NewFileDb(path.Join(cfg.FileDBDir,cfg.HomeIPDBFile)).Load()
 }
@@ -149,7 +151,11 @@ func Save()  {
 }
 
 func IntervalSave()  {
+	if wg == nil{
+		GetHomeIPDB()
+	}
 	wg.Add(1)
+	defer wg.Done()
 	var count int64=0
 	for{
 		count ++
@@ -164,7 +170,7 @@ func IntervalSave()  {
 		}
 		time.Sleep(time.Second*1)
 	}
-	wg.Done()
+
 }
 
 func Destroy()  {
