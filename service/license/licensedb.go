@@ -44,7 +44,7 @@ func newLicenseDB() db.NbsDbInter {
 	quit = make(chan int, 0)
 	wg = &sync.WaitGroup{}
 	cfg:=common.GetSAConfig()
-	return db.NewFileDb(path.Join(cfg.Root.HomeDir,cfg.FileDBDir,"license")).Load()
+	return db.NewFileDb(path.Join(cfg.Root.HomeDir,cfg.FileDBDir,cfg.LicenseDBFile)).Load()
 }
 
 func Insert(sofaaddr string,user string,ndays int32,ipaddr string,l string) error {
