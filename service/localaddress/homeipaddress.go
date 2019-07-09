@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"strings"
 	"time"
+	"fmt"
 )
 
 var (
@@ -175,6 +176,8 @@ func IntervalSave()  {
 
 func Destroy()  {
 	quit<-1
+	fmt.Print("begin to save ...")
 	Save()
+	fmt.Print("save end ...")
 	wg.Wait()
 }
