@@ -64,8 +64,8 @@ var daemonCmd = &cobra.Command{
 		log.Println("nbssa daemon started")
 
 		localaddress.SetMachineName(*hostname)
+
 		cfg.Role = *role
-		
 
 		go service.Run(cfg)
 

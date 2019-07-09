@@ -25,7 +25,10 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 )
 
-
+var (
+	machinerole *int64
+	machinename *string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -41,8 +44,8 @@ var rootCmd = &cobra.Command{
 
 		cfg := common.GetSAConfig()
 
-		localaddress.SetMachineName(*hostname)
-		cfg.Role = *role
+		localaddress.SetMachineName(*machinename)
+		cfg.Role = *machinerole
 
 		go service.Run(cfg)
 		cmdservice.StartCmdService()
@@ -70,8 +73,8 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	hostname=rootCmd.Flags().StringP("username","u","","Set User Name, Usually set to email address")
-	role=rootCmd.Flags().Int64P("role","r",0,"Set nbssa role")
+	machinename=rootCmd.Flags().StringP("username","u","","Set User Name, Usually set to email address")
+	machinerole=rootCmd.Flags().Int64P("role","r",0,"Set nbssa role")
 }
 
 // initConfig reads in config file and ENV variables if set.

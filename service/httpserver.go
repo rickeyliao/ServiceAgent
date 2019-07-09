@@ -17,7 +17,6 @@ import (
 	"time"
 	"github.com/rickeyliao/ServiceAgent/service/login"
 	"sync"
-	"fmt"
 )
 
 var (
@@ -78,7 +77,7 @@ func Stop() {
 		quit<-1
 		wg.Wait()
 	}
-	fmt.Println("role value:",common.GetSAConfig().Role)
+	
 	if common.GetSAConfig().Role == 1{
 
 		localaddress.Destroy()
