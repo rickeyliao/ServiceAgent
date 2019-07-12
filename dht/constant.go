@@ -12,6 +12,8 @@ const (
 	FIND_NODE_RESP uint32 = 4
 	FIND_VALUE_REQ uint32 = 5
 	FIND_VALUE_RESP uint32 = 6
+	STORE_REQ uint32 = 7
+	STORE_RESP uint32 = 8
 )
 
 

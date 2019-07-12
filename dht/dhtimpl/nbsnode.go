@@ -98,7 +98,7 @@ func (node *NbsNode) Store(key []byte) error {
 	}
 	defer conn.Close()
 
-	sn, data := node.encFindNode(key)
+	sn, data := node.encStore(key)
 	if data == nil {
 		return errors.New("enc FindNode Request Failed")
 	}
@@ -111,19 +111,16 @@ func (node *NbsNode) Store(key []byte) error {
 
 	conn.SetReadDeadline(time.Now().Add(time.Second * 2))
 
-	buf := make([]byte, 2048)
+	buf := make([]byte, 1024)
 
 	n, err = conn.Read(buf)
 	if err != nil {
 		return err
 	}
 
-	var l list.List
-	if l,err = node.updateByFindNode(key,buf, sn); err != nil {
+	if err = node.updateByStore(key,buf, sn); err != nil {
 		return err
 	}
-
-
 
 	return nil
 }
