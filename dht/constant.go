@@ -10,6 +10,8 @@ const (
 	PING_RESP uint32 = 2
 	FIND_NODE_REQ  uint32 = 3
 	FIND_NODE_RESP uint32 = 4
+	FIND_VALUE_REQ uint32 = 5
+	FIND_VALUE_RESP uint32 = 6
 )
 
 

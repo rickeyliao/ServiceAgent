@@ -14,7 +14,8 @@ message NbsNode{
 
 message NbsNodeList{
     repeated NbsNode Nodes = 1;
-    bytes data=2;
+    bool HaveData = 2;
+    bytes data = 3;
 }
 
 

@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"net"
 	"time"
-	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
 	"github.com/rickeyliao/ServiceAgent/common"
 )
 
@@ -92,14 +91,39 @@ func (node *NbsNode) Ping() (bool, error) {
 	return true, nil
 }
 
-func (node *NbsNode) Store(key []byte, dv *dhttable.DhtNode) error {
-	//if node.AddrCmp(dhtserver.GetLocalNode().NbsAddr) {
-	//	//save local db
-	//
-	//	return nil
-	//}
+func (node *NbsNode) Store(key []byte) error {
+	conn,err:=node.connect()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
 
-	//send to remote
+	sn, data := node.encFindNode(key)
+	if data == nil {
+		return errors.New("enc FindNode Request Failed")
+	}
+
+	var n int
+	n, err = conn.Write(data)
+	if err != nil || n != len(data) {
+		return errors.New("Send FindNode Request Failed")
+	}
+
+	conn.SetReadDeadline(time.Now().Add(time.Second * 2))
+
+	buf := make([]byte, 2048)
+
+	n, err = conn.Read(buf)
+	if err != nil {
+		return err
+	}
+
+	var l list.List
+	if l,err = node.updateByFindNode(key,buf, sn); err != nil {
+		return err
+	}
+
+
 
 	return nil
 }
@@ -141,8 +165,39 @@ func (node *NbsNode) FindNode(key []byte) (list.List, error) {
 }
 
 
-func (node *NbsNode) FindValue(key []byte) (list.List, []byte, error) {
-	return nil, nil, nil
+func (node *NbsNode) FindValue(key []byte) (list.List, *DhtValue, error) {
+	conn,err:=node.connect()
+	if err != nil {
+		return nil,nil, err
+	}
+	defer conn.Close()
+
+	sn, data := node.encFindValue(key)
+	if data == nil {
+		return nil, nil,errors.New("enc FindNode Request Failed")
+	}
+
+	var n int
+	n, err = conn.Write(data)
+	if err != nil || n != len(data) {
+		return nil, nil,errors.New("Send FindNode Request Failed")
+	}
+
+	conn.SetReadDeadline(time.Now().Add(time.Second * 2))
+
+	buf := make([]byte, 2048)
+
+	n, err = conn.Read(buf)
+	if err != nil {
+		return nil,nil, err
+	}
+
+	var l list.List
+	if l,err = node.updateByFindNode(key,buf, sn); err != nil {
+		return nil,nil, err
+	}
+
+	return l, nil,nil
 }
 
 
