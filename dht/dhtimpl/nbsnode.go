@@ -133,7 +133,7 @@ func (node *NbsNode) FindNode(key []byte) (list.List, error) {
 	}
 
 	var l list.List
-	if l,err = node.updateByFindNode(buf, sn); err != nil {
+	if l,err = node.updateByFindNode(key,buf, sn); err != nil {
 		return nil, err
 	}
 
@@ -146,29 +146,3 @@ func (node *NbsNode) FindValue(key []byte) (list.List, []byte, error) {
 }
 
 
-//func (nn *NbsNode) GetBigInt() *big.Int {
-//	bgi:=&big.Int{}
-//
-//	return bgi.SetBytes(nn.NbsAddr)
-//}
-//
-//func (nn *NbsNode) Clone() *NbsNode {
-//	newnode:=&NbsNode{Port: nn.Port}
-//	ipv:=make([]byte,0)
-//	for _,b:=range nn.Ipv4Addr{
-//		ipv=append(ipv,b)
-//	}
-//	addr:=make([]byte,0)
-//	for _,b:=range nn.NbsAddr  {
-//		addr=append(addr,b)
-//	}
-//
-//	newnode.NbsAddr = addr
-//	newnode.Ipv4Addr = ipv
-//
-//	return newnode
-//}
-//
-//func (nn *NbsNode)GetLastAccessTime() int64  {
-//	//todo...
-//}
