@@ -47,7 +47,7 @@ func (dhr *DhtHandler)Reg(msgtyp uint32,f DhtFunc)  {
 	}
 }
 
-func (dhr *DhtHandler)Run(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err error) {
+func (dhr *DhtHandler)Dispatch(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err error) {
 	if f,ok:=dhr.h[dm.Msgtyp];ok{
 		if f!=nil{
 			return f(dm,addr,conn)

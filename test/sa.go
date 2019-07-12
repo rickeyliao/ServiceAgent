@@ -9,6 +9,7 @@ import (
 	"time"
 	"github.com/rickeyliao/ServiceAgent/service/license"
 	"github.com/rickeyliao/ServiceAgent/app/cmd"
+	"github.com/kprc/nbsnetwork/common/list"
 )
 
 
@@ -53,6 +54,42 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main()  {
 
+	l:=list.NewList(func(v1 interface{}, v2 interface{}) int {
+		i1,i2:=v1.(int),v2.(int)
+
+		return i1-i2
+	})
+
+	l.SetSortFunc(func(v1 interface{}, v2 interface{}) int {
+		i1,i2:=v1.(int),v2.(int)
+
+		return i1-i2
+	})
+
+	l.SetCloneFunc(func(v1 interface{}) (r interface{}) {
+		i1:=v1.(int)
+		r = i1
+		return
+	})
+
+	l.AddValue(23)
+	l.AddValue(22)
+	l.AddValue(22)
+	l.AddValue(21)
+	l.AddValue(290)
+	l.AddValue(33)
+	l.AddValue(12)
+
+	l.Traverse("->",list.Print)
+
+
+	l.Sort()
+
+
+
+
+
+	return
 
 	if !cmd.CheckProcessCanStarted() {
 		return

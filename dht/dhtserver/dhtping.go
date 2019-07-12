@@ -6,6 +6,8 @@ import (
 	"github.com/rickeyliao/ServiceAgent/dht"
 	"github.com/pkg/errors"
 	"github.com/gogo/protobuf/proto"
+	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
+	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
 )
 
 func respPing(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err error)  {
@@ -16,7 +18,10 @@ func respPing(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err erro
 	resp:=&pbdht.Dhtmessage{}
 	resp.Msgtyp = dht.PING_RESP
 	resp.Sn = dm.Sn
-	resp.Nbsaddr = GetLocalNode().NbsAddr
+	resp.Localnbsaddr = dhtimpl.GetLocalNode().NbsAddr
+	resp.Remotenbsaddr = dm.Localnbsaddr
+
+	dhttable.GetRouteTableInst().UpdateOrder(dhtimpl.NewDhtNode(dm.Localnbsaddr,addr.IP))
 
 	var data []byte
 	data,err=proto.Marshal(resp)

@@ -8,6 +8,8 @@ import (
 const (
 	PING_REQ  uint32 = 1
 	PING_RESP uint32 = 2
+	FIND_NODE_REQ  uint32 = 3
+	FIND_NODE_RESP uint32 = 4
 )
 
 

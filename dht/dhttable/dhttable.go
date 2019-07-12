@@ -4,6 +4,7 @@ import (
 	"math/big"
 	"github.com/kprc/nbsnetwork/common/hashlist"
 	"sync"
+	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
 )
 
 type DhtNode interface {
@@ -11,6 +12,8 @@ type DhtNode interface {
 	Clone() DhtNode
 	GetLastAccessTime() int64
 }
+
+
 
 var (
 	routetable hashlist.HashList
@@ -32,8 +35,10 @@ func GetRouteTableInst() hashlist.HashList  {
 
 func newRouteTable() hashlist.HashList {
 	t := hashlist.NewHashList(256, func(v interface{}) uint {
-		bgnode:=v.(DhtNode)
-		bitl:=bgnode.GetBigInt().BitLen()
+		vbgint:=v.(DhtNode).GetBigInt()
+		localBgInt:=dhtimpl.GetLocalNode().GetBgInt()
+		z:=&big.Int{}
+		bitl:=z.Xor(vbgint,localBgInt).BitLen()
 		if bitl>0{
 			bitl-=1
 		}
@@ -42,7 +47,7 @@ func newRouteTable() hashlist.HashList {
 		bgnode1,bgnode2:=v1.(DhtNode),v2.(DhtNode)
 		return bgnode1.GetBigInt().Cmp(bgnode2.GetBigInt())
 	})
-	t.SetLimitCnt(16)
+	t.SetLimitCnt(20)
 	t.SetSortFunc(func(v1 interface{}, v2 interface{}) int {
 		tm1,tm2:=v1.(DhtNode).GetLastAccessTime(),v2.(DhtNode).GetLastAccessTime()
 		
@@ -55,6 +60,14 @@ func newRouteTable() hashlist.HashList {
 	})
 
 	return t
+}
+
+func Distance(v1 interface{},v2 interface{}) *big.Int{
+	bgv1,bgv2:=v1.(DhtNode).GetBigInt(),v2.(DhtNode).GetBigInt()
+
+	z:=&big.Int{}
+
+	return z.Xor(bgv1,bgv2)
 }
 
 

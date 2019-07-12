@@ -11,7 +11,7 @@ import (
 )
 
 type DhtServer struct {
-	servernode *dhtimpl.NbsNode
+	servernode *dhtimpl.LocalNode
 	conn *net.UDPConn
 }
 
@@ -37,7 +37,7 @@ func GetDhtServer() *DhtServer {
 
 	ds:=&DhtServer{}
 
-	ds.servernode = GetLocalNode()
+	ds.servernode = dhtimpl.GetLocalNode()
 
 	ds.conn = nil
 
@@ -68,7 +68,6 @@ func (ds *DhtServer)Run()  {
 			return
 		}
 		handleBuf(buf[:n],addr,conn)
-
 	}
 
 }
@@ -80,10 +79,9 @@ func handleBuf(buf []byte,addr *net.UDPAddr,conn *net.UDPConn)  {
 		return
 	}
 
-	if err:=GetDhtHandlerInst().Run(dm,addr,conn);err!=nil{
+	if err:=GetDhtHandlerInst().Dispatch(dm,addr,conn);err!=nil{
 		log.Println(err)
 	}
-
 }
 
 

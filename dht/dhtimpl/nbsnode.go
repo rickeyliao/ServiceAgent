@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
-	"math/big"
+	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 type NbsNode struct {
@@ -16,7 +16,7 @@ type NbsNode struct {
 }
 
 func NbsAddr2Port(nbsaddr []byte) uint16 {
-	return uint16(50810)
+	return common.GetSAConfig().DhtListenPort
 }
 
 func NewNbsNode(ipaddr []byte, nbsaddr []byte) *NbsNode {
@@ -43,7 +43,7 @@ func (node *NbsNode) AddrCmp(addr []byte) bool {
 	return true
 }
 
-func (node *NbsNode) Ping() (bool, error) {
+func (node *NbsNode)connect() (*net.UDPConn,error)  {
 	remoteaddr := &net.UDPAddr{
 		IP:   node.Ipv4Addr,
 		Port: int(node.Port),
@@ -54,7 +54,12 @@ func (node *NbsNode) Ping() (bool, error) {
 		Port: 0,
 	}
 
-	conn, err := net.DialUDP("udp", localaddr, remoteaddr)
+	return net.DialUDP("udp", localaddr, remoteaddr)
+}
+
+func (node *NbsNode) Ping() (bool, error) {
+
+	conn, err := node.connect()
 	if err != nil {
 		return false, errors.New("Dial UDP Error")
 	}
@@ -100,37 +105,70 @@ func (node *NbsNode) Store(key []byte, dv *dhttable.DhtNode) error {
 }
 
 func (node *NbsNode) FindNode(key []byte) (list.List, error) {
-	return nil, nil
+
+	conn,err:=node.connect()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	sn, data := node.encFindNode(key)
+	if data == nil {
+		return nil, errors.New("enc FindNode Request Failed")
+	}
+
+	var n int
+	n, err = conn.Write(data)
+	if err != nil || n != len(data) {
+		return nil, errors.New("Send FindNode Request Failed")
+	}
+
+	conn.SetReadDeadline(time.Now().Add(time.Second * 2))
+
+	buf := make([]byte, 2048)
+
+	n, err = conn.Read(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	var l list.List
+	if l,err = node.updateByFindNode(buf, sn); err != nil {
+		return nil, err
+	}
+
+	return l, nil
 }
 
-func (node *NbsNode) FindValue(key []byte) (list.List, *dhttable.DhtNode, error) {
+
+func (node *NbsNode) FindValue(key []byte) (list.List, []byte, error) {
 	return nil, nil, nil
 }
 
 
-func (nn *NbsNode) GetBigInt() *big.Int {
-	bgi:=big.NewInt(0)
-
-	return bgi.SetBytes(nn.NbsAddr)
-}
-
-func (nn *NbsNode) Clone() *NbsNode {
-	newnode:=&NbsNode{Port: nn.Port}
-	ipv:=make([]byte,0)
-	for _,b:=range nn.Ipv4Addr{
-		ipv=append(ipv,b)
-	}
-	addr:=make([]byte,0)
-	for _,b:=range nn.NbsAddr  {
-		addr=append(addr,b)
-	}
-
-	newnode.NbsAddr = addr
-	newnode.Ipv4Addr = ipv
-
-	return newnode
-}
-
-func (nn *NbsNode)GetLastAccessTime() int64  {
-	//todo...
-}
+//func (nn *NbsNode) GetBigInt() *big.Int {
+//	bgi:=&big.Int{}
+//
+//	return bgi.SetBytes(nn.NbsAddr)
+//}
+//
+//func (nn *NbsNode) Clone() *NbsNode {
+//	newnode:=&NbsNode{Port: nn.Port}
+//	ipv:=make([]byte,0)
+//	for _,b:=range nn.Ipv4Addr{
+//		ipv=append(ipv,b)
+//	}
+//	addr:=make([]byte,0)
+//	for _,b:=range nn.NbsAddr  {
+//		addr=append(addr,b)
+//	}
+//
+//	newnode.NbsAddr = addr
+//	newnode.Ipv4Addr = ipv
+//
+//	return newnode
+//}
+//
+//func (nn *NbsNode)GetLastAccessTime() int64  {
+//	//todo...
+//}

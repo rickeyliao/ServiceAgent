@@ -6,6 +6,7 @@ package pbdht;
 message dhtmessage{
     uint64 sn = 1;
     uint32 msgtyp=2;
-    bytes nbsaddr=3;
-    bytes data = 4;
+    bytes localnbsaddr=3;
+    bytes remotenbsaddr=4;
+    bytes data = 5;
 }

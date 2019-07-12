@@ -1,23 +1,27 @@
 package dhtimpl
 
 import (
-	"github.com/gogo/protobuf/proto"
-	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"github.com/rickeyliao/ServiceAgent/dht"
-	"log"
 	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
+	"github.com/golang/protobuf/proto"
+	"log"
+	"errors"
+	"github.com/kprc/nbsnetwork/common/list"
 )
 
-func (node *NbsNode) encPingData() (uint64, []byte) {
+
+
+func (node *NbsNode) encFindNode(key []byte) (uint64, []byte) {
 	req := &pbdht.Dhtmessage{}
 
 	req.Sn = dht.GetNextMsgCnt()
 
-	req.Msgtyp = dht.PING_REQ
+	req.Msgtyp = dht.FIND_NODE_REQ
 
 	req.Localnbsaddr = GetLocalNode().NbsAddr
 	req.Remotenbsaddr = node.NbsAddr
+	req.Data = key
 
 	if data, err := proto.Marshal(req); err != nil {
 		log.Fatal("Marshall Ping Request Message Failed")
@@ -27,16 +31,16 @@ func (node *NbsNode) encPingData() (uint64, []byte) {
 	}
 }
 
-func (node *NbsNode) updateByPingResp(buf []byte, reqsn uint64) error {
+func (node *NbsNode)updateByFindNode(buf []byte, reqsn uint64) (list.List,error) {
 
 	resp := &pbdht.Dhtmessage{}
 
 	if err := proto.Unmarshal(buf, resp); err != nil {
-		return err
+		return nil,err
 	}
 
 	if reqsn != resp.Sn {
-		return errors.New("SerialNumber not Corrected!")
+		return nil,errors.New("SerialNumber not Corrected!")
 	}
 
 	if !node.AddrCmp(resp.Localnbsaddr) {
@@ -44,10 +48,13 @@ func (node *NbsNode) updateByPingResp(buf []byte, reqsn uint64) error {
 		dhttable.GetRouteTableInst().Del(NewDhtNode(node.NbsAddr,node.Ipv4Addr))
 		dhttable.GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
 
-		return errors.New("Address not corrected!")
-	}else {
-		dhttable.GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
+		return nil,errors.New("Address not corrected!")
 	}
 
-	return nil
+	dhttable.GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
+
+
+
+	return nil,nil
 }
+

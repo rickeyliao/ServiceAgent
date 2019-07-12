@@ -4,16 +4,20 @@ import (
 	"github.com/mr-tron/base58"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"sync"
-
 	"math/big"
 )
 
+type LocalNode struct {
+	NbsNode
+	Bgint *big.Int
+}
+
 var (
-	localNode      *NbsNode
+	localNode      *LocalNode
 	localNode_lock sync.Mutex
 )
 
-func GetLocalNode() *NbsNode {
+func GetLocalNode() *LocalNode {
 	if localNode == nil {
 		localNode_lock.Lock()
 
@@ -26,13 +30,13 @@ func GetLocalNode() *NbsNode {
 	return localNode
 }
 
-func newLocalNode() *NbsNode {
+func newLocalNode() *LocalNode {
 
 	sac := common.GetSAConfig()
 
 	nbsAddr := sac.NbsRsaAddr
 
-	node := &NbsNode{}
+	node := &LocalNode{}
 
 	if addr, err := base58.Decode(nbsAddr[2:]); err != nil {
 		return nil
@@ -40,8 +44,13 @@ func newLocalNode() *NbsNode {
 		node.NbsAddr = addr
 		node.Port = NbsAddr2Port(node.NbsAddr)
 	}
+	bgi:=&big.Int{}
+	node.Bgint = bgi.SetBytes(node.NbsAddr)
 
 	return node
 
 }
 
+func (ln *LocalNode) GetBgInt() *big.Int {
+	return ln.Bgint
+}

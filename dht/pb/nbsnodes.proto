@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package pbdht;
+
+
+
+message NbsNode{
+    bytes Nbsaddr =1;
+    bytes INetAddr =2;
+}
+
+
+
+
+message NbsNodeList{
+    repeated NbsNode Nodes = 1;
+}
+
+
+
+
+
