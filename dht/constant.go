@@ -17,6 +17,11 @@ const (
 )
 
 
+const(
+	DHT_K int32 = 20
+	DHT_A int32 = 3
+)
+
 
 func GetDhtHashV(n int) int {
 	cnt:=0

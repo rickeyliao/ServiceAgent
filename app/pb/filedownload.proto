@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+
+import "default.proto";
+
+
+message filedownloadreq{
+    string filehash=1;
+    string hostip = 2;
+    string savepath=3;
+}
+
+service fileudownloadsrv{
+    rpc downloadfile (filedownloadreq) returns (DefaultResp) {}
+}
+
+

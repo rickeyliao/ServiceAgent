@@ -5,6 +5,7 @@ import (
 	"github.com/kprc/nbsnetwork/common/hashlist"
 	"sync"
 	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
+	"github.com/rickeyliao/ServiceAgent/dht"
 )
 
 type DhtNode interface {
@@ -47,7 +48,7 @@ func newRouteTable() hashlist.HashList {
 		bgnode1,bgnode2:=v1.(DhtNode),v2.(DhtNode)
 		return bgnode1.GetBigInt().Cmp(bgnode2.GetBigInt())
 	})
-	t.SetLimitCnt(20)
+	t.SetLimitCnt(dht.DHT_K)
 	t.SetSortFunc(func(v1 interface{}, v2 interface{}) int {
 		tm1,tm2:=v1.(DhtNode).GetLastAccessTime(),v2.(DhtNode).GetLastAccessTime()
 		

@@ -30,7 +30,7 @@ func respFindNode(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err 
 
 	knode:=dhtimpl.NewDhtNode(dm.Data,nil)
 	
-	l:=dhttable.GetRouteTableInst().GetNodes(knode, 20, func(v1 interface{}, v2 interface{}) int {
+	l:=dhttable.GetRouteTableInst().GetNodes(knode, dht.DHT_K, func(v1 interface{}, v2 interface{}) int {
 		bg1,bg2:=v1.(dhttable.DhtNode).GetBigInt(),v2.(dhttable.DhtNode).GetBigInt()
 		z1,z2:=&big.Int{},&big.Int{}
 		bgk:=knode.GetBigInt()
@@ -42,7 +42,7 @@ func respFindNode(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err 
 	if l!=nil && l.Count()>0{
 		dhtnodes:=&pbdht.NbsNodeList{}
 		dhtnodes.Nodes = make([]*pbdht.NbsNode,0)
-		it:=l.ListIterator(20)
+		it:=l.ListIterator(int(dht.DHT_K))
 
 		for{
 			v:=it.Next()

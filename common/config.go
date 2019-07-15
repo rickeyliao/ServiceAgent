@@ -402,6 +402,7 @@ func (sac *SAConfig) GenNbsRsaAddr() {
 	pubkeybytes := x509.MarshalPKCS1PublicKey(&sac.PrivKey.PublicKey)
 
 	s := sha256.New()
+
 	s.Write(pubkeybytes)
 
 	sum := s.Sum(nil)

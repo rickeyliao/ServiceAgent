@@ -191,3 +191,17 @@ func LicenseCmdSend(op int32,req string)  {
 	}
 
 }
+
+func UploadFileCmdSend(hostip string,filepath string)  {
+	request:=&pb.Fileuploadreq{Hostip:hostip,Filepath:filepath}
+	conn:=DialToCmdService()
+	defer conn.Close()
+
+	client:=pb.NewFileuploadsrvClient(conn.c)
+	if resp,err:=client.Uploadfile(conn.ctx,request);err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(resp.Message)
+	}
+
+}

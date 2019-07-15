@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+
+import "default.proto";
+
+
+message fileuploadreq{
+    string hostip=1;
+    string filepath=2;
+}
+
+service fileuploadsrv{
+    rpc uploadfile (fileuploadreq) returns (DefaultResp) {}
+}
+
+

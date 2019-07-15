@@ -5,11 +5,12 @@ import (
 	"sync"
 	"fmt"
 	"crypto/sha1"
-	"gx/ipfs/QmWFAMPqsEyUX7gDUsRVmMWz59FxSpJ1b2v6bJ1yYzo7jY/go-base58-fast/base58"
 	"time"
 	"github.com/rickeyliao/ServiceAgent/service/license"
 	"github.com/rickeyliao/ServiceAgent/app/cmd"
 	"github.com/kprc/nbsnetwork/common/list"
+	"github.com/rickeyliao/ServiceAgent/service/file"
+	"github.com/btcsuite/btcutil/base58"
 )
 
 
@@ -53,6 +54,15 @@ func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //}
 
 func main()  {
+
+	//s11:="l"
+	//
+	//arrpath:=file.GetArrPath(s11)
+	//
+	//fmt.Println(arrpath)
+
+
+	return
 
 	l:=list.NewList(func(v1 interface{}, v2 interface{}) int {
 		i1,i2:=v1.(int),v2.(int)
