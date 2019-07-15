@@ -86,7 +86,7 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	uploadhostip = uploadFileCmd.Flags().StringP("host", "h", "","Set Peer IP Address")
+	uploadhostip = uploadFileCmd.Flags().StringP("host", "s", "","Set Peer IP Address")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

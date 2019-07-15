@@ -27,7 +27,7 @@ func main()  {
 		defer wg.Done()
 		defer pipew.Close()
 
-		part,err:=m.CreateFormFile("filename","foo.txt")
+		part,err:=m.CreateFormFile("FileHash","foo.txt")
 		if err!=nil{
 			fmt.Println(err)
 			return

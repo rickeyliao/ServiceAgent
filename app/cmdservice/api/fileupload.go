@@ -42,7 +42,7 @@ func (cfu *CmdFileUpLoad)Uploadfile(ctx context.Context,req  *pb.Fileuploadreq) 
 
 func uploadfile(hostip string,filepath string) (string,error) {
 
-	resultchan:=make(chan error,0)
+	resultchan:=make(chan error,1)
 
 	wg:=&sync.WaitGroup{}
 	piper,pipew:=io.Pipe()
@@ -61,36 +61,38 @@ func uploadfile(hostip string,filepath string) (string,error) {
 	m:=multipart.NewWriter(pipew)
 
 	wg.Add(1)
-	go func() error{
+	go func() {
 		defer wg.Done()
 		defer pipew.Close()
 
 		part,err:=m.CreateFormFile("FileHash",hv)
 		if err!=nil{
 			resultchan <- err
-			return err
+			return
 		}
 		defer m.Close()
 
 		file, err := os.Open(filepath)
 		if err != nil {
 			resultchan <- err
-			return err
+			return
 		}
 		defer file.Close()
 
 		if _, err = io.Copy(part, file); err != nil {
 			resultchan <- err
-			return err
+			return
 		}
 		resultchan <- err
-		return nil
+		return
 	}()
 
 	posturl:="http://"+hostip+":50810/upload"
 
+
 	resp,err:=http.Post(posturl, m.FormDataContentType(), piper)
 	wg.Wait()
+
 	select{
 	    case err=<-resultchan:
 		//todo...

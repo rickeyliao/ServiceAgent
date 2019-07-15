@@ -23,9 +23,12 @@ func NewFileUpLoad() http.Handler {
 
 func (fu *fileupload) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(maxUploadSize)
+
 	defer r.MultipartForm.RemoveAll()
 	file, h, err := r.FormFile("FileHash")
+
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -33,6 +36,7 @@ func (fu *fileupload) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	f, err := os.OpenFile(getSaveFilePath(h.Filename), os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
+
 		fmt.Println(err)
 		return
 	}
