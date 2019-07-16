@@ -4,7 +4,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"net"
 	"github.com/rickeyliao/ServiceAgent/dht"
-	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
+
 	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
 	"errors"
 	"github.com/golang/protobuf/proto"
@@ -19,16 +19,16 @@ func respFindNode(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err 
 	resp:=&pbdht.Dhtmessage{}
 	resp.Msgtyp = dht.FIND_NODE_RESP
 	resp.Sn = dm.Sn
-	resp.Localnbsaddr = dhtimpl.GetLocalNode().NbsAddr
+	resp.Localnbsaddr = dht.GetLocalNode().NbsAddr
 	resp.Remotenbsaddr = dm.Localnbsaddr
 
-	dhttable.GetRouteTableInst().UpdateOrder(dhtimpl.NewDhtNode(dm.Localnbsaddr,addr.IP))
+	dhttable.GetRouteTableInst().UpdateOrder(dht.NewDhtNode(dm.Localnbsaddr,addr.IP))
 
 	if len(dm.Data) == 0{
 		return errors.New("no key found")
 	}
 
-	knode:=dhtimpl.NewDhtNode(dm.Data,nil)
+	knode:=dht.NewDhtNode(dm.Data,nil)
 	
 	l:=dhttable.GetRouteTableInst().GetNodes(knode, dht.DHT_K, func(v1 interface{}, v2 interface{}) int {
 		bg1,bg2:=v1.(dhttable.DhtNode).GetBigInt(),v2.(dhttable.DhtNode).GetBigInt()
@@ -50,7 +50,7 @@ func respFindNode(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err 
 				return nil
 			}
 			pbnn:=&pbdht.NbsNode{}
-			node:=v.(dhtimpl.DhtNode)
+			node:=v.(dht.DhtNode)
 			pbnn.INetAddr = node.Ipv4Addr
 			pbnn.Nbsaddr = node.NbsAddr
 

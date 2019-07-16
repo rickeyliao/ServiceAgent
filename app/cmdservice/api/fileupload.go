@@ -35,7 +35,7 @@ func (cfu *CmdFileUpLoad)Uploadfile(ctx context.Context,req  *pb.Fileuploadreq) 
 	if hv,err:=uploadfile(req.Hostip,req.Filepath);err!=nil{
 		return encResp("upload failed"),nil
 	}else{
-		msg:=fmt.Sprintf("Upload file:%s\r\nTo host:%s\r\nRename To HashCode:%s",req.Filepath,req.Hostip,hv)
+		msg:=fmt.Sprintf("Upload file: %s\r\nTo host: %s\r\nRename To HashCode: %s",req.Filepath,req.Hostip,hv)
 		return encResp(msg),nil
 	}
 }
@@ -89,8 +89,14 @@ func uploadfile(hostip string,filepath string) (string,error) {
 
 	posturl:="http://"+hostip+":50810/upload"
 
+	client:=http.Client{Transport:&(http.Transport{DisableKeepAlives:true})}
 
-	resp,err:=http.Post(posturl, m.FormDataContentType(), piper)
+	request,_:=http.NewRequest("POST",posturl,piper)
+	request.Header.Set("Content-Type",m.FormDataContentType() )
+
+	resp,err:=client.Do(request)
+
+	//resp,err:=http.Post(posturl, m.FormDataContentType(), piper)
 	wg.Wait()
 
 	select{

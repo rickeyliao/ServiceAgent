@@ -1,16 +1,17 @@
-package dhttable
+package dht
 
 import (
 	"math/big"
 	"github.com/kprc/nbsnetwork/common/hashlist"
 	"sync"
-	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
-	"github.com/rickeyliao/ServiceAgent/dht"
+
+
+
 )
 
-type DhtNode interface {
+type IDhtNode interface {
 	GetBigInt() *big.Int
-	Clone() DhtNode
+	Clone() IDhtNode
 	GetLastAccessTime() int64
 }
 
@@ -36,8 +37,8 @@ func GetRouteTableInst() hashlist.HashList  {
 
 func newRouteTable() hashlist.HashList {
 	t := hashlist.NewHashList(256, func(v interface{}) uint {
-		vbgint:=v.(DhtNode).GetBigInt()
-		localBgInt:=dhtimpl.GetLocalNode().GetBgInt()
+		vbgint:=v.(IDhtNode).GetBigInt()
+		localBgInt:=GetLocalNode().GetBgInt()
 		z:=&big.Int{}
 		bitl:=z.Xor(vbgint,localBgInt).BitLen()
 		if bitl>0{
@@ -45,18 +46,18 @@ func newRouteTable() hashlist.HashList {
 		}
 		return uint(bitl)
 	}, func(v1 interface{}, v2 interface{}) int {
-		bgnode1,bgnode2:=v1.(DhtNode),v2.(DhtNode)
+		bgnode1,bgnode2:=v1.(IDhtNode),v2.(IDhtNode)
 		return bgnode1.GetBigInt().Cmp(bgnode2.GetBigInt())
 	})
-	t.SetLimitCnt(dht.DHT_K)
+	t.SetLimitCnt(DHT_K)
 	t.SetSortFunc(func(v1 interface{}, v2 interface{}) int {
-		tm1,tm2:=v1.(DhtNode).GetLastAccessTime(),v2.(DhtNode).GetLastAccessTime()
+		tm1,tm2:=v1.(IDhtNode).GetLastAccessTime(),v2.(IDhtNode).GetLastAccessTime()
 		
 		return int(tm1-tm2)
 	})
 	
 	t.SetCloneFunc(func(v1 interface{}) (r interface{}) {
-		r = v1.(DhtNode).Clone()
+		r = v1.(IDhtNode).Clone()
 		return
 	})
 
@@ -64,7 +65,7 @@ func newRouteTable() hashlist.HashList {
 }
 
 func Distance(v1 interface{},v2 interface{}) *big.Int{
-	bgv1,bgv2:=v1.(DhtNode).GetBigInt(),v2.(DhtNode).GetBigInt()
+	bgv1,bgv2:=v1.(IDhtNode).GetBigInt(),v2.(IDhtNode).GetBigInt()
 
 	z:=&big.Int{}
 

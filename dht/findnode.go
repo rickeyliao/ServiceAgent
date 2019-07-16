@@ -1,28 +1,24 @@
-package dhtimpl
+package dht
 
 import (
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
-	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
-	"github.com/kprc/nbsnetwork/common/list"
-	"math/big"
-	"github.com/rickeyliao/ServiceAgent/dht"
+
 	"github.com/golang/protobuf/proto"
 	"log"
 	"errors"
+	"github.com/kprc/nbsnetwork/common/list"
+	"math/big"
+
 )
 
-type DhtValue struct {
-	HaveData bool
-	data []byte
-}
 
 
-func (node *NbsNode) encFindValue(key []byte) (uint64, []byte) {
+func (node *NbsNode)encFindNode(key []byte) (uint64, []byte) {
 	req := &pbdht.Dhtmessage{}
 
-	req.Sn = dht.GetNextMsgCnt()
+	req.Sn = GetNextMsgCnt()
 
-	req.Msgtyp = dht.FIND_VALUE_REQ
+	req.Msgtyp = FIND_NODE_REQ
 
 	req.Localnbsaddr = GetLocalNode().NbsAddr
 	req.Remotenbsaddr = node.NbsAddr
@@ -36,7 +32,7 @@ func (node *NbsNode) encFindValue(key []byte) (uint64, []byte) {
 	}
 }
 
-func (node *NbsNode)updateByFindValue(key []byte,buf []byte, reqsn uint64) (list.List,error) {
+func (node *NbsNode)UpdateByFindNode(key []byte,buf []byte, reqsn uint64) (list.List,error) {
 
 	resp := &pbdht.Dhtmessage{}
 
@@ -50,13 +46,13 @@ func (node *NbsNode)updateByFindValue(key []byte,buf []byte, reqsn uint64) (list
 
 	if !node.AddrCmp(resp.Localnbsaddr) {
 
-		dhttable.GetRouteTableInst().Del(NewDhtNode(node.NbsAddr,node.Ipv4Addr))
-		dhttable.GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
+		GetRouteTableInst().Del(NewDhtNode(node.NbsAddr,node.Ipv4Addr))
+		GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
 
 		return nil,errors.New("Address not corrected!")
 	}
 
-	dhttable.GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
+	GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
 
 	nl:=&pbdht.NbsNodeList{}
 	if err:=proto.Unmarshal(resp.Data,nl);err!=nil{
@@ -64,15 +60,15 @@ func (node *NbsNode)updateByFindValue(key []byte,buf []byte, reqsn uint64) (list
 	}
 
 	l:=list.NewList(func(v1 interface{}, v2 interface{}) int {
-		bg1,bg2:=v1.(dhttable.DhtNode).GetBigInt(),v2.(dhttable.DhtNode).GetBigInt()
+		bg1,bg2:=v1.(IDhtNode).GetBigInt(),v2.(IDhtNode).GetBigInt()
 		return bg1.Cmp(bg2)
 	})
-
+	
 	l.SetCloneFunc(func(v1 interface{}) (r interface{}) {
-		return v1.(dhttable.DhtNode).Clone()
+		return v1.(IDhtNode).Clone()
 	})
 	l.SetSortFunc(func(v1 interface{}, v2 interface{}) int {
-		bg1,bg2:=v1.(dhttable.DhtNode).GetBigInt(),v2.(dhttable.DhtNode).GetBigInt()
+		bg1,bg2:=v1.(IDhtNode).GetBigInt(),v2.(IDhtNode).GetBigInt()
 		z1,z2:=&big.Int{},&big.Int{}
 		bgk:=(&big.Int{}).SetBytes(key)
 		d1,d2:=z1.Xor(bg1,bgk),z2.Xor(bg2,bgk)
@@ -87,3 +83,4 @@ func (node *NbsNode)updateByFindValue(key []byte,buf []byte, reqsn uint64) (list
 
 	return l,nil
 }
+

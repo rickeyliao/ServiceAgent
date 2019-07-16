@@ -7,11 +7,12 @@ import (
 	"log"
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"github.com/gogo/protobuf/proto"
-	"github.com/rickeyliao/ServiceAgent/dht/dhtimpl"
+
+	"github.com/rickeyliao/ServiceAgent/dht"
 )
 
 type DhtServer struct {
-	servernode *dhtimpl.LocalNode
+	servernode *dht.LocalNode
 	conn *net.UDPConn
 }
 
@@ -37,7 +38,7 @@ func GetDhtServer() *DhtServer {
 
 	ds:=&DhtServer{}
 
-	ds.servernode = dhtimpl.GetLocalNode()
+	ds.servernode = dht.GetLocalNode()
 
 	ds.conn = nil
 

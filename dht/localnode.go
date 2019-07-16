@@ -1,4 +1,4 @@
-package dhtimpl
+package dht
 
 import (
 	"github.com/mr-tron/base58"

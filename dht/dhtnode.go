@@ -1,8 +1,9 @@
-package dhtimpl
+package dht
 
 import (
 	"math/big"
 	"github.com/kprc/nbsnetwork/tools"
+
 )
 
 type DhtNode struct {

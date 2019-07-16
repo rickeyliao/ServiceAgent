@@ -65,8 +65,6 @@ var uploadFileCmd = &cobra.Command{
 			}
 
 			filepath = path.Join(curdir,filepath)
-
-
 		}
 
 		if !tools.FileExists(filepath){

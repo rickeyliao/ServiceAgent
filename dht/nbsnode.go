@@ -1,4 +1,4 @@
-package dhtimpl
+package dht
 
 import (
 	"github.com/kprc/nbsnetwork/common/list"
@@ -154,7 +154,7 @@ func (node *NbsNode) FindNode(key []byte) (list.List, error) {
 	}
 
 	var l list.List
-	if l,err = node.updateByFindNode(key,buf, sn); err != nil {
+	if l,err = node.UpdateByFindNode(key,buf, sn); err != nil {
 		return nil, err
 	}
 
@@ -190,7 +190,7 @@ func (node *NbsNode) FindValue(key []byte) (list.List, *DhtValue, error) {
 	}
 
 	var l list.List
-	if l,err = node.updateByFindNode(key,buf, sn); err != nil {
+	if l,err = node.updateByFindValue(key,buf, sn); err != nil {
 		return nil,nil, err
 	}
 

@@ -30,6 +30,7 @@ func StartCmdService() {
 	pb.RegisterHomeIPShowSrvServer(grpcServer,&api.CmdHomeShow{})
 	pb.RegisterLicenseSrvServer(grpcServer,&api.CmdOpLicenseSrv{})
 	pb.RegisterFileuploadsrvServer(grpcServer,&api.CmdFileUpLoad{})
+	pb.RegisterFileudownloadsrvServer(grpcServer,&api.CmdFileDownload{})
 	reflection.Register(grpcServer)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)

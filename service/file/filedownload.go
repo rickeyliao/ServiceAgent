@@ -2,7 +2,7 @@ package file
 
 import (
 	"net/http"
-	"fmt"
+	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 type filedownload struct {
@@ -17,18 +17,18 @@ func (fdl *filedownload) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	filehash:=r.Header.Get("FileHash")
-	filename:=r.Header.Get("FileName")
-
-	fmt.Println(filehash,filename)
 
 	//w.Header().Add("Content-Disposition", "Attachment")
 	//begin to download...
-	fmt.Println("begin to downloading")
+	//fmt.Println("begin to downloading")
+	filename:=common.GetSaveFilePath(filehash)
+	if filename == ""{
+		w.Header().Add("message","FileNotFound")
+		w.Write([]byte("Failed"))
+		return
+	}
 
-	http.ServeFile(w,r,"/Users/rickey/Downloads/android-studio-ide-173.4819257-mac.dmg")
-
-	//http.ServeContent()
-
-	fmt.Println("end download..")
+	http.ServeFile(w,r,filename)
 
 }
+

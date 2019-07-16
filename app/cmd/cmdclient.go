@@ -205,3 +205,16 @@ func UploadFileCmdSend(hostip string,filepath string)  {
 	}
 
 }
+
+func DownloadFileCmdSend(hostip string,filename string,filesavepath string)  {
+	request:=&pb.Filedownloadreq{Hostip:hostip,Filehash:filename,Savepath:filesavepath}
+	conn:=DialToCmdService()
+	defer conn.Close()
+
+	client:=pb.NewFileudownloadsrvClient(conn.c)
+	if resp,err:=client.Downloadfile(conn.ctx,request);err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(resp.Message)
+	}
+}
