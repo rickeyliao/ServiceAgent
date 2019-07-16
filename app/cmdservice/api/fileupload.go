@@ -7,13 +7,14 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	"sync"
 	"os"
-	"github.com/minio/sha256-simd"
+
 	"io"
 	"github.com/btcsuite/btcutil/base58"
 	"mime/multipart"
 	"net/http"
 	"io/ioutil"
 	"fmt"
+	"crypto/sha256"
 )
 
 type CmdFileUpLoad struct {
