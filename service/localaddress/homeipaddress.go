@@ -75,12 +75,7 @@ func Insert(nbsaddress string,mn string,interAddress string,natAddress string) e
 		return errors.New("nbsaddress not found")
 	}
 
-	if mn==""{
-		mn,_ = os.Hostname()
-		if mn==""{
-			mn="nbsmachinename"
-		}
-	}
+
 
 	hid:=&Homeipdesc{MachineName:mn,InternetAddress:interAddress,NatAddress:String2arr(natAddress)}
 
@@ -151,6 +146,12 @@ func SetMachineName(mn string)  {
 }
 
 func GetMachineName() string {
+	if machineName==""{
+		machineName,_ = os.Hostname()
+		if machineName==""{
+			machineName="nbsmachinename"
+		}
+	}
 	return machineName
 }
 
