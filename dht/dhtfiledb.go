@@ -36,7 +36,7 @@ func newFileStoreDB() db.NbsDbInter  {
 
 	cfg:=common.GetSAConfig()
 
-	return db.NewFileDb(path.Join(cfg.Root.HomeDir,cfg.FileDBDir,cfg.FileStoreDB)).Load()
+	return db.NewFileDb(path.Join(cfg.GetFileDbDir(),cfg.FileStoreDB)).Load()
 }
 
 

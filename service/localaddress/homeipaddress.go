@@ -37,7 +37,7 @@ func newHomeIPDB() db.NbsDbInter {
 	quit = make(chan int,0)
 	wg=&sync.WaitGroup{}
 	cfg:=common.GetSAConfig()
-	return db.NewFileDb(path.Join(cfg.Root.HomeDir,cfg.FileDBDir,cfg.HomeIPDBFile)).Load()
+	return db.NewFileDb(path.Join(cfg.GetFileDbDir(),cfg.HomeIPDBFile)).Load()
 }
 
 type Homeipdesc struct {

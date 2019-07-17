@@ -46,8 +46,7 @@ func GetSaveFilePath(filename string) string  {
 
 	arrpath:=getArrPath(filename)
 
-	filepath := path.Join(sac.Root.HomeDir,sac.FileStoreDir)
-
+	filepath:=sac.GetFileStoreDir()
 	for i:=0;i<len(arrpath); i++{
 		filepath = path.Join(filepath,arrpath[i])
 	}
