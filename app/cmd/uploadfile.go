@@ -31,8 +31,8 @@ var(
 var uploadFileCmd = &cobra.Command{
 	Use:   "uploadfile",
 	Aliases: []string{"uf","upload"},
-	Short: "Upload a file to a host",
-	Long: `Upload a file to a host`,
+	Short: "upload a file to a host",
+	Long: `upload a file to a host`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if !CheckProcessReady() {

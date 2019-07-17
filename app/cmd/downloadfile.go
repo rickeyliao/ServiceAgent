@@ -32,8 +32,8 @@ var(
 // downloadfileCmd represents the downloadfile command
 var downloadfileCmd = &cobra.Command{
 	Use:   "downloadfile",
-	Short: "Download a file from server",
-	Long: `Download a file from server`,
+	Short: "download a file from server",
+	Long: `download a file from server`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if !CheckProcessReady() {

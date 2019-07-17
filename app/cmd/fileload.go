@@ -20,26 +20,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// storeCmd represents the store command
-var filestoreCmd = &cobra.Command{
-	Use:   "store",
-	Short: "store a file",
-	Long: `store a file`,
+// loadCmd represents the load command
+var fileloadCmd = &cobra.Command{
+	Use:   "load",
+	Short: "load a stored file",
+	Long: `load a stored file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("store called")
+		fmt.Println("load called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(filestoreCmd)
+	rootCmd.AddCommand(fileloadCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// filestoreCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// loadCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// filestoreCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// loadCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

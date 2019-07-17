@@ -21,22 +21,17 @@ import (
 )
 
 // getfileCmd represents the getfile command
-var getfileCmd = &cobra.Command{
-	Use:   "getfile",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+var filefetchCmd = &cobra.Command{
+	Use:   "fetch",
+	Short: "fetch a share file",
+	Long: `fetch a share file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("getfile called")
+		fmt.Println("fetch called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(getfileCmd)
+	rootCmd.AddCommand(filefetchCmd)
 
 	// Here you will define your flags and configuration settings.
 

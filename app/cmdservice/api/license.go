@@ -24,7 +24,7 @@ func (chs *CmdOpLicenseSrv)OpLicense(cxt context.Context,hi *pb.LicenseReq) (*pb
 		license.Save()
 		return encResp("save success"),nil
 	case 3:
-		return encResp(license.CmdShowLicenseSimple()),nil
+		return encResp(license.CmdShowLicenseSummary()),nil
 	}
 
 	return encResp("not found cmd"),nil

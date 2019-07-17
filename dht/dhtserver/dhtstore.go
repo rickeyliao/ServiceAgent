@@ -5,7 +5,7 @@ import (
 	"net"
 	"github.com/rickeyliao/ServiceAgent/dht"
 
-	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
+
 	"errors"
 	"github.com/golang/protobuf/proto"
 )
@@ -21,7 +21,7 @@ func respStore(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err err
 	resp.Localnbsaddr = dht.GetLocalNode().NbsAddr
 	resp.Remotenbsaddr = dm.Localnbsaddr
 
-	dhttable.GetRouteTableInst().UpdateOrder(dht.NewDhtNode(dm.Localnbsaddr,addr.IP))
+	dht.GetRouteTableInst().UpdateOrder(dht.NewDhtNode(dm.Localnbsaddr,addr.IP))
 
 	var data []byte
 	data,err=proto.Marshal(resp)

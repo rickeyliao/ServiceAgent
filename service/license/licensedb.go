@@ -151,7 +151,7 @@ func CmdShowLicenseStatistic() string {
 	return r
 }
 
-func CmdShowLicenseSimple() string {
+func CmdShowLicenseSummary() string {
 	dbcusor:=GetLicenseDB().DBIterator()
 
 	cnt:=0

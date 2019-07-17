@@ -118,7 +118,7 @@ func main()  {
 	fmt.Println(license.CmdShowLicenseStatistic())
 
 
-	fmt.Println(license.CmdShowLicenseSimple())
+	fmt.Println(license.CmdShowLicenseSummary())
 	license.Save()
 
 

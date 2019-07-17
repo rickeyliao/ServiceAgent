@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 	"fmt"
+	"sync"
 )
 
 type filedbkev struct {
@@ -19,12 +20,13 @@ type filedbkev struct {
 
 type filedb struct {
 	filepath string
+	flock *sync.Mutex
 	f        *os.File
 	mkey     map[string]string
 }
 
 func NewFileDb(filepath string) NbsDbInter {
-	return &filedb{filepath: filepath, mkey: make(map[string]string)}
+	return &filedb{filepath: filepath, mkey: make(map[string]string),flock:&sync.Mutex{}}
 }
 
 func (fdb *filedb)Print()  {
@@ -39,14 +41,18 @@ func (fdb *filedb)DBIterator() *DBCusor {
 
 func (fdb *filedb) Load() NbsDbInter {
 	if fdb.filepath == "" {
-		log.Fatal("No Fill ")
+		log.Fatal("No File ")
 	}
+
+	fdb.flock.Lock()
+	defer fdb.flock.Unlock()
 
 	flag := os.O_RDWR | os.O_APPEND
 
 	if !tools.FileExists(fdb.filepath) {
 		flag |= os.O_CREATE
 	}
+
 
 	if f, err := os.OpenFile(fdb.filepath, flag, 0755); err != nil {
 		log.Fatal("Can't open file")
@@ -97,10 +103,21 @@ func (fdb *filedb) tomap(line []byte) {
 
 	k := &filedbkev{}
 
+	var delflag bool
+
+	if line[0]=='-'{
+		delflag = true
+		line = line[1:]
+	}
+
 	if err := json.Unmarshal(line, k); err != nil {
 		return
 	} else {
-		fdb.Insert(k.Key, k.Value)
+		if delflag{
+			fdb.Delete(k.Key)
+		}else{
+			fdb.Update(k.Key, k.Value)
+		}
 	}
 }
 
@@ -150,6 +167,8 @@ func (fdb *filedb) write(data []byte) {
 
 func (fdb *filedb) Save() {
 
+	fdb.flock.Lock()
+	defer fdb.flock.Unlock()
 	listkey := reflect.ValueOf(fdb.mkey).MapKeys()
 	for _, key := range listkey {
 		k := key.Interface().(string)
@@ -173,5 +192,10 @@ func (fdb *filedb) Save() {
 	}
 
 	fdb.f = nil
+
+
+}
+
+func (fdb *filedb)AppendSave()  {
 
 }
