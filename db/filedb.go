@@ -114,9 +114,9 @@ func (fdb *filedb) tomap(line []byte) {
 		return
 	} else {
 		if delflag{
-			fdb.Delete(k.Key)
+			delete(fdb.mkey,k.Key)
 		}else{
-			fdb.Update(k.Key, k.Value)
+			fdb.mkey[k.Key]= k.Value
 		}
 	}
 }
@@ -124,6 +124,7 @@ func (fdb *filedb) tomap(line []byte) {
 func (fdb *filedb) Insert(key string, value string) error {
 	if _, ok := fdb.mkey[key]; !ok {
 		fdb.mkey[key] = value
+		fdb.AppendSave(key,value,false)
 	} else {
 		return errors.New("Duplicate key")
 	}
@@ -132,7 +133,10 @@ func (fdb *filedb) Insert(key string, value string) error {
 }
 
 func (fdb *filedb) Delete(key string) {
+	v:=fdb.mkey[key]
+
 	delete(fdb.mkey, key)
+	fdb.AppendSave(key,v,true)
 }
 
 func (fdb *filedb) Find(key string) (string, error) {
@@ -145,10 +149,11 @@ func (fdb *filedb) Find(key string) (string, error) {
 func (fdb *filedb) Update(key string, value string) {
 
 	fdb.mkey[key] = value
+	fdb.AppendSave(key,value,false)
 }
 
 func (fdb *filedb) write(data []byte) {
-	if fdb.f == nil || fdb.filepath == "" {
+	if fdb.f == nil  {
 		flag := os.O_WRONLY | os.O_TRUNC
 
 		if !tools.FileExists(fdb.filepath) {
@@ -196,6 +201,41 @@ func (fdb *filedb) Save() {
 
 }
 
-func (fdb *filedb)AppendSave()  {
+
+func (fdb *filedb)AppendSave(key,value string,del bool)  {
+	fdb.flock.Lock()
+	defer fdb.flock.Unlock()
+
+	if fdb.f == nil  {
+		flag := os.O_WRONLY | os.O_APPEND
+
+		if !tools.FileExists(fdb.filepath) {
+			flag |= os.O_CREATE
+		}
+		if f, err := os.OpenFile(fdb.filepath, flag, 0755); err != nil {
+			log.Fatal("Can't open file")
+			return
+		} else {
+			fdb.f = f
+		}
+	}
+
+	fk := &filedbkev{}
+
+	fk.Key = key
+	fk.Value = value
+
+	if bj, err := json.Marshal(fk); err != nil {
+		log.Println("save error", fk.Key, fk.Value)
+	} else {
+		if del {
+			fdb.f.Write([]byte{'-'})
+		}
+		fdb.f.Write(bj)
+		fdb.f.Write([]byte("\r\n"))
+	}
+
+	fdb.f.Close()
+	fdb.f = nil
 
 }

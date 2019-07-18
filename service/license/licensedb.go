@@ -204,11 +204,10 @@ func IntervalSave()  {
 	defer wg.Done()
 	var count int64=0
 	for{
-		count ++
-		if count%300 == 0{
+		if count%86400 == 0{
 			Save()
 		}
-
+		count ++
 		select {
 		case <-quit:
 			return

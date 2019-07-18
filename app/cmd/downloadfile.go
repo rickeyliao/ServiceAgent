@@ -41,7 +41,7 @@ var downloadfileCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 || len(args[0])==0{
-			fmt.Println("Please Set upload file")
+			fmt.Println("Please Set download file")
 			return
 		}
 
@@ -75,7 +75,6 @@ var downloadfileCmd = &cobra.Command{
 			outputpathstr = curdir
 		}
 
-		//outputfile = path.Join(outputfile,args[0])
 		DownloadFileCmdSend(*downloadip,args[0],outputpathstr)
 
 	},
