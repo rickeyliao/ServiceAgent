@@ -5,7 +5,6 @@ import (
 	"net"
 	"github.com/rickeyliao/ServiceAgent/dht"
 
-
 	"errors"
 	"github.com/golang/protobuf/proto"
 )
@@ -36,5 +35,31 @@ func respStore(dm pbdht.Dhtmessage,addr *net.UDPAddr,conn *net.UDPConn) (err err
 	//todo inform to download the file
 
 	return
+
+}
+
+func storeContent(dm pbdht.Dhtmessage) error  {
+
+	sv:=&pbdht.Dhtstore{}
+
+	if err:=proto.Unmarshal(dm.Data,sv);err!=nil{
+		return err
+	}
+
+	if sv.Share {
+		if len(sv.Key)==0 || len(sv.Value)==0{
+			return errors.New("sotre share file error")
+		}
+
+
+
+
+
+
+	}else{
+		// go to download the key
+	}
+
+	return nil
 
 }

@@ -2,14 +2,11 @@ package dht
 
 import (
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
-	"github.com/rickeyliao/ServiceAgent/dht/dhttable"
 	"github.com/kprc/nbsnetwork/common/list"
 	"math/big"
-
 	"github.com/golang/protobuf/proto"
 	"log"
 	"errors"
-
 )
 
 

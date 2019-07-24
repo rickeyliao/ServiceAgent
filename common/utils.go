@@ -24,6 +24,7 @@ func CheckNbsCotentHash(hv string) bool  {
 	return true
 }
 
+
 func CheckNbsNodeHash(hv string) bool  {
 	if len(hv)<2{
 		return false

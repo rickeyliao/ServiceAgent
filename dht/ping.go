@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"log"
-
 	)
 
 func (node *NbsNode)encPingData() (uint64, []byte) {

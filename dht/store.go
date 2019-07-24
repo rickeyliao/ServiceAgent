@@ -11,7 +11,7 @@ import (
 
 
 
-func  (node *NbsNode)encStore(key []byte) (uint64, []byte) {
+func  (node *NbsNode)encStore(key []byte,share bool,value ...[]byte) (uint64, []byte) {
 	req := &pbdht.Dhtmessage{}
 
 	req.Sn = GetNextMsgCnt()
@@ -20,10 +20,21 @@ func  (node *NbsNode)encStore(key []byte) (uint64, []byte) {
 
 	req.Localnbsaddr = GetLocalNode().NbsAddr
 	req.Remotenbsaddr = node.NbsAddr
-	req.Data = key
+
+	storevalue := &pbdht.Dhtstore{}
+	storevalue.Key = key
+	storevalue.Share = share
+	storevalue.Value = value
+
+	if v,err:=proto.Marshal(storevalue);err!=nil{
+		log.Println("Marshall store value failed")
+		return 0,nil
+	}else{
+		req.Data = v
+	}
 
 	if data, err := proto.Marshal(req); err != nil {
-		log.Fatal("Marshall Ping Request Message Failed")
+		log.Println("Marshall Ping Request Message Failed")
 		return 0, nil
 	} else {
 		return req.Sn, data

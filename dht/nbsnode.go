@@ -91,14 +91,14 @@ func (node *NbsNode) Ping() (bool, error) {
 	return true, nil
 }
 
-func (node *NbsNode) Store(key []byte) error {
+func (node *NbsNode) Store(key []byte,share bool,value ...[]byte) error {
 	conn,err:=node.connect()
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
-	sn, data := node.encStore(key)
+	sn, data := node.encStore(key,share,value...)
 	if data == nil {
 		return errors.New("enc FindNode Request Failed")
 	}

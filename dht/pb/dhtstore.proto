@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package pbdht;
+
+
+message dhtstore{
+    bytes key = 1;
+    bool share = 2;
+    repeated bytes value = 3;
+}

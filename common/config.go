@@ -208,7 +208,6 @@ func DefaultInitConfig() *SAConfig {
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadPath = "/download"
 	sa.EmailPath = "/public/key/refresh"
-
 	sa.UpdateClientSoftwarePath = "/public/app"
 	sa.Uploadpath = "/upload"
 	sa.TestIPAddressPath = "/localipaddress"
@@ -246,7 +245,7 @@ func (sar *SARootConfig) LoadCfg() *SAConfig {
 		return nil
 	}
 
-	cfg := &SAConfig{}
+	cfg := DefaultInitConfig()
 
 	if err = json.Unmarshal(data, cfg); err != nil {
 		return nil
@@ -259,6 +258,7 @@ func (sar *SARootConfig) LoadCfg() *SAConfig {
 	return cfg
 
 }
+
 
 func (sar *SARootConfig) IsInitialized() bool {
 	cfgname := path.Join(sar.CfgDir, sar.CfgFileName)
