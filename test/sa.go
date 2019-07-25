@@ -9,7 +9,6 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service/license"
 	"github.com/rickeyliao/ServiceAgent/app/cmd"
 	"github.com/kprc/nbsnetwork/common/list"
-	"github.com/rickeyliao/ServiceAgent/service/file"
 	"github.com/btcsuite/btcutil/base58"
 )
 

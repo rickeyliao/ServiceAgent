@@ -47,17 +47,19 @@ type FileStoreDesc struct {
 	LastAccessTime int64 `json:"t"`
 	IsShare bool		`json:"s"`
 	NodeAddr []string   `json:"na"`
+	FileExists bool     `json:"e"`
 }
 
 func Find(fhashv string) (v string, err error)  {
 	return  GetFileStoreDB().Find(fhashv)
 }
 
-func Insert(fhashv string,islocal bool,share bool,naddrs []string) error {
+func Insert(fhashv string,islocal bool,share bool,naddrs []string,exist bool) error {
 	if fhashv == "" && !common.CheckNbsCotentHash(fhashv){
 		return errors.New("Content Hash Error")
 	}
 	fsd:=&FileStoreDesc{IsLocal:islocal,LastAccessTime:tools.GetNowMsTime()}
+	fsd.FileExists = exist
 	fsd.IsShare = share
 	if len(naddrs)>0{
 		fsd.NodeAddr = naddrs
@@ -116,7 +118,7 @@ func UpdateLocal(fhashv string,islocal bool) error {
 	return nil
 }
 
-func Update(fhashv string,islocal,isshare bool, nbsaddrs []string) error  {
+func Update(fhashv string,islocal,isshare bool, nbsaddrs []string,exist bool) error  {
 	sfsd,err:=GetFileStoreDB().Find(fhashv)
 	if err!=nil{
 		return err
@@ -128,6 +130,7 @@ func Update(fhashv string,islocal,isshare bool, nbsaddrs []string) error  {
 	fsd.LastAccessTime = tools.GetNowMsTime()
 	fsd.IsLocal = islocal
 	fsd.IsShare = isshare
+	fsd.FileExists = exist
 	if fsd.NodeAddr == nil{
 		fsd.NodeAddr = nbsaddrs
 	}else{
@@ -145,6 +148,21 @@ func Update(fhashv string,islocal,isshare bool, nbsaddrs []string) error  {
 
 	return nil
 }
+
+func GetFileExistFlag(key string) bool {
+	if v,err:=Find(key);err==nil{
+		return false
+	}else{
+		fsd:=&FileStoreDesc{}
+		if err=json.Unmarshal([]byte(v),fsd);err!=nil{
+			return false
+		}
+
+		return fsd.FileExists
+	}
+
+}
+
 
 func DeleteAddr(fhashv,nbsaddr string) error {
 	sfsd,err:=GetFileStoreDB().Find(fhashv)
