@@ -4,7 +4,6 @@ import (
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"net"
 	"github.com/rickeyliao/ServiceAgent/dht"
-
 	"errors"
 	"github.com/golang/protobuf/proto"
 	"math/big"

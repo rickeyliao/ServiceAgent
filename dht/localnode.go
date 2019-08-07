@@ -20,11 +20,11 @@ var (
 func GetLocalNode() *LocalNode {
 	if localNode == nil {
 		localNode_lock.Lock()
+		defer localNode_lock.Unlock()
 
-		localNode = newLocalNode()
-
-		localNode_lock.Unlock()
-
+		if localNode == nil{
+			localNode = newLocalNode()
+		}
 	}
 
 	return localNode
