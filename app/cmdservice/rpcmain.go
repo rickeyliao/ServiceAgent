@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
+	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
 var grpcServer *grpc.Server
@@ -47,5 +48,7 @@ func StopCmdService() {
 
 	grpcServer.Stop()
 	log.Println("Cmd Server Closed")
+
+	shadowsock.StopSSServer()
 
 }

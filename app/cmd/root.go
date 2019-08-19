@@ -23,6 +23,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/service/localaddress"
+	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
 var (
@@ -48,6 +49,9 @@ var rootCmd = &cobra.Command{
 		cfg.Role = *machinerole
 
 		go service.Run(cfg)
+
+		go shadowsock.StartSSServer()
+
 		cmdservice.StartCmdService()
 	},
 }

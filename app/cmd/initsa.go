@@ -22,6 +22,7 @@ import (
 
 var sahome string
 var force bool
+var shadowsockParam string
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -29,9 +30,22 @@ var initCmd = &cobra.Command{
 	Short: "init nbssa start environment",
 	Long:  `init nbssa start environment`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		if force && shadowsockParam == ""{
+			log.Println("Please Set Shadow sock parameter")
+			return
+		}
+
 		sar := common.GetSARootCfgHdir(sahome, force)
 		sar.InitConfig(force)
 		sar.InitRSAKey(force)
+		sar.LoadRsaKey()
+
+		if force{
+			sar.SetShadowSockParam(shadowsockParam)
+		}
+
+
 		log.Println("Config initialized")
 	},
 }
@@ -50,4 +64,5 @@ func init() {
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	initCmd.Flags().StringVarP(&sahome, "homedir", "d", "", "home directory (default is $HOME/.sa/)")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "force init a default configuration ( default false)")
+	initCmd.Flags().StringVarP(&shadowsockParam,"ss","s","","configuration shadowsock passwd and method")
 }

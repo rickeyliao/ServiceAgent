@@ -15,6 +15,7 @@ import (
 	"path"
 	"sync"
 	"github.com/rickeyliao/ServiceAgent/htmlfile"
+	"strings"
 )
 
 type SAConfig struct {
@@ -47,6 +48,10 @@ type SAConfig struct {
 	LoginDir                 string          `json:"logindir"`
 	Loginfile                string          `json:"loginfile"`
 	LicenseAdminUser         [][]string      `json:"licenseadminuser"`
+	ShadowSockServerSwitch   bool			 `json:"shadowsockserverswitch"`
+	ShadowSockPort			 uint16			 `json:"shadowsockport"`
+	ShadowSockPasswd         string          `json:"sspasswd"`
+	ShadowSockMethod         string			 `json:"ssmethod"`
 	Role                     int64           `json:"-"`
 	PrivKey                  *rsa.PrivateKey `json:"-"`
 	Root					 *SARootConfig   `json:"-"`
@@ -232,6 +237,10 @@ func DefaultInitConfig() *SAConfig {
 	sa.StaticFileDir = "staticfile"
 	sa.LoginDir = "login"
 	sa.Loginfile = "login.gptl"
+	sa.ShadowSockServerSwitch = true
+	sa.ShadowSockPort = 50812
+	sa.ShadowSockPasswd=""
+	sa.ShadowSockMethod=""
 	sa.LicenseAdminUser = [][]string{{"sofaadmin","J1jdNR8vQb"},{"nbsadmin","Dkf44u3Ad8"},}
 
 	return sa
@@ -413,6 +422,79 @@ func (sac *SAConfig) GenNbsRsaAddr() {
 	sac.NbsRsaAddr = "91" + base58.Encode(sum)
 }
 
+func (sac *SAConfig)GetSSPasswd() string {
+
+	if sac.ShadowSockPasswd == ""{
+		return ""
+	}
+
+	if encpasswd,err:=base58.Decode(sac.ShadowSockPasswd);err!=nil{
+		return ""
+	}else{
+
+		if data,errd:=nbscrypt.DecryptRsa(encpasswd,sac.PrivKey);errd!=nil{
+			return ""
+		}else{
+			return string(data)
+		}
+	}
+
+}
+
+func (sac *SAConfig)GetSSMethod() string {
+	if sac.ShadowSockMethod == ""{
+		return ""
+	}
+
+	if encmethod,err:=base58.Decode(sac.ShadowSockMethod);err!=nil{
+		return ""
+	}else{
+
+		if data,errd:=nbscrypt.DecryptRsa(encmethod,sac.PrivKey);errd!=nil{
+			return ""
+		}else{
+			return string(data)
+		}
+	}
+}
+
+func (sac *SAConfig)Save()  {
+	bjson, err := json.MarshalIndent(*sac, "", "\t")
+	if err != nil {
+		log.Fatal("Json module error")
+	} else {
+		tools.Save2File(bjson, path.Join(sac.Root.CfgDir, sac.Root.CfgFileName))
+	}
+}
+
+func (sar *SARootConfig)SetShadowSockParam(param string)  {
+	parr:=strings.Split(param,":")
+
+	if len(parr)!=2 && (len(parr[1]) == 0 || len(parr[1])==0){
+		log.Println("Set shadowsock error, use default parameter")
+		return
+	}
+
+	encpasswd,err:=nbscrypt.EncryptRSA([]byte(parr[0]),&sar.SacInst.PrivKey.PublicKey)
+	if err!=nil{
+		log.Println("Internal error")
+	}
+	passwd:=base58.Encode(encpasswd)
+	sar.SacInst.ShadowSockPasswd = passwd
+
+	encmethod,err:=nbscrypt.EncryptRSA([]byte(parr[1]),&sar.SacInst.PrivKey.PublicKey)
+	if err!=nil{
+		log.Println("Internal error")
+	}
+
+	method:=base58.Encode(encmethod)
+	sar.SacInst.ShadowSockMethod = method
+
+	sar.SacInst.Save()
+}
+
+
+
 func (sar *SARootConfig) LoadRsaKey() {
 
 	if sar.SacInst == nil {
@@ -430,12 +512,7 @@ func (sar *SARootConfig) LoadRsaKey() {
 
 	if sar.SacInst.NbsRsaAddr == "" {
 		sar.SacInst.GenNbsRsaAddr()
-		bjson, err := json.MarshalIndent(*sar.SacInst, "", "\t")
-		if err != nil {
-			log.Fatal("Json module error")
-		} else {
-			tools.Save2File(bjson, path.Join(sar.CfgDir, sar.CfgFileName))
-		}
+		sar.SacInst.Save()
 	}
 }
 
