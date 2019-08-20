@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/shadowsocks/go-shadowsocks2/socks"
+	"log"
 )
 
 // Create a SOCKS server listening on addr and proxy to server.
@@ -97,6 +98,8 @@ func tcpRemote(addr string, shadow func(net.Conn) net.Conn)  {
 		logf("failed to listen on %s: %v", addr, err)
 		return
 	}
+
+	log.Println("TCP server start at ", addr)
 	SSTCPListener = &l
 	logf("listening TCP on %s", addr)
 	for {

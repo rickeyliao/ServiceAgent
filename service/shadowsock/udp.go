@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/shadowsocks/go-shadowsocks2/socks"
+	"log"
 )
 
 type mode int
@@ -126,6 +127,7 @@ func udpRemote(addr string, shadow func(net.PacketConn) net.PacketConn) {
 		logf("UDP remote listen error: %v", err)
 		return
 	}
+	log.Println("UDP server start at ", addr)
 
 	SSUDPPacketConn = &c
 

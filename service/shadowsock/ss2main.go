@@ -72,6 +72,8 @@ func ss2server(port int,passwd,method string) error {
 	}
 
 	go udpRemote(addr, ciph.PacketConn)
+
+
 	tcpRemote(addr, ciph.StreamConn)
 
 	return nil
