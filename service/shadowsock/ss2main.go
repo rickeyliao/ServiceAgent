@@ -68,6 +68,7 @@ func ss2server(port int,passwd,method string) error {
 
 	var key []byte
 
+	config.Verbose = true
 
 	addr := flags.Server
 	cipher := flags.Cipher
