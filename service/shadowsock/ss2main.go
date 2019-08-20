@@ -38,25 +38,15 @@ func ss2server(port int,passwd,method string) error {
 	}
 
 	var flags struct {
-		Client    string
 		Server    string
 		Cipher    string
-		Key       string
 		Password  string
-		Keygen    int
-		Socks     string
-		RedirTCP  string
-		RedirTCP6 string
-		TCPTun    string
-		UDPTun    string
-		UDPSocks  bool
 	}
 
 	flags.Cipher = "AES-256-CFB"
 	if method != ""{
 		flags.Cipher = strings.ToUpper(method)
 	}
-
 
 	flags.Password = passwd
 
@@ -83,12 +73,6 @@ func ss2server(port int,passwd,method string) error {
 
 	go udpRemote(addr, ciph.PacketConn)
 	tcpRemote(addr, ciph.StreamConn)
-
-
-	//sigCh := make(chan os.Signal, 1)
-	//signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	//<-sigCh
-
 
 	return nil
 }
