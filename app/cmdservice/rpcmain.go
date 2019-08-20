@@ -17,7 +17,8 @@ var grpcServer *grpc.Server
 
 func StartCmdService() {
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", common.GetSAConfig().CmdListenIP, common.GetSAConfig().CmdListenPort))
+	lis, err := net.Listen("tcp",
+		fmt.Sprintf("%s:%d", common.GetSAConfig().CmdListenIP, common.GetSAConfig().CmdListenPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -49,6 +50,6 @@ func StopCmdService() {
 	grpcServer.Stop()
 	log.Println("Cmd Server Closed")
 
-	shadowsock.StopSSServer()
+	shadowsock.StopSS2Server()
 
 }

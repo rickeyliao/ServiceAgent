@@ -1,0 +1,125 @@
+package shadowsock
+
+import (
+	"github.com/shadowsocks/go-shadowsocks2/core"
+	"log"
+	"net/url"
+	"strings"
+	"time"
+	"github.com/pkg/errors"
+	"strconv"
+	"net"
+	"github.com/rickeyliao/ServiceAgent/common"
+)
+
+var config struct {
+	Verbose    bool
+	UDPTimeout time.Duration
+}
+
+var (
+	SSTCPListener *net.Listener
+	SSUDPPacketConn *net.PacketConn
+)
+
+
+//var logger = log.New(os.Stderr, "", log.Lshortfile|log.LstdFlags)
+
+func logf(f string, v ...interface{}) {
+	if config.Verbose {
+		log.Println(v)
+	}
+}
+
+func ss2server(port int,passwd,method string) error {
+
+	if passwd == ""{
+		return errors.New("Please Set Passwd")
+	}
+
+	var flags struct {
+		Client    string
+		Server    string
+		Cipher    string
+		Key       string
+		Password  string
+		Keygen    int
+		Socks     string
+		RedirTCP  string
+		RedirTCP6 string
+		TCPTun    string
+		UDPTun    string
+		UDPSocks  bool
+	}
+
+	flags.Cipher = "AES-256-CFB"
+	if method != ""{
+		flags.Cipher = strings.ToUpper(method)
+	}
+
+
+	flags.Password = passwd
+
+	if port >1024{
+		flags.Server = ":"+strconv.Itoa(port)
+	}else{
+		flags.Server = ":50812"
+	}
+
+	var key []byte
+
+
+	addr := flags.Server
+	cipher := flags.Cipher
+	password := flags.Password
+
+
+
+	ciph, err := core.PickCipher(cipher, key, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go udpRemote(addr, ciph.PacketConn)
+	tcpRemote(addr, ciph.StreamConn)
+
+
+	//sigCh := make(chan os.Signal, 1)
+	//signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	//<-sigCh
+
+
+	return nil
+}
+
+func parseURL(s string) (addr, cipher, password string, err error) {
+	u, err := url.Parse(s)
+	if err != nil {
+		return
+	}
+
+	addr = u.Host
+	if u.User != nil {
+		cipher = u.User.Username()
+		password, _ = u.User.Password()
+	}
+	return
+
+}
+
+func StartSS2Server() {
+	sa:=common.GetSAConfig()
+	ss2server(int(sa.ShadowSockPort),sa.GetSSPasswd(),sa.GetSSMethod())
+}
+
+func StopSS2Server() {
+	if SSTCPListener != nil{
+		lis:=*SSTCPListener
+		lis.Close()
+	}
+
+	if SSUDPPacketConn != nil{
+		sup:=*SSUDPPacketConn
+		sup.Close()
+	}
+}

@@ -70,7 +70,7 @@ var daemonCmd = &cobra.Command{
 
 		go service.Run(cfg)
 
-		go shadowsock.StartSSServer()
+		go shadowsock.StartSS2Server()
 
 		cmdservice.StartCmdService()
 	},
