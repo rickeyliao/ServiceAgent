@@ -49,8 +49,9 @@ var rootCmd = &cobra.Command{
 		cfg.Role = *machinerole
 
 		go service.Run(cfg)
-
-		go shadowsock.StartSS2Server()
+		if cfg.ShadowSockServerSwitch{
+			go shadowsock.StartSS2Server()
+		}
 
 		cmdservice.StartCmdService()
 	},
