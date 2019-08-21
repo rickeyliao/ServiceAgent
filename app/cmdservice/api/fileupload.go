@@ -15,6 +15,8 @@ import (
 	"io/ioutil"
 	"fmt"
 	"crypto/sha256"
+	"strings"
+	"strconv"
 )
 
 type CmdFileUpLoad struct {
@@ -25,9 +27,28 @@ func (cfu *CmdFileUpLoad)Uploadfile(ctx context.Context,req  *pb.Fileuploadreq) 
 	if req.Filepath=="" || req.Hostip == ""{
 		return encResp("Param error"),nil
 	}
-	if net.ParseIP(req.Hostip) == nil{
+
+	hiparr:=strings.Split(req.Hostip,":")
+	if len(hiparr)!=2{
+
 		return encResp("host ip address error"),nil
 	}
+
+	if net.ParseIP(hiparr[0]) == nil{
+
+		return encResp("host ip address error"),nil
+	}
+
+	if rport,err:=strconv.Atoi(hiparr[1]);err!=nil{
+
+		return encResp("host ip address error"),nil
+	}else {
+		if rport<1024 || rport >65535{
+
+			return encResp("host ip address error"),nil
+		}
+	}
+
 
 	if !tools.FileExists(req.Filepath){
 		return encResp("file not found"),nil
@@ -88,7 +109,7 @@ func uploadfile(hostip string,filepath string) (string,error) {
 		return
 	}()
 
-	posturl:="http://"+hostip+":50810/upload"
+	posturl:="http://"+hostip+"/upload"
 
 	client:=http.Client{Transport:&(http.Transport{DisableKeepAlives:true})}
 

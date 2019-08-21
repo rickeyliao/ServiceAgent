@@ -91,33 +91,42 @@ func Stop() {
 	httpserver.Shutdown(ctx)
 }
 
+
+
+
+func report(address string)  {
+	tp:=http.Transport{DisableKeepAlives:true}
+	c:=&http.Client{Transport:&tp}
+
+	if req,err:=http.NewRequest("GET","http://"+address+"/localipaddress",nil);err!=nil{
+		return
+	}else{
+
+		req.Header.Add("nbsaddress",common.GetSAConfig().NbsRsaAddr)
+		ips:=common.GetAllLocalIpAddr()
+		req.Header.Add("nataddrs",localaddress.LocalIPArr2string(ips))
+		req.Header.Add("hostname",localaddress.GetMachineName())
+
+		if resp,errresp:=c.Do(req);errresp != nil{
+			log.Println(errresp)
+			return
+		}else {
+			resp.Body.Close()
+			//log.Println(resp)
+		}
+
+	}
+}
+
 func reportAddress()  {
 	var count int64
 
 	for {
 		count++
 		if count %300 == 0{
-
-			tp:=http.Transport{DisableKeepAlives:true}
-			c:=&http.Client{Transport:&tp}
-
-			if req,err:=http.NewRequest("GET","http://103.45.98.72:50810/localipaddress",nil);err!=nil{
-				continue
-			}else{
-
-				req.Header.Add("nbsaddress",common.GetSAConfig().NbsRsaAddr)
-				ips:=common.GetAllLocalIpAddr()
-				req.Header.Add("nataddrs",localaddress.LocalIPArr2string(ips))
-				req.Header.Add("hostname",localaddress.GetMachineName())
-
-				if resp,errresp:=c.Do(req);errresp != nil{
-					log.Println(errresp)
-					continue
-				}else {
-					resp.Body.Close()
-					//log.Println(resp)
-				}
-
+			for _,addr:=range common.GetSAConfig().ReportServerIPAddress{
+				report(addr)
+				time.Sleep(time.Second*1)
 			}
 		}
 		time.Sleep(time.Second*1)

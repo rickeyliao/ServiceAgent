@@ -22,6 +22,8 @@ import (
 	"path"
 	"os"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"strings"
+	"strconv"
 )
 
 var(
@@ -55,9 +57,25 @@ var downloadfileCmd = &cobra.Command{
 			return
 		}
 
-		if net.ParseIP(*downloadip) == nil{
+		hiparr:=strings.Split(*downloadip,":")
+		if len(hiparr)!=2{
+			fmt.Println("Please Set Host IP Address like 1.1.1.1:50810")
+			return
+		}
+
+		if net.ParseIP(hiparr[0]) == nil{
 			fmt.Println("Please Set Correct Host Ip Address")
 			return
+		}
+
+		if rport,err:=strconv.Atoi(hiparr[1]);err!=nil{
+			fmt.Println("Please Set Correct Remote Port")
+			return
+		}else {
+			if rport<1024 || rport >65535{
+				fmt.Println("Please Set Correct Remote Port")
+				return
+			}
 		}
 
 		outputpathstr:=""

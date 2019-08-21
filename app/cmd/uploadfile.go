@@ -21,6 +21,8 @@ import (
 	"os"
 	"path"
 	"github.com/kprc/nbsnetwork/tools"
+	"strings"
+	"strconv"
 )
 
 var(
@@ -43,9 +45,25 @@ var uploadFileCmd = &cobra.Command{
 			return
 		}
 
-		if net.ParseIP(*uploadhostip) == nil{
+		hiparr:=strings.Split(*uploadhostip,":")
+		if len(hiparr)!=2{
+			fmt.Println("Please Set Host IP Address like 1.1.1.1:50810")
+			return
+		}
+
+		if net.ParseIP(hiparr[0]) == nil{
 			fmt.Println("Please Set Correct Host Ip Address")
 			return
+		}
+
+		if rport,err:=strconv.Atoi(hiparr[1]);err!=nil{
+			fmt.Println("Please Set Correct Remote Port")
+			return
+		}else {
+			if rport<1024 || rport >65535{
+				fmt.Println("Please Set Correct Remote Port")
+				return
+			}
 		}
 
 		filepath:=""

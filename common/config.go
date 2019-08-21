@@ -39,6 +39,7 @@ type SAConfig struct {
 	RemoteServerPort         uint16          `json:"remoteserverport"`
 	HttpListenPort           uint16          `json:"httplistenport"`		//50810 tcp/http for file transfer
 	BootstrapIPAddress       []string        `json:"bootstrapipaddress"`
+	ReportServerIPAddress	 []string        `json:"reportserveraddress"`
 	ListenTyp                string          `json:"listentyp"`
 	NbsRsaAddr               string          `json:"nbsaddr"`
 	CmdListenIP              string          `json:"cmdlistenip"`
@@ -209,7 +210,8 @@ func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
 func DefaultInitConfig() *SAConfig {
 	sa := &SAConfig{}
 
-	sa.BootstrapIPAddress = []string{"103.45.98.72:50811", "174.7.124.45:50811"}
+	sa.BootstrapIPAddress = []string{"103.45.98.72:50811", "24.86.164.242:50811"}
+	sa.ReportServerIPAddress = []string{"103.45.98.72:50810","24.86.164.242:50810"}
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadPath = "/download"
 	sa.EmailPath = "/public/key/refresh"

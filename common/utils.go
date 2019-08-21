@@ -97,7 +97,7 @@ func DownloadFile(hostip string,savepath string,filehash string) error  {
 	tp:=http.Transport{DisableKeepAlives:true}
 	c:=&http.Client{Transport:&tp}
 
-	geturl:="http://"+hostip+":50810/download"
+	geturl:="http://"+hostip+"/download"
 
 	if req,err:=http.NewRequest("GET",geturl,nil);err!=nil{
 

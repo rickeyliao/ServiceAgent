@@ -7,6 +7,8 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"fmt"
+	"strings"
+	"strconv"
 )
 
 type CmdFileDownload struct {
@@ -18,8 +20,25 @@ func (cfd *CmdFileDownload)Downloadfile(ctx context.Context, req *pb.Filedownloa
 		return encResp("Parameter error"),nil
 	}
 
-	if net.ParseIP(req.Hostip) == nil{
+	hiparr:=strings.Split(req.Hostip,":")
+	if len(hiparr)!=2{
+
 		return encResp("host ip address error"),nil
+	}
+
+	if net.ParseIP(hiparr[0]) == nil{
+
+		return encResp("host ip address error"),nil
+	}
+
+	if rport,err:=strconv.Atoi(hiparr[1]);err!=nil{
+
+		return encResp("host ip address error"),nil
+	}else {
+		if rport<1024 || rport >65535{
+
+			return encResp("host ip address error"),nil
+		}
 	}
 
 	if !tools.FileExists(req.Savepath){
