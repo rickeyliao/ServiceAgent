@@ -1,7 +1,7 @@
 package license
 
 import (
-	"github.com/rickeyliao/ServiceAgent/db"
+	"github.com/kprc/nbsnetwork/db"
 	"sync"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"path"
