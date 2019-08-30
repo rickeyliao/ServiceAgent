@@ -46,8 +46,10 @@ type SAConfig struct {
 	CmdListenPort            uint16          `json:"cmdlistenport"`   //50811 tcp for cmd
 	DhtListenPort            uint16          `json:"dhtlistenport"`	  //50811 udp for control message
 	StaticFileDir            string			 `json:"staticfiledir"`
-	LoginDir                 string          `json:"logindir"`
+	LoginPath                string          `json:"logindir"`
 	Loginfile                string          `json:"loginfile"`
+	CheckIPPath               string         `json:"checkipdir"`
+	CheckIPFile              string			 `json:"checkipfile"`
 	LicenseAdminUser         [][]string      `json:"licenseadminuser"`
 	ShadowSockServerSwitch   bool			 `json:"shadowsockserverswitch"`
 	ShadowSockPort			 uint16			 `json:"shadowsockport"`
@@ -237,8 +239,10 @@ func DefaultInitConfig() *SAConfig {
 	sa.DhtListenPort = 50811
 	sa.ListenTyp = "tcp4"
 	sa.StaticFileDir = "staticfile"
-	sa.LoginDir = "login"
+	sa.LoginPath = "/login"
+	sa.CheckIPPath = "/checkip"
 	sa.Loginfile = "login.gptl"
+	sa.CheckIPFile = "checkip.gptl"
 	sa.ShadowSockServerSwitch = true
 	sa.ShadowSockPort = 50812
 	sa.ShadowSockPasswd=""
@@ -363,6 +367,11 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 
 	if !tools.FileExists(loginfilename){
 		htmlfile.NewLoginFile(loginfilename)
+	}
+
+	checkipfilename:=path.Join(staticfile,sar.SacInst.CheckIPFile)
+	if !tools.FileExists(checkipfilename){
+		htmlfile.NewCheckIPFile(checkipfilename)
 	}
 
 	sar.SacInst.Root = sar

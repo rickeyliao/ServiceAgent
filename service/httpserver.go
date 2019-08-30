@@ -12,12 +12,12 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service/postsocks5"
 	"log"
 	"net/http"
-	"path"
 	"strconv"
 	"time"
 	"github.com/rickeyliao/ServiceAgent/service/login"
 	"sync"
 	"github.com/rickeyliao/ServiceAgent/service/license"
+	"github.com/rickeyliao/ServiceAgent/service/checkip"
 )
 
 var (
@@ -50,7 +50,8 @@ func Run(cfg *common.SAConfig) {
 	mux.Handle(cfg.PostSocks5Path, postsocks5.NewPostSocks5())
 	mux.Handle(cfg.Uploadpath, file.NewFileUpLoad())
 	mux.Handle(cfg.DownloadPath, file.NewFileDownLoad())
-	mux.Handle(path.Join("/",cfg.LoginDir),login.NewLoginInfo())
+	mux.Handle(cfg.LoginPath,login.NewLoginInfo())
+	mux.Handle(cfg.CheckIPPath,checkip.NewCheckPrivateIP())
 
 	listenportstr := ":" + strconv.Itoa(int(cfg.HttpListenPort))
 
