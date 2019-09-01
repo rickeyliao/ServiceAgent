@@ -31,18 +31,18 @@ var initCmd = &cobra.Command{
 	Long:  `init nbssa start environment`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if force && shadowsockParam == ""{
-			log.Println("Please Set Shadow sock parameter")
-			return
-		}
-
 		sar := common.GetSARootCfgHdir(sahome, force)
 		sar.InitConfig(force)
 		sar.InitRSAKey(force)
 		sar.LoadRsaKey()
 
-		if force{
+		if shadowsockParam != "" {
 			sar.SetShadowSockParam(shadowsockParam)
+		}else{
+			if sar.SacInst.ShadowSockServerSwitch{
+				sar.SacInst.ShadowSockServerSwitch = false
+				sar.SacInst.Save()
+			}
 		}
 
 

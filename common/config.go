@@ -243,7 +243,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.CheckIPPath = "/checkip"
 	sa.Loginfile = "login.gptl"
 	sa.CheckIPFile = "checkip.gptl"
-	sa.ShadowSockServerSwitch = true
+	sa.ShadowSockServerSwitch = false
 	sa.ShadowSockPort = 50812
 	sa.ShadowSockPasswd=""
 	sa.ShadowSockMethod=""
@@ -500,6 +500,8 @@ func (sar *SARootConfig)SetShadowSockParam(param string)  {
 
 	method:=base58.Encode(encmethod)
 	sar.SacInst.ShadowSockMethod = method
+
+	sar.SacInst.ShadowSockServerSwitch = true
 
 	sar.SacInst.Save()
 }

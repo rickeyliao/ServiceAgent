@@ -113,7 +113,11 @@ func (ss *CmdDefaultServer)licenseusershow() (*pb.DefaultResp, error) {
 		message += strconv.Itoa(idx+1)+". user: "+userpair[0]+"\t passwd: "+userpair[1] +"\r\n"
 	}
 
-	resp.Message = message[0:len(message)-2]
+	if len(message) > 2{
+		resp.Message = message[0:len(message)-2]
+	}else{
+		resp.Message = "No License Admin User"
+	}
 
 	return resp, nil
 }
