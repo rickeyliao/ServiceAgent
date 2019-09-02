@@ -40,6 +40,10 @@ func (ss *CmdDefaultServer) DefaultNbssa(ctx context.Context, in *pb.DefaultRequ
 		return ss.savehomeip()
 	}
 
+	if in.Reqid == app.CMD_SHADOWSOCK_SHOW{
+		return ss.shadowsockshow()
+	}
+
 	resp := &pb.DefaultResp{}
 	resp.Message = "no cmd found"
 
@@ -83,6 +87,25 @@ func (ss *CmdDefaultServer) remoteshow() (*pb.DefaultResp, error) {
 
 	return resp, nil
 }
+
+func (ss *CmdDefaultServer)shadowsockshow() (*pb.DefaultResp, error) {
+	sac:=common.GetSAConfig()
+	resp:=&pb.DefaultResp{}
+
+	sw :="false"
+	if sac.ShadowSockServerSwitch {
+		sw= "true"
+	}
+
+	resp.Message = "Switch: "+ sw
+	resp.Message += "\r\nPort: "+ strconv.Itoa(int(sac.ShadowSockPort))
+	resp.Message += "\r\nPasswd : "+ sac.GetSSPasswd()
+	resp.Message += "\r\nMethod : "+ sac.GetSSMethod()
+
+	return resp, nil
+
+}
+
 
 func (ss *CmdDefaultServer) bootstrapshow() (*pb.DefaultResp, error) {
 	sac := common.GetSAConfig()
