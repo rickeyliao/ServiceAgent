@@ -14,8 +14,8 @@ import (
 	"os"
 	"path"
 	"sync"
-	"github.com/rickeyliao/ServiceAgent/htmlfile"
 	"strings"
+	"github.com/rickeyliao/ServiceAgent/htmlfile"
 )
 
 type SAConfig struct {
@@ -288,7 +288,6 @@ func (sar *SARootConfig) LoadCfg() *SAConfig {
 	cfg.Root = sar
 
 	return cfg
-
 }
 
 
@@ -297,6 +296,7 @@ func (sar *SARootConfig) IsInitialized() bool {
 	if !tools.FileExists(cfgname) {
 		return false
 	}
+
 
 	return true
 }
@@ -345,7 +345,9 @@ func (sar *SARootConfig) InitConfig(force,iscoord bool,hostname string) *SARootC
 		nds = true
 	}
 
-
+	if nds{
+		sar.SacInst.Save()
+	}
 
 	filedbdir :=""
 
@@ -401,11 +403,8 @@ func (sar *SARootConfig) InitConfig(force,iscoord bool,hostname string) *SARootC
 		htmlfile.NewCheckIPFile(checkipfilename)
 	}
 
-	sar.SacInst.Root = sar
 
-	if nds{
-		sar.SacInst.Save()
-	}
+	sar.SacInst.Root = sar
 
 	return sar
 }
@@ -512,7 +511,7 @@ func (sac *SAConfig)Save()  {
 func (sar *SARootConfig)SetShadowSockParam(param string)  {
 	parr:=strings.Split(param,":")
 
-	if len(parr)!=2 && (len(parr[1]) == 0 || len(parr[1])==0){
+	if len(parr)!=2 {
 		log.Println("Set shadowsock error, use default parameter")
 		return
 	}
