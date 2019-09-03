@@ -59,13 +59,13 @@ func Run(cfg *common.SAConfig) {
 	log.Println("Server Listen at:", listenportstr)
 	log.Println("LocalNbsAddress:", cfg.NbsRsaAddr)
 
-	if cfg.Role == 0 {
+	if !cfg.IsCoordinator {
 		quit = make(chan int,0)
 		wg.Add(1)
 		go reportAddress()
 	}
 
-	if cfg.Role == 1{
+	if cfg.IsCoordinator{
 		go localaddress.IntervalSave()
 	}
 
@@ -77,12 +77,12 @@ func Run(cfg *common.SAConfig) {
 }
 
 func Stop() {
-	if common.GetSAConfig().Role==0{
+	if !common.GetSAConfig().IsCoordinator{
 		quit<-1
 		wg.Wait()
 	}
 
-	if common.GetSAConfig().Role == 1{
+	if common.GetSAConfig().IsCoordinator{
 		localaddress.Destroy()
 	}
 

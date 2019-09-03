@@ -22,6 +22,8 @@ import (
 
 var sahome string
 var force bool
+var iscoord bool
+var machinename string
 var shadowsockParam string
 
 // initCmd represents the init command
@@ -32,7 +34,7 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		sar := common.GetSARootCfgHdir(sahome, force)
-		sar.InitConfig(force)
+		sar.InitConfig(force,iscoord,machinename)
 		sar.InitRSAKey(force)
 		sar.LoadRsaKey()
 
@@ -53,16 +55,9 @@ var initCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(initCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// initCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	initCmd.Flags().StringVarP(&sahome, "homedir", "d", "", "home directory (default is $HOME/.sa/)")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "force init a default configuration ( default false)")
 	initCmd.Flags().StringVarP(&shadowsockParam,"ss","s","","configuration shadowsock passwd and method")
+	initCmd.Flags().BoolVarP(&iscoord,"coordinator","c",false,"current machine is a coordinator")
+	initCmd.Flags().StringVarP(&machinename,"machinename","m","","set machine name")
 }

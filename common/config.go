@@ -55,7 +55,9 @@ type SAConfig struct {
 	ShadowSockPort			 uint16			 `json:"shadowsockport"`
 	ShadowSockPasswd         string          `json:"sspasswd"`
 	ShadowSockMethod         string			 `json:"ssmethod"`
-	Role                     int64           `json:"-"`
+	HostName                 string          `json:"hostname"`
+	IsCoordinator            bool            `json:"iscoordinator"`
+
 	PrivKey                  *rsa.PrivateKey `json:"-"`
 	Root					 *SARootConfig   `json:"-"`
 }
@@ -65,6 +67,7 @@ type SARootConfig struct {
 	CfgDir      string
 	CfgFileName string
 	SacInst     *SAConfig
+	needSave    bool
 }
 
 type Roothome struct {
@@ -134,17 +137,9 @@ func forceInitRootConfig(hdir string) *SARootConfig {
 		return nil
 	}
 
-	//save homedir to .sainit file
-	rh := Roothome{sahome}
-	var brh []byte
-	if brh, err = json.MarshalIndent(rh, "", "\t"); err != nil {
-		log.Fatal("Can't save to .sainit file")
-	}
-	tools.Save2File(brh, path.Join(homedir, ".sainit"))
-
 	cfgdir := path.Join(sahome, "config")
 
-	return &SARootConfig{HomeDir: sahome, CfgDir: cfgdir, CfgFileName: "sa.json"}
+	return &SARootConfig{HomeDir: sahome, CfgDir: cfgdir, CfgFileName: "sa.json",needSave:true}
 }
 
 func unforceInitRootConfig(hdir string) *SARootConfig {
@@ -152,6 +147,7 @@ func unforceInitRootConfig(hdir string) *SARootConfig {
 	var savedir string
 	var d []byte
 	var err error
+	var nds bool
 
 	if homedir, err = tools.Home(); err != nil {
 		log.Fatal("Can't Get Home Directory")
@@ -172,14 +168,8 @@ func unforceInitRootConfig(hdir string) *SARootConfig {
 				savedir = hdir
 			}
 		}
-		//save homedir to .sainit file
-		rh := Roothome{savedir}
-		var brh []byte
-		if brh, err = json.MarshalIndent(rh, "", "\t"); err != nil {
-			log.Fatal("Can't save to .sainit file")
-		}
 
-		tools.Save2File(brh, path.Join(homedir, ".sainit"))
+		nds = true
 
 	} else {
 		prh := &Roothome{}
@@ -193,7 +183,7 @@ func unforceInitRootConfig(hdir string) *SARootConfig {
 	if savedir == "" {
 		return nil
 	}
-	return &SARootConfig{HomeDir: savedir, CfgDir: path.Join(savedir, "config"), CfgFileName: "sa.json"}
+	return &SARootConfig{HomeDir: savedir, CfgDir: path.Join(savedir, "config"), CfgFileName: "sa.json",needSave:nds}
 }
 
 func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
@@ -204,7 +194,9 @@ func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
 		sar = unforceInitRootConfig(hdir)
 	}
 
-	//log.Println("Config Root:", sar.HomeDir)
+	if sar != nil && sar.needSave{
+		sar.Save()
+	}
 
 	return sar
 }
@@ -245,11 +237,36 @@ func DefaultInitConfig() *SAConfig {
 	sa.CheckIPFile = "checkip.gptl"
 	sa.ShadowSockServerSwitch = false
 	sa.ShadowSockPort = 50812
+
 	sa.ShadowSockPasswd=""
 	sa.ShadowSockMethod=""
+	sa.HostName =""
+	sa.IsCoordinator = false
 	sa.LicenseAdminUser = [][]string{{"sofaadmin","J1jdNR8vQb"},{"nbsadmin","Dkf44u3Ad8"},}
 
 	return sa
+}
+
+func (sar *SARootConfig)Save() *SARootConfig  {
+
+	if sar.HomeDir == ""{
+		return sar
+	}
+
+	//save homedir to .sainit file
+	rh := Roothome{sar.HomeDir}
+
+	if brh, err := json.MarshalIndent(rh, "", "\t"); err != nil {
+		log.Fatal("Can't save to .sainit file")
+	}else {
+		if homedir,err1 := tools.Home(); err1 != nil {
+			log.Fatal("Can't Get Home Directory")
+		}else{
+			tools.Save2File(brh, path.Join(homedir, ".sainit"))
+		}
+	}
+
+	return sar
 }
 
 func (sar *SARootConfig) LoadCfg() *SAConfig {
@@ -284,13 +301,15 @@ func (sar *SARootConfig) IsInitialized() bool {
 	return true
 }
 
-func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
+func (sar *SARootConfig) InitConfig(force,iscoord bool,hostname string) *SARootConfig {
+	var nds bool
 	if sar.HomeDir == "" || sar.CfgDir == "" || sar.CfgFileName == "" {
 		log.Fatal("Please Set Config Path")
 	}
 
 	if force {
 		os.RemoveAll(sar.HomeDir)
+		nds = true
 	}
 
 	cfgname := path.Join(sar.CfgDir, sar.CfgFileName)
@@ -301,11 +320,7 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 		}
 		sac := DefaultInitConfig()
 		sar.SacInst = sac
-		bjson, err := json.MarshalIndent(*sac, "", "\t")
-		if err != nil {
-			log.Fatal("Json module error")
-		}
-		tools.Save2File(bjson, cfgname)
+		nds = true
 	} else {
 		bjson, err := tools.OpenAndReadAll(cfgname)
 		if err != nil {
@@ -319,6 +334,18 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 		}
 		sar.SacInst = sac
 	}
+
+	if sar.SacInst.HostName != hostname{
+		sar.SacInst.HostName = hostname
+		nds = true
+	}
+
+	if sar.SacInst.IsCoordinator != iscoord{
+		sar.SacInst.IsCoordinator = iscoord
+		nds = true
+	}
+
+
 
 	filedbdir :=""
 
@@ -375,6 +402,10 @@ func (sar *SARootConfig) InitConfig(force bool) *SARootConfig {
 	}
 
 	sar.SacInst.Root = sar
+
+	if nds{
+		sar.SacInst.Save()
+	}
 
 	return sar
 }

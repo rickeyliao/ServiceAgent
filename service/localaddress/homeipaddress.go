@@ -15,7 +15,6 @@ import (
 var (
 	homeipdb db.NbsDbInter
 	homeipdblock sync.Mutex
-	machineName string
 	quit chan int
 	wg *sync.WaitGroup
 )
@@ -141,18 +140,17 @@ func CmdShowAddressAll() string {
 }
 
 
-func SetMachineName(mn string)  {
-	machineName = mn
-}
+
 
 func GetMachineName() string {
-	if machineName==""{
-		machineName,_ = os.Hostname()
-		if machineName==""{
-			machineName="nbsmachinename"
+	mn:=common.GetSAConfig().HostName
+	if mn==""{
+		mn,_ = os.Hostname()
+		if mn==""{
+			mn="nbsmachinename"
 		}
 	}
-	return machineName
+	return mn
 }
 
 func Save()  {
