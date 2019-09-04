@@ -361,9 +361,6 @@ func (sar *SARootConfig) InitConfig(force bool,iscoord int,hostname string) *SAR
 	}
 
 
-	if nds{
-		sar.SacInst.Save()
-	}
 
 	filedbdir :=""
 
@@ -421,6 +418,12 @@ func (sar *SARootConfig) InitConfig(force bool,iscoord int,hostname string) *SAR
 
 
 	sar.SacInst.Root = sar
+
+
+	if nds{
+		sar.SacInst.Save()
+	}
+
 
 	return sar
 }
