@@ -34,7 +34,11 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		sar := common.GetSARootCfgHdir(sahome, force)
-		sar.InitConfig(force,iscoord,machinename)
+		cmbool:=common.InitFalse
+		if iscoord{
+			cmbool=common.InitTrue
+		}
+		sar.InitConfig(force,cmbool,machinename)
 		sar.InitRSAKey(force)
 		sar.LoadRsaKey()
 

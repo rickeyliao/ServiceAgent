@@ -301,7 +301,13 @@ func (sar *SARootConfig) IsInitialized() bool {
 	return true
 }
 
-func (sar *SARootConfig) InitConfig(force,iscoord bool,hostname string) *SARootConfig {
+const (
+	InitNone int = 0
+	InitTrue int =1
+	InitFalse int =2
+)
+
+func (sar *SARootConfig) InitConfig(force bool,iscoord int,hostname string) *SARootConfig {
 	var nds bool
 	if sar.HomeDir == "" || sar.CfgDir == "" || sar.CfgFileName == "" {
 		log.Fatal("Please Set Config Path")
@@ -335,15 +341,25 @@ func (sar *SARootConfig) InitConfig(force,iscoord bool,hostname string) *SARootC
 		sar.SacInst = sac
 	}
 
-	if sar.SacInst.HostName != hostname{
-		sar.SacInst.HostName = hostname
-		nds = true
+	if hostname != ""{
+		if sar.SacInst.HostName != hostname{
+			sar.SacInst.HostName = hostname
+			nds = true
+		}
 	}
 
-	if sar.SacInst.IsCoordinator != iscoord{
-		sar.SacInst.IsCoordinator = iscoord
-		nds = true
+
+	if iscoord != InitNone{
+		iscoordb:=false
+		if iscoord == InitTrue{
+			iscoordb = true
+		}
+		if sar.SacInst.IsCoordinator != iscoordb{
+			sar.SacInst.IsCoordinator = iscoordb
+			nds = true
+		}
 	}
+
 
 	if nds{
 		sar.SacInst.Save()
