@@ -25,10 +25,10 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
-var (
-	hostname *string
-	role *int64
-)
+//var (
+//	hostname *string
+//	role *int64
+//)
 
 // daemonCmd represents the daemon command
 var daemonCmd = &cobra.Command{

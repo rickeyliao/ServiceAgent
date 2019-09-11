@@ -47,9 +47,9 @@ func StopCmdService() {
 		return
 	}
 
+	shadowsock.StopSS2Server()
+
 	grpcServer.Stop()
 	log.Println("Cmd Server Closed")
-
-	shadowsock.StopSS2Server()
 
 }

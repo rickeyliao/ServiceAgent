@@ -424,7 +424,6 @@ func (sar *SARootConfig) InitConfig(force bool,iscoord int,hostname string) *SAR
 		sar.SacInst.Save()
 	}
 
-
 	return sar
 }
 

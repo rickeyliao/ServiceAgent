@@ -106,7 +106,7 @@ func CheckProcessReady() bool {
 	sar.LoadRsaKey()
 	cfg := sar.SacInst
 	//if the program started, quit
-	if !tools.CheckPortUsed(cfg.ListenTyp, cfg.CmdListenPort) {
+	if !tools.CheckPortUsed(cfg.ListenTyp,cfg.CmdListenIP, cfg.CmdListenPort) {
 		log.Println("nbssa not started")
 		return false
 	}
@@ -125,7 +125,7 @@ func CheckProcessCanStarted() bool {
 	sar.LoadRsaKey()
 	cfg := sar.SacInst
 	//if the program started, quit
-	if tools.CheckPortUsed(cfg.ListenTyp, cfg.CmdListenPort) {
+	if tools.CheckPortUsed(cfg.ListenTyp,cfg.CmdListenIP, cfg.CmdListenPort) {
 		log.Println("nbssa have started")
 		return false
 	}

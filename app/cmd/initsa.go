@@ -51,7 +51,6 @@ var initCmd = &cobra.Command{
 			}
 		}
 
-
 		log.Println("Config initialized")
 	},
 }
