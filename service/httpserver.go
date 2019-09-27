@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"crypto/rsa"
 	"github.com/rickeyliao/ServiceAgent/agent/email"
 	"github.com/rickeyliao/ServiceAgent/agent/key"
 	"github.com/rickeyliao/ServiceAgent/agent/listallip"
@@ -19,6 +21,9 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/kprc/nbsnetwork/tools"
+	"io/ioutil"
 )
 
 var (
@@ -94,7 +99,7 @@ func Stop() {
 	httpserver.Shutdown(ctx)
 }
 
-func report(address string) {
+func report(address string, ra *rsaaddr) {
 	tp := http.Transport{DisableKeepAlives: true}
 	c := &http.Client{Transport: &tp}
 
@@ -119,24 +124,95 @@ func report(address string) {
 	}
 }
 
-func updatemapaddr(addr string, mapaddr map[string]string) {
-	if addr == "" {
-		return
+
+
+
+type rsaaddr struct {
+	pk      *rsa.PublicKey
+	addr    string
+	nbsaddr string
+	ts      int64
+	failcnt int32
+}
+
+func reqrsaaddr(addr string) *rsaaddr {
+	tp := http.Transport{DisableKeepAlives: true}
+	c := &http.Client{Transport: &tp}
+
+	var ra *rsaaddr
+
+	r := bytes.NewReader([]byte(pubkey.GetNbsPubkey()))
+
+	if req, err := http.NewRequest("POST", "http://"+addr+common.GetSAConfig().PubkeyPath, r); err != nil {
+		return nil
+	} else {
+		if resp, errresp := c.Do(req); errresp != nil {
+			log.Println(errresp)
+
+			return nil
+		} else {
+
+			if pkjson, err := ioutil.ReadAll(resp.Body); err == nil {
+				nbsaddr, rsapk := pubkey.UnMarshalPubKey(pkjson)
+				ra = &rsaaddr{}
+				ra.pk = rsapk
+				ra.addr = addr
+				ra.nbsaddr = nbsaddr
+				ra.ts = tools.GetNowMsTime()/1000
+			} else {
+				log.Println(err)
+			}
+
+			resp.Body.Close()
+
+			//log.Println(resp)
+		}
 	}
 
+	return ra
+}
+
+func updatemapaddr(addr string, mapaddr map[string]*rsaaddr) *rsaaddr {
+	now := tools.GetNowMsTime()/1000
+	if addr == "" {
+		return nil
+	}
+
+	var v *rsaaddr
+	var ok bool
+
+	if v, ok = mapaddr[addr]; ok {
+		if v.failcnt == 0 || now-v.ts < 86400 {
+			return v
+		}
+	}
+	ra := reqrsaaddr(addr)
+
+	if ra == nil {
+		if v != nil {
+			v.failcnt++
+		}
+		return nil
+	} else {
+		mapaddr[addr] = ra
+	}
+
+	return ra
 }
 
 func reportAddress() {
 	var count int64
 
-	mapaddr := make(map[string]string)
+	mapaddr := make(map[string]*rsaaddr)
 
 	for {
 		count++
 		if count%300 == 0 {
 			for _, addr := range common.GetSAConfig().ReportServerIPAddress {
-				updatemapaddr(addr, mapaddr)
-				report(addr)
+				ra := updatemapaddr(addr, mapaddr)
+				if ra != nil {
+					report(addr, ra)
+				}
 				time.Sleep(time.Second * 1)
 			}
 		}

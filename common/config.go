@@ -527,6 +527,12 @@ func (sac *SAConfig) GetSSMethod() string {
 	}
 }
 
+func (sac *SAConfig) GetPubKey() string {
+	pubkeybytes := x509.MarshalPKCS1PublicKey(&sac.PrivKey.PublicKey)
+
+	return base58.Encode(pubkeybytes)
+}
+
 func (sac *SAConfig) Save() {
 	bjson, err := json.MarshalIndent(*sac, "", "\t")
 	if err != nil {

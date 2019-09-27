@@ -1,6 +1,7 @@
 package pubkey
 
 import (
+	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"github.com/rickeyliao/ServiceAgent/common"
@@ -11,6 +12,7 @@ import (
 
 type pubkey struct {
 	NbsAddr string `json:"nbsaddr"`
+	Pubkey  string `json:"pubkey"`
 }
 
 func NewHttpPubKey() http.Handler {
@@ -33,16 +35,31 @@ func (pk *pubkey) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(200)
-	fmt.Fprintf(w, getNbsAddr())
+	w.Header().Add("Connection", "close")
+	fmt.Fprintf(w, GetNbsPubkey())
 
 }
 
-func getNbsAddr() string {
-	addr := &pubkey{NbsAddr: common.GetSAConfig().NbsRsaAddr}
+func GetNbsPubkey() string {
+	sac := common.GetSAConfig()
+	addr := &pubkey{NbsAddr: sac.NbsRsaAddr, Pubkey: sac.GetPubKey()}
 	if v, err := json.Marshal(*addr); err != nil {
 		log.Println(err)
 		return "{}"
 	} else {
 		return string(v)
 	}
+}
+
+func UnMarshalPubKey(pkjson []byte) (addr string, pk *rsa.PublicKey) {
+	p := &pubkey{}
+
+	err := json.Unmarshal(pkjson, p)
+	if err != nil {
+		return "", nil
+	}
+
+	pk = common.ToPubKey(p.Pubkey)
+
+	return p.NbsAddr, pk
 }

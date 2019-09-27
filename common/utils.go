@@ -1,6 +1,8 @@
 package common
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
 	"errors"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/nbsnetwork/tools"
@@ -130,4 +132,17 @@ func DownloadFile(hostip string, savepath string, filehash string) error {
 
 	}
 
+}
+
+func ToPubKey(b58pk string) *rsa.PublicKey {
+	if b58pk == "" {
+		return nil
+	}
+	bytepk := base58.Decode(b58pk)
+
+	if pk, err := x509.ParsePKCS1PublicKey(bytepk); err != nil {
+		return nil
+	} else {
+		return pk
+	}
 }
