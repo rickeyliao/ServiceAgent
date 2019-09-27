@@ -15,10 +15,9 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
 )
-
 
 var ssserverNationality int32
 
@@ -26,12 +25,12 @@ var ssserverNationality int32
 var ssserverCmd = &cobra.Command{
 	Use:   "ssserver",
 	Short: "Show Shadowsock Server List",
-	Long: `Show Shadowsock Server List`,
+	Long:  `Show Shadowsock Server List`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !CheckProcessReady(){
+		if !CheckProcessReady() {
 			return
 		}
-		SServerCmdSend(app.CMD_SSSERVER_SHOW,ssserverNationality,false)
+		SServerCmdSend(app.CMD_SSSERVER_SHOW, ssserverNationality, false)
 	},
 }
 
@@ -48,8 +47,5 @@ func init() {
 	// is called directly, e.g.:
 	// ssserverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	ssserverCmd.PersistentFlags().Int32VarP(&ssserverNationality,"nationality","n",0,"set nationality:American 1,china mainland 86")
+	ssserverCmd.PersistentFlags().Int32VarP(&ssserverNationality, "nationality", "n", 0, "set nationality:American 1,china mainland 86")
 }
-
-
-

@@ -24,7 +24,7 @@ import (
 var fileloadCmd = &cobra.Command{
 	Use:   "load",
 	Short: "load a stored file",
-	Long: `load a stored file`,
+	Long:  `load a stored file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("load called")
 	},

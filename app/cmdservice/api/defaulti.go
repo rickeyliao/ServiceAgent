@@ -5,10 +5,10 @@ import (
 	"github.com/rickeyliao/ServiceAgent/app"
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 	"golang.org/x/net/context"
 	"strconv"
 	"time"
-	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 )
 
 type CmdDefaultServer struct {
@@ -32,15 +32,15 @@ func (ss *CmdDefaultServer) DefaultNbssa(ctx context.Context, in *pb.DefaultRequ
 		return ss.bootstrapshow()
 	}
 
-	if in.Reqid == app.CMD_LICENSE_USER_SHOW_REQ{
+	if in.Reqid == app.CMD_LICENSE_USER_SHOW_REQ {
 		return ss.licenseusershow()
 	}
 
-	if in.Reqid == app.CMD_HOMEIP_SAVE_REQ{
+	if in.Reqid == app.CMD_HOMEIP_SAVE_REQ {
 		return ss.savehomeip()
 	}
 
-	if in.Reqid == app.CMD_SHADOWSOCK_SHOW{
+	if in.Reqid == app.CMD_SHADOWSOCK_SHOW {
 		return ss.shadowsockshow()
 	}
 
@@ -88,24 +88,23 @@ func (ss *CmdDefaultServer) remoteshow() (*pb.DefaultResp, error) {
 	return resp, nil
 }
 
-func (ss *CmdDefaultServer)shadowsockshow() (*pb.DefaultResp, error) {
-	sac:=common.GetSAConfig()
-	resp:=&pb.DefaultResp{}
+func (ss *CmdDefaultServer) shadowsockshow() (*pb.DefaultResp, error) {
+	sac := common.GetSAConfig()
+	resp := &pb.DefaultResp{}
 
-	sw :="false"
+	sw := "false"
 	if sac.ShadowSockServerSwitch {
-		sw= "true"
+		sw = "true"
 	}
 
-	resp.Message = "Switch: "+ sw
-	resp.Message += "\r\nPort: "+ strconv.Itoa(int(sac.ShadowSockPort))
-	resp.Message += "\r\nPasswd : "+ sac.GetSSPasswd()
-	resp.Message += "\r\nMethod : "+ sac.GetSSMethod()
+	resp.Message = "Switch: " + sw
+	resp.Message += "\r\nPort: " + strconv.Itoa(int(sac.ShadowSockPort))
+	resp.Message += "\r\nPasswd : " + sac.GetSSPasswd()
+	resp.Message += "\r\nMethod : " + sac.GetSSMethod()
 
 	return resp, nil
 
 }
-
 
 func (ss *CmdDefaultServer) bootstrapshow() (*pb.DefaultResp, error) {
 	sac := common.GetSAConfig()
@@ -125,32 +124,30 @@ func (ss *CmdDefaultServer) bootstrapshow() (*pb.DefaultResp, error) {
 	return resp, nil
 }
 
-
-
-func (ss *CmdDefaultServer)licenseusershow() (*pb.DefaultResp, error) {
+func (ss *CmdDefaultServer) licenseusershow() (*pb.DefaultResp, error) {
 	sac := common.GetSAConfig()
 	resp := &pb.DefaultResp{}
 
 	message := ""
 	for idx, userpair := range sac.LicenseAdminUser {
-		message += strconv.Itoa(idx+1)+". user: "+userpair[0]+"\t passwd: "+userpair[1] +"\r\n"
+		message += strconv.Itoa(idx+1) + ". user: " + userpair[0] + "\t passwd: " + userpair[1] + "\r\n"
 	}
 
-	if len(message) > 2{
-		resp.Message = message[0:len(message)-2]
-	}else{
+	if len(message) > 2 {
+		resp.Message = message[0 : len(message)-2]
+	} else {
 		resp.Message = "No License Admin User"
 	}
 
 	return resp, nil
 }
 
-func (ss *CmdDefaultServer)savehomeip() (*pb.DefaultResp, error)   {
+func (ss *CmdDefaultServer) savehomeip() (*pb.DefaultResp, error) {
 	localaddress.Save()
 
-	resp:=&pb.DefaultResp{}
+	resp := &pb.DefaultResp{}
 
 	resp.Message = "save success"
 
-	return resp,nil
+	return resp, nil
 }

@@ -1,8 +1,8 @@
 package file
 
 import (
-	"net/http"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"net/http"
 )
 
 type filedownload struct {
@@ -16,19 +16,18 @@ func (fdl *filedownload) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		return
 	}
-	filehash:=r.Header.Get("FileHash")
+	filehash := r.Header.Get("FileHash")
 
 	//w.Header().Add("Content-Disposition", "Attachment")
 	//begin to download...
 	//fmt.Println("begin to downloading")
-	filename:=common.GetSaveFilePath(filehash)
-	if filename == ""{
-		w.Header().Add("message","FileNotFound")
+	filename := common.GetSaveFilePath(filehash)
+	if filename == "" {
+		w.Header().Add("message", "FileNotFound")
 		w.Write([]byte("Failed"))
 		return
 	}
 
-	http.ServeFile(w,r,filename)
+	http.ServeFile(w, r, filename)
 
 }
-

@@ -24,7 +24,7 @@ import (
 var filestoreCmd = &cobra.Command{
 	Use:   "store",
 	Short: "store a file",
-	Long: `store a file`,
+	Long:  `store a file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("store called")
 	},

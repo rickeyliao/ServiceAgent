@@ -3,9 +3,9 @@ package dht
 import (
 	"github.com/kprc/nbsnetwork/common/list"
 	"github.com/pkg/errors"
+	"github.com/rickeyliao/ServiceAgent/common"
 	"net"
 	"time"
-	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 type NbsNode struct {
@@ -42,7 +42,7 @@ func (node *NbsNode) AddrCmp(addr []byte) bool {
 	return true
 }
 
-func (node *NbsNode)connect() (*net.UDPConn,error)  {
+func (node *NbsNode) connect() (*net.UDPConn, error) {
 	remoteaddr := &net.UDPAddr{
 		IP:   node.Ipv4Addr,
 		Port: int(node.Port),
@@ -91,14 +91,14 @@ func (node *NbsNode) Ping() (bool, error) {
 	return true, nil
 }
 
-func (node *NbsNode) Store(key []byte,share bool,value ...[]byte) error {
-	conn,err:=node.connect()
+func (node *NbsNode) Store(key []byte, share bool, value ...[]byte) error {
+	conn, err := node.connect()
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
-	sn, data := node.encStore(key,share,value...)
+	sn, data := node.encStore(key, share, value...)
 	if data == nil {
 		return errors.New("enc FindNode Request Failed")
 	}
@@ -118,7 +118,7 @@ func (node *NbsNode) Store(key []byte,share bool,value ...[]byte) error {
 		return err
 	}
 
-	if err = node.updateByStore(key,buf, sn); err != nil {
+	if err = node.updateByStore(key, buf, sn); err != nil {
 		return err
 	}
 
@@ -127,7 +127,7 @@ func (node *NbsNode) Store(key []byte,share bool,value ...[]byte) error {
 
 func (node *NbsNode) FindNode(key []byte) (list.List, error) {
 
-	conn,err:=node.connect()
+	conn, err := node.connect()
 	if err != nil {
 		return nil, err
 	}
@@ -154,30 +154,29 @@ func (node *NbsNode) FindNode(key []byte) (list.List, error) {
 	}
 
 	var l list.List
-	if l,err = node.UpdateByFindNode(key,buf, sn); err != nil {
+	if l, err = node.UpdateByFindNode(key, buf, sn); err != nil {
 		return nil, err
 	}
 
 	return l, nil
 }
 
-
 func (node *NbsNode) FindValue(key []byte) (list.List, *DhtValue, error) {
-	conn,err:=node.connect()
+	conn, err := node.connect()
 	if err != nil {
-		return nil,nil, err
+		return nil, nil, err
 	}
 	defer conn.Close()
 
 	sn, data := node.encFindValue(key)
 	if data == nil {
-		return nil, nil,errors.New("enc FindNode Request Failed")
+		return nil, nil, errors.New("enc FindNode Request Failed")
 	}
 
 	var n int
 	n, err = conn.Write(data)
 	if err != nil || n != len(data) {
-		return nil, nil,errors.New("Send FindNode Request Failed")
+		return nil, nil, errors.New("Send FindNode Request Failed")
 	}
 
 	conn.SetReadDeadline(time.Now().Add(time.Second * 2))
@@ -186,15 +185,13 @@ func (node *NbsNode) FindValue(key []byte) (list.List, *DhtValue, error) {
 
 	n, err = conn.Read(buf)
 	if err != nil {
-		return nil,nil, err
+		return nil, nil, err
 	}
 
 	var l list.List
-	if l,err = node.updateByFindValue(key,buf, sn); err != nil {
-		return nil,nil, err
+	if l, err = node.updateByFindValue(key, buf, sn); err != nil {
+		return nil, nil, err
 	}
 
-	return l, nil,nil
+	return l, nil, nil
 }
-
-

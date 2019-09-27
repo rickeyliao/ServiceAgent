@@ -9,59 +9,59 @@ import (
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"github.com/mr-tron/base58"
 	"github.com/pkg/errors"
+	"github.com/rickeyliao/ServiceAgent/htmlfile"
 	"github.com/spf13/viper"
 	"log"
 	"os"
 	"path"
-	"sync"
 	"strings"
-	"github.com/rickeyliao/ServiceAgent/htmlfile"
+	"sync"
 )
 
 type SAConfig struct {
-	DownloadPath             string          `json:"downloadpath"`
-	Uploadpath               string          `json:"uploadpath"`
-	TestIPAddressPath        string          `json:"testipaddress"`
-	PostSocks5Path           string          `json:"postsocks5path"`
-	VerifyPath               string          `json:"verifypath"`
-	ConsumePath              string          `json:"consumepath"`
-	ListIpsPath              string          `json:"listipspath"`
-	EmailPath                string          `json:"emailpath"`
-	UpdateClientSoftwarePath string          `json:"updateclientsoftwarepath"`
-	PubkeyPath               string          `json:"pubkeypath"`
-	KeyDir                   string          `json:"keydir"`
-	PidDir                   string          `json:"piddir"`
-	FileDBDir                string          `json:"filedbdir"`
-	HomeIPDBFile             string          `json:"homeipdbfile"`
-	LicenseDBFile			 string 		 `json:"licensedbfile"`
-	FileStoreDB				 string 		 `json:"filestoredb"`
-	FileStoreDir             string          `json:"filestoredir"`
-	RemoteServerIP           string          `json:"remoteserverip"`
-	RemoteServerPort         uint16          `json:"remoteserverport"`
-	HttpListenPort           uint16          `json:"httplistenport"`		//50810 tcp/http for file transfer
-	BootstrapIPAddress       []string        `json:"bootstrapipaddress"`
-	ReportServerIPAddress	 []string        `json:"reportserveraddress"`
-	ListenTyp                string          `json:"listentyp"`
-	NbsRsaAddr               string          `json:"nbsaddr"`
-	CmdListenIP              string          `json:"cmdlistenip"`
-	CmdListenPort            uint16          `json:"cmdlistenport"`   //50811 tcp for cmd
-	DhtListenPort            uint16          `json:"dhtlistenport"`	  //50811 udp for control message
-	StaticFileDir            string			 `json:"staticfiledir"`
-	LoginPath                string          `json:"logindir"`
-	Loginfile                string          `json:"loginfile"`
-	CheckIPPath               string         `json:"checkipdir"`
-	CheckIPFile              string			 `json:"checkipfile"`
-	LicenseAdminUser         [][]string      `json:"licenseadminuser"`
-	ShadowSockServerSwitch   bool			 `json:"shadowsockserverswitch"`
-	ShadowSockPort			 uint16			 `json:"shadowsockport"`
-	ShadowSockPasswd         string          `json:"sspasswd"`
-	ShadowSockMethod         string			 `json:"ssmethod"`
-	HostName                 string          `json:"hostname"`
-	IsCoordinator            bool            `json:"iscoordinator"`
-	Nationality              int32           `json:"nationality"`
+	DownloadPath             string     `json:"downloadpath"`
+	Uploadpath               string     `json:"uploadpath"`
+	TestIPAddressPath        string     `json:"testipaddress"`
+	PostSocks5Path           string     `json:"postsocks5path"`
+	VerifyPath               string     `json:"verifypath"`
+	ConsumePath              string     `json:"consumepath"`
+	ListIpsPath              string     `json:"listipspath"`
+	EmailPath                string     `json:"emailpath"`
+	UpdateClientSoftwarePath string     `json:"updateclientsoftwarepath"`
+	PubkeyPath               string     `json:"pubkeypath"`
+	KeyDir                   string     `json:"keydir"`
+	PidDir                   string     `json:"piddir"`
+	FileDBDir                string     `json:"filedbdir"`
+	HomeIPDBFile             string     `json:"homeipdbfile"`
+	LicenseDBFile            string     `json:"licensedbfile"`
+	FileStoreDB              string     `json:"filestoredb"`
+	FileStoreDir             string     `json:"filestoredir"`
+	RemoteServerIP           string     `json:"remoteserverip"`
+	RemoteServerPort         uint16     `json:"remoteserverport"`
+	HttpListenPort           uint16     `json:"httplistenport"` //50810 tcp/http for file transfer
+	BootstrapIPAddress       []string   `json:"bootstrapipaddress"`
+	ReportServerIPAddress    []string   `json:"reportserveraddress"`
+	ListenTyp                string     `json:"listentyp"`
+	NbsRsaAddr               string     `json:"nbsaddr"`
+	CmdListenIP              string     `json:"cmdlistenip"`
+	CmdListenPort            uint16     `json:"cmdlistenport"` //50811 tcp for cmd
+	DhtListenPort            uint16     `json:"dhtlistenport"` //50811 udp for control message
+	StaticFileDir            string     `json:"staticfiledir"`
+	LoginPath                string     `json:"logindir"`
+	Loginfile                string     `json:"loginfile"`
+	CheckIPPath              string     `json:"checkipdir"`
+	CheckIPFile              string     `json:"checkipfile"`
+	LicenseAdminUser         [][]string `json:"licenseadminuser"`
+	ShadowSockServerSwitch   bool       `json:"shadowsockserverswitch"`
+	ShadowSockPort           uint16     `json:"shadowsockport"`
+	ShadowSockPasswd         string     `json:"sspasswd"`
+	ShadowSockMethod         string     `json:"ssmethod"`
+	HostName                 string     `json:"hostname"`
+	IsCoordinator            bool       `json:"iscoordinator"`
+	Nationality              int32      `json:"nationality"`
 
-	PrivKey                  *rsa.PrivateKey `json:"-"`
-	Root					 *SARootConfig   `json:"-"`
+	PrivKey *rsa.PrivateKey `json:"-"`
+	Root    *SARootConfig   `json:"-"`
 }
 
 type SARootConfig struct {
@@ -141,7 +141,7 @@ func forceInitRootConfig(hdir string) *SARootConfig {
 
 	cfgdir := path.Join(sahome, "config")
 
-	return &SARootConfig{HomeDir: sahome, CfgDir: cfgdir, CfgFileName: "sa.json",needSave:true}
+	return &SARootConfig{HomeDir: sahome, CfgDir: cfgdir, CfgFileName: "sa.json", needSave: true}
 }
 
 func unforceInitRootConfig(hdir string) *SARootConfig {
@@ -185,7 +185,7 @@ func unforceInitRootConfig(hdir string) *SARootConfig {
 	if savedir == "" {
 		return nil
 	}
-	return &SARootConfig{HomeDir: savedir, CfgDir: path.Join(savedir, "config"), CfgFileName: "sa.json",needSave:nds}
+	return &SARootConfig{HomeDir: savedir, CfgDir: path.Join(savedir, "config"), CfgFileName: "sa.json", needSave: nds}
 }
 
 func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
@@ -196,7 +196,7 @@ func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
 		sar = unforceInitRootConfig(hdir)
 	}
 
-	if sar != nil && sar.needSave{
+	if sar != nil && sar.needSave {
 		sar.Save()
 	}
 
@@ -207,7 +207,7 @@ func DefaultInitConfig() *SAConfig {
 	sa := &SAConfig{}
 
 	sa.BootstrapIPAddress = []string{"103.45.98.72:50811", "24.86.164.242:50811"}
-	sa.ReportServerIPAddress = []string{"103.45.98.72:50810","24.86.164.242:50810"}
+	sa.ReportServerIPAddress = []string{"103.45.98.72:50810", "24.86.164.242:50810"}
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadPath = "/download"
 	sa.EmailPath = "/public/key/refresh"
@@ -241,19 +241,19 @@ func DefaultInitConfig() *SAConfig {
 	sa.ShadowSockServerSwitch = false
 	sa.ShadowSockPort = 50812
 
-	sa.ShadowSockPasswd=""
-	sa.ShadowSockMethod=""
-	sa.HostName =""
+	sa.ShadowSockPasswd = ""
+	sa.ShadowSockMethod = ""
+	sa.HostName = ""
 	sa.IsCoordinator = false
-	sa.LicenseAdminUser = [][]string{{"sofaadmin","J1jdNR8vQb"},{"nbsadmin","Dkf44u3Ad8"},}
-	sa.Nationality = 1   //1 American 86 China
+	sa.LicenseAdminUser = [][]string{{"sofaadmin", "J1jdNR8vQb"}, {"nbsadmin", "Dkf44u3Ad8"}}
+	sa.Nationality = 1 //1 American 86 China
 
 	return sa
 }
 
-func (sar *SARootConfig)Save() *SARootConfig  {
+func (sar *SARootConfig) Save() *SARootConfig {
 
-	if sar.HomeDir == ""{
+	if sar.HomeDir == "" {
 		return sar
 	}
 
@@ -262,10 +262,10 @@ func (sar *SARootConfig)Save() *SARootConfig  {
 
 	if brh, err := json.MarshalIndent(rh, "", "\t"); err != nil {
 		log.Fatal("Can't save to .sainit file")
-	}else {
-		if homedir,err1 := tools.Home(); err1 != nil {
+	} else {
+		if homedir, err1 := tools.Home(); err1 != nil {
 			log.Fatal("Can't Get Home Directory")
-		}else{
+		} else {
 			tools.Save2File(brh, path.Join(homedir, ".sainit"))
 		}
 	}
@@ -294,31 +294,28 @@ func (sar *SARootConfig) LoadCfg() *SAConfig {
 	return cfg
 }
 
-
 func (sar *SARootConfig) IsInitialized() bool {
 	cfgname := path.Join(sar.CfgDir, sar.CfgFileName)
 	if !tools.FileExists(cfgname) {
 		return false
 	}
 
-
 	return true
 }
 
 const (
-	InitNone int = 0
-	InitTrue int =1
-	InitFalse int =2
+	InitNone  int = 0
+	InitTrue  int = 1
+	InitFalse int = 2
 )
 
 type ConfigInitParam struct {
-	Force bool
-	IsCoord int
-	Hostname string
-	SS string
+	Force       bool
+	IsCoord     int
+	Hostname    string
+	SS          string
 	Nationality int32
 }
-
 
 func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 	var nds bool
@@ -354,55 +351,54 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 		sar.SacInst = sac
 	}
 
-	if cip.Hostname != ""{
-		if sar.SacInst.HostName != cip.Hostname{
+	if cip.Hostname != "" {
+		if sar.SacInst.HostName != cip.Hostname {
 			sar.SacInst.HostName = cip.Hostname
 			nds = true
 		}
 	}
 
-
-	if cip.IsCoord != InitNone{
-		iscoordb:=false
-		if cip.IsCoord == InitTrue{
+	if cip.IsCoord != InitNone {
+		iscoordb := false
+		if cip.IsCoord == InitTrue {
 			iscoordb = true
 		}
-		if sar.SacInst.IsCoordinator != iscoordb{
+		if sar.SacInst.IsCoordinator != iscoordb {
 			sar.SacInst.IsCoordinator = iscoordb
 			nds = true
 		}
 	}
 
-	if cip.Nationality > 0{
+	if cip.Nationality > 0 {
 		sar.SacInst.Nationality = cip.Nationality
 		nds = true
 	}
 
-	filedbdir :=""
+	filedbdir := ""
 
-	if sar.SacInst.FileDBDir[0] == '/'{
+	if sar.SacInst.FileDBDir[0] == '/' {
 		filedbdir = sar.SacInst.FileDBDir
-	}else{
+	} else {
 		filedbdir = path.Join(sar.HomeDir, sar.SacInst.FileDBDir)
 	}
 
 	filestoredir := ""
-	if sar.SacInst.FileStoreDir[0] == '/'{
+	if sar.SacInst.FileStoreDir[0] == '/' {
 		filestoredir = sar.SacInst.FileStoreDir
-	}else{
+	} else {
 		filestoredir = path.Join(sar.HomeDir, sar.SacInst.FileStoreDir)
 	}
 
 	keydir := path.Join(sar.HomeDir, sar.SacInst.KeyDir)
 
 	piddir := ""
-	if sar.SacInst.PidDir[0] == '/'{
+	if sar.SacInst.PidDir[0] == '/' {
 		piddir = sar.SacInst.PidDir
-	}else{
+	} else {
 		piddir = path.Join(sar.HomeDir, sar.SacInst.PidDir)
 	}
 
-	staticfile:=path.Join(sar.HomeDir,sar.SacInst.StaticFileDir)
+	staticfile := path.Join(sar.HomeDir, sar.SacInst.StaticFileDir)
 
 	if !tools.FileExists(filedbdir) {
 		os.MkdirAll(filedbdir, 0755)
@@ -421,22 +417,20 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 		os.MkdirAll(staticfile, 0755)
 	}
 
-	loginfilename:=path.Join(staticfile,sar.SacInst.Loginfile)
+	loginfilename := path.Join(staticfile, sar.SacInst.Loginfile)
 
-	if !tools.FileExists(loginfilename){
+	if !tools.FileExists(loginfilename) {
 		htmlfile.NewLoginFile(loginfilename)
 	}
 
-	checkipfilename:=path.Join(staticfile,sar.SacInst.CheckIPFile)
-	if !tools.FileExists(checkipfilename){
+	checkipfilename := path.Join(staticfile, sar.SacInst.CheckIPFile)
+	if !tools.FileExists(checkipfilename) {
 		htmlfile.NewCheckIPFile(checkipfilename)
 	}
 
-
 	sar.SacInst.Root = sar
 
-
-	if nds{
+	if nds {
 		sar.SacInst.Save()
 	}
 
@@ -457,28 +451,28 @@ func (sar *SARootConfig) InitRSAKey(force bool) *SARootConfig {
 	return sar
 }
 
-func (sac *SAConfig)GetPidDir() string  {
-	if sac.PidDir[0] == '/'{
+func (sac *SAConfig) GetPidDir() string {
+	if sac.PidDir[0] == '/' {
 		return sac.PidDir
 	}
 
-	return  path.Join(sac.Root.HomeDir,sac.PidDir)
+	return path.Join(sac.Root.HomeDir, sac.PidDir)
 }
 
-func (sac *SAConfig)GetFileDbDir() string  {
-	if sac.FileDBDir[0] == '/'{
+func (sac *SAConfig) GetFileDbDir() string {
+	if sac.FileDBDir[0] == '/' {
 		return sac.FileDBDir
 	}
 
-	return  path.Join(sac.Root.HomeDir,sac.FileDBDir)
+	return path.Join(sac.Root.HomeDir, sac.FileDBDir)
 }
 
-func (sac *SAConfig)GetFileStoreDir() string  {
-	if sac.FileStoreDir[0] == '/'{
+func (sac *SAConfig) GetFileStoreDir() string {
+	if sac.FileStoreDir[0] == '/' {
 		return sac.FileStoreDir
 	}
 
-	return  path.Join(sac.Root.HomeDir,sac.FileStoreDir)
+	return path.Join(sac.Root.HomeDir, sac.FileStoreDir)
 }
 
 func (sac *SAConfig) GenNbsRsaAddr() {
@@ -497,43 +491,43 @@ func (sac *SAConfig) GenNbsRsaAddr() {
 	sac.NbsRsaAddr = "91" + base58.Encode(sum)
 }
 
-func (sac *SAConfig)GetSSPasswd() string {
+func (sac *SAConfig) GetSSPasswd() string {
 
-	if sac.ShadowSockPasswd == ""{
+	if sac.ShadowSockPasswd == "" {
 		return ""
 	}
 
-	if encpasswd,err:=base58.Decode(sac.ShadowSockPasswd);err!=nil{
+	if encpasswd, err := base58.Decode(sac.ShadowSockPasswd); err != nil {
 		return ""
-	}else{
+	} else {
 
-		if data,errd:=nbscrypt.DecryptRsa(encpasswd,sac.PrivKey);errd!=nil{
+		if data, errd := nbscrypt.DecryptRsa(encpasswd, sac.PrivKey); errd != nil {
 			return ""
-		}else{
+		} else {
 			return string(data)
 		}
 	}
 
 }
 
-func (sac *SAConfig)GetSSMethod() string {
-	if sac.ShadowSockMethod == ""{
+func (sac *SAConfig) GetSSMethod() string {
+	if sac.ShadowSockMethod == "" {
 		return ""
 	}
 
-	if encmethod,err:=base58.Decode(sac.ShadowSockMethod);err!=nil{
+	if encmethod, err := base58.Decode(sac.ShadowSockMethod); err != nil {
 		return ""
-	}else{
+	} else {
 
-		if data,errd:=nbscrypt.DecryptRsa(encmethod,sac.PrivKey);errd!=nil{
+		if data, errd := nbscrypt.DecryptRsa(encmethod, sac.PrivKey); errd != nil {
 			return ""
-		}else{
+		} else {
 			return string(data)
 		}
 	}
 }
 
-func (sac *SAConfig)Save()  {
+func (sac *SAConfig) Save() {
 	bjson, err := json.MarshalIndent(*sac, "", "\t")
 	if err != nil {
 		log.Fatal("Json module error")
@@ -542,35 +536,33 @@ func (sac *SAConfig)Save()  {
 	}
 }
 
-func (sar *SARootConfig)SetShadowSockParam(param string)  {
-	parr:=strings.Split(param,":")
+func (sar *SARootConfig) SetShadowSockParam(param string) {
+	parr := strings.Split(param, ":")
 
-	if len(parr)!=2 {
+	if len(parr) != 2 {
 		log.Println("Set shadowsock error, use default parameter")
 		return
 	}
 
-	encpasswd,err:=nbscrypt.EncryptRSA([]byte(parr[0]),&sar.SacInst.PrivKey.PublicKey)
-	if err!=nil{
+	encpasswd, err := nbscrypt.EncryptRSA([]byte(parr[0]), &sar.SacInst.PrivKey.PublicKey)
+	if err != nil {
 		log.Println("Internal error")
 	}
-	passwd:=base58.Encode(encpasswd)
+	passwd := base58.Encode(encpasswd)
 	sar.SacInst.ShadowSockPasswd = passwd
 
-	encmethod,err:=nbscrypt.EncryptRSA([]byte(parr[1]),&sar.SacInst.PrivKey.PublicKey)
-	if err!=nil{
+	encmethod, err := nbscrypt.EncryptRSA([]byte(parr[1]), &sar.SacInst.PrivKey.PublicKey)
+	if err != nil {
 		log.Println("Internal error")
 	}
 
-	method:=base58.Encode(encmethod)
+	method := base58.Encode(encmethod)
 	sar.SacInst.ShadowSockMethod = method
 
 	sar.SacInst.ShadowSockServerSwitch = true
 
 	sar.SacInst.Save()
 }
-
-
 
 func (sar *SARootConfig) LoadRsaKey() {
 
@@ -593,12 +585,12 @@ func (sar *SARootConfig) LoadRsaKey() {
 	}
 }
 
-func CheckUserPassword(username string,password string) bool {
-	sac:=GetSAConfig()
+func CheckUserPassword(username string, password string) bool {
+	sac := GetSAConfig()
 
-	for _,authpair:=range sac.LicenseAdminUser{
-		if len(authpair) == 2{
-			if username == authpair[0] && password == authpair[1]{
+	for _, authpair := range sac.LicenseAdminUser {
+		if len(authpair) == 2 {
+			if username == authpair[0] && password == authpair[1] {
 				return true
 			}
 		}
@@ -606,5 +598,3 @@ func CheckUserPassword(username string,password string) bool {
 
 	return false
 }
-
-

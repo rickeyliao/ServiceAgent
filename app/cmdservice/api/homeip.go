@@ -7,22 +7,21 @@ import (
 )
 
 type CmdHomeShow struct {
-
 }
 
-func (chs *CmdHomeShow)ShowHomeIP(cxt context.Context,hi *pb.HomeIPShowReq) (*pb.DefaultResp, error) {
-	if hi.Nbsaddr == ""{
-		message:=localaddress.CmdShowAddressAll()
-		if message==""{
+func (chs *CmdHomeShow) ShowHomeIP(cxt context.Context, hi *pb.HomeIPShowReq) (*pb.DefaultResp, error) {
+	if hi.Nbsaddr == "" {
+		message := localaddress.CmdShowAddressAll()
+		if message == "" {
 			message = "No home ip"
 		}
-		return encResp(message),nil
-	}else{
-		message:=localaddress.CmdShowAddress(hi.Nbsaddr)
-		if message == ""{
-			return encResp("not found"),nil
-		}else{
-			return encResp(message),nil
+		return encResp(message), nil
+	} else {
+		message := localaddress.CmdShowAddress(hi.Nbsaddr)
+		if message == "" {
+			return encResp("not found"), nil
+		} else {
+			return encResp(message), nil
 		}
 	}
 }

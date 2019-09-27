@@ -1,52 +1,51 @@
 package dht
 
 import (
+	"github.com/btcsuite/btcutil/base58"
+	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/dht/dhtdb"
 	"math/big"
 	"net"
-	"github.com/btcsuite/btcutil/base58"
 	"sync"
-	"github.com/rickeyliao/ServiceAgent/dht/dhtdb"
-	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 type ddesc struct {
 	key string
-	ip string
+	ip  string
 }
 
-type dqchan struct{
-	key chan *ddesc
+type dqchan struct {
+	key  chan *ddesc
 	quit chan int
 }
 
 type downloadqueue struct {
 	q []*dqchan
-
 }
 
 type DownloadQueue interface {
-	EnQueue(key []byte,ip net.IP)
+	EnQueue(key []byte, ip net.IP)
 	DeQueue(i int) *ddesc
 	Run()
 	Stop()
 }
 
-const(
-	DownloadQueueCnt int = 8
+const (
+	DownloadQueueCnt    int = 8
 	DonwloadQueueLength int = 1024
 )
 
 var (
-	dqinst *downloadqueue
+	dqinst     *downloadqueue
 	dqinstlock sync.Mutex
-	dqwg *sync.WaitGroup
+	dqwg       *sync.WaitGroup
 )
 
 func GetDownloadQueue() DownloadQueue {
-	if dqinst == nil{
+	if dqinst == nil {
 		dqinstlock.Lock()
 		defer dqinstlock.Unlock()
-		if dqinst== nil{
+		if dqinst == nil {
 			dqinst = newDownloadQueue()
 		}
 	}
@@ -56,10 +55,10 @@ func GetDownloadQueue() DownloadQueue {
 }
 
 func newDownloadQueue() *downloadqueue {
-	dqueue:=&downloadqueue{make([]*dqchan,DownloadQueueCnt)}
+	dqueue := &downloadqueue{make([]*dqchan, DownloadQueueCnt)}
 
-	for i:=0;i<len(dqueue.q);i++{
-		dc:=&dqchan{key:make(chan *ddesc,DonwloadQueueLength),quit:make(chan int,1)}
+	for i := 0; i < len(dqueue.q); i++ {
+		dc := &dqchan{key: make(chan *ddesc, DonwloadQueueLength), quit: make(chan int, 1)}
 		dqueue.q[i] = dc
 	}
 
@@ -68,13 +67,13 @@ func newDownloadQueue() *downloadqueue {
 	return dqueue
 }
 
-func (dqueue *downloadqueue)EnQueue(key []byte,ip net.IP)  {
-	bgi:=&big.Int{}
+func (dqueue *downloadqueue) EnQueue(key []byte, ip net.IP) {
+	bgi := &big.Int{}
 	bgi.SetBytes(key)
-	i:=bgi.BitLen() & (0x07)
+	i := bgi.BitLen() & (0x07)
 
-	desc:=&ddesc{"c1"+base58.Encode(key),ip.String()}
-	q:=dqueue.q[i]
+	desc := &ddesc{"c1" + base58.Encode(key), ip.String()}
+	q := dqueue.q[i]
 
 	select {
 	case q.key <- desc:
@@ -82,26 +81,25 @@ func (dqueue *downloadqueue)EnQueue(key []byte,ip net.IP)  {
 	}
 }
 
-func (dqueue *downloadqueue)DeQueue(i int) *ddesc  {
-	if i<0  || i>=DownloadQueueCnt{
+func (dqueue *downloadqueue) DeQueue(i int) *ddesc {
+	if i < 0 || i >= DownloadQueueCnt {
 		return nil
 	}
 
-	q:=dqueue.q[i]
+	q := dqueue.q[i]
 
-	select{
-		case key:=<-q.key:
-			return key
-		case <-q.quit:
-			return nil
+	select {
+	case key := <-q.key:
+		return key
+	case <-q.quit:
+		return nil
 	}
 
 	return nil
 }
 
-
-func (dqueue *downloadqueue)Run()  {
-	for i:=0;i<	DownloadQueueCnt;i++{
+func (dqueue *downloadqueue) Run() {
+	for i := 0; i < DownloadQueueCnt; i++ {
 		dqwg.Add(1)
 
 		go dqueue.doDownloadFile(i)
@@ -110,34 +108,29 @@ func (dqueue *downloadqueue)Run()  {
 
 }
 
-func (dqueue *downloadqueue)doDownloadFile(i int)  {
+func (dqueue *downloadqueue) doDownloadFile(i int) {
 	defer dqwg.Done()
 
-	for{
-		d:=dqueue.DeQueue(i)
+	for {
+		d := dqueue.DeQueue(i)
 
-		if d == nil{
+		if d == nil {
 			return
 		}
-		if !dhtdb.GetFileExistFlag(d.key){
-			if err:=common.DownloadFile(d.ip,"",d.key);err==nil{
-				dhtdb.Update(d.key,false,false,nil,true)
+		if !dhtdb.GetFileExistFlag(d.key) {
+			if err := common.DownloadFile(d.ip, "", d.key); err == nil {
+				dhtdb.Update(d.key, false, false, nil, true)
 			}
 		}
 
 	}
 }
 
-
-func (dqueue *downloadqueue)Stop(){
-	for i:=0;i<DownloadQueueCnt; i++{
-		q:=dqueue.q[i]
+func (dqueue *downloadqueue) Stop() {
+	for i := 0; i < DownloadQueueCnt; i++ {
+		q := dqueue.q[i]
 		q.quit <- 1
 	}
 
 	dqwg.Wait()
 }
-
-
-
-

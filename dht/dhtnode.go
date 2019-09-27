@@ -1,9 +1,8 @@
 package dht
 
 import (
-	"math/big"
 	"github.com/kprc/nbsnetwork/tools"
-
+	"math/big"
 )
 
 type DhtNode struct {
@@ -11,36 +10,36 @@ type DhtNode struct {
 	TimeStamp int64
 }
 
-func (dn *DhtNode)Clone() *DhtNode  {
-	tdn:=&DhtNode{}
+func (dn *DhtNode) Clone() *DhtNode {
+	tdn := &DhtNode{}
 
 	tdn.TimeStamp = dn.TimeStamp
 
-	tdn.NbsAddr = make([]byte,len(dn.NbsAddr))
-	copy(tdn.NbsAddr,dn.NbsAddr)
+	tdn.NbsAddr = make([]byte, len(dn.NbsAddr))
+	copy(tdn.NbsAddr, dn.NbsAddr)
 	tdn.Port = dn.Port
-	tdn.Ipv4Addr = make([]byte,len(dn.Ipv4Addr))
-	copy(tdn.Ipv4Addr,dn.Ipv4Addr)
+	tdn.Ipv4Addr = make([]byte, len(dn.Ipv4Addr))
+	copy(tdn.Ipv4Addr, dn.Ipv4Addr)
 
 	return tdn
 }
 
-func (dn *DhtNode)GetBigInt() *big.Int  {
-	bgi:=&big.Int{}
+func (dn *DhtNode) GetBigInt() *big.Int {
+	bgi := &big.Int{}
 
 	return bgi.SetBytes(dn.NbsAddr)
 }
 
-func (dn *DhtNode)GetLastAccessTime() int64  {
+func (dn *DhtNode) GetLastAccessTime() int64 {
 	return dn.TimeStamp
 }
 
-func (dn *DhtNode)SetTimeStamp(ts int64)  {
+func (dn *DhtNode) SetTimeStamp(ts int64) {
 	dn.TimeStamp = ts
 }
 
-func NewDhtNodeTimeStamp(nbsaddr,ipaddr []byte,timestamp int64) *DhtNode {
-	dn:=&DhtNode{}
+func NewDhtNodeTimeStamp(nbsaddr, ipaddr []byte, timestamp int64) *DhtNode {
+	dn := &DhtNode{}
 
 	dn.NbsAddr = nbsaddr
 	dn.Ipv4Addr = ipaddr
@@ -50,8 +49,8 @@ func NewDhtNodeTimeStamp(nbsaddr,ipaddr []byte,timestamp int64) *DhtNode {
 	return dn
 }
 
-func NewDhtNode(nbsaddr,ipaddr []byte) *DhtNode  {
-	dn:=&DhtNode{}
+func NewDhtNode(nbsaddr, ipaddr []byte) *DhtNode {
+	dn := &DhtNode{}
 
 	dn.NbsAddr = nbsaddr
 	dn.Ipv4Addr = ipaddr

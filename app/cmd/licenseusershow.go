@@ -15,15 +15,15 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
 )
 
 // licenseuserCmd represents the licenseuser command
 var licenseuserCmd = &cobra.Command{
 	Use:   "licenseuser",
 	Short: "show license user info",
-	Long: `show license user info`,
+	Long:  `show license user info`,
 	Run: func(cmd *cobra.Command, args []string) {
 		DefaultCmdSend(app.CMD_LICENSE_USER_SHOW_REQ)
 	},

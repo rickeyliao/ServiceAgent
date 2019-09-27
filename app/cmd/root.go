@@ -26,7 +26,6 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "nbssa",
@@ -42,7 +41,7 @@ var rootCmd = &cobra.Command{
 		cfg := common.GetSAConfig()
 
 		go service.Run(cfg)
-		if cfg.ShadowSockServerSwitch{
+		if cfg.ShadowSockServerSwitch {
 			go shadowsock.StartSS2Server()
 		}
 

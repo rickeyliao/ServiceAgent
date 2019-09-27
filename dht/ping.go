@@ -5,9 +5,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 	"log"
-	)
+)
 
-func (node *NbsNode)encPingData() (uint64, []byte) {
+func (node *NbsNode) encPingData() (uint64, []byte) {
 	req := &pbdht.Dhtmessage{}
 
 	req.Sn = GetNextMsgCnt()
@@ -25,7 +25,7 @@ func (node *NbsNode)encPingData() (uint64, []byte) {
 	}
 }
 
-func (node *NbsNode)updateByPingResp(buf []byte, reqsn uint64) error {
+func (node *NbsNode) updateByPingResp(buf []byte, reqsn uint64) error {
 
 	resp := &pbdht.Dhtmessage{}
 
@@ -39,12 +39,12 @@ func (node *NbsNode)updateByPingResp(buf []byte, reqsn uint64) error {
 
 	if !node.AddrCmp(resp.Localnbsaddr) {
 
-		GetRouteTableInst().Del(NewDhtNode(node.NbsAddr,node.Ipv4Addr))
-		GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
+		GetRouteTableInst().Del(NewDhtNode(node.NbsAddr, node.Ipv4Addr))
+		GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr, node.Ipv4Addr))
 
 		return errors.New("Address not corrected!")
-	}else {
-		GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
+	} else {
+		GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr, node.Ipv4Addr))
 	}
 
 	return nil

@@ -3,15 +3,12 @@ package dht
 import (
 	"github.com/rickeyliao/ServiceAgent/dht/pb"
 
+	"errors"
 	"github.com/golang/protobuf/proto"
 	"log"
-	"errors"
-
 )
 
-
-
-func  (node *NbsNode)encStore(key []byte,share bool,value ...[]byte) (uint64, []byte) {
+func (node *NbsNode) encStore(key []byte, share bool, value ...[]byte) (uint64, []byte) {
 	req := &pbdht.Dhtmessage{}
 
 	req.Sn = GetNextMsgCnt()
@@ -26,10 +23,10 @@ func  (node *NbsNode)encStore(key []byte,share bool,value ...[]byte) (uint64, []
 	storevalue.Share = share
 	storevalue.Value = value
 
-	if v,err:=proto.Marshal(storevalue);err!=nil{
+	if v, err := proto.Marshal(storevalue); err != nil {
 		log.Println("Marshall store value failed")
-		return 0,nil
-	}else{
+		return 0, nil
+	} else {
 		req.Data = v
 	}
 
@@ -41,7 +38,7 @@ func  (node *NbsNode)encStore(key []byte,share bool,value ...[]byte) (uint64, []
 	}
 }
 
-func (node *NbsNode)updateByStore(key []byte,buf []byte, reqsn uint64) (error) {
+func (node *NbsNode) updateByStore(key []byte, buf []byte, reqsn uint64) error {
 
 	resp := &pbdht.Dhtmessage{}
 
@@ -55,14 +52,13 @@ func (node *NbsNode)updateByStore(key []byte,buf []byte, reqsn uint64) (error) {
 
 	if !node.AddrCmp(resp.Localnbsaddr) {
 
-		GetRouteTableInst().Del(NewDhtNode(node.NbsAddr,node.Ipv4Addr))
-		GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
+		GetRouteTableInst().Del(NewDhtNode(node.NbsAddr, node.Ipv4Addr))
+		GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr, node.Ipv4Addr))
 
 		return errors.New("Address not corrected!")
 	}
 
-	GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr,node.Ipv4Addr))
+	GetRouteTableInst().UpdateOrder(NewDhtNode(resp.Localnbsaddr, node.Ipv4Addr))
 
 	return nil
 }
-

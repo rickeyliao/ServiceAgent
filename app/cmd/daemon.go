@@ -18,11 +18,11 @@ import (
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/rickeyliao/ServiceAgent/service"
+	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 	"github.com/sevlyar/go-daemon"
 	"github.com/spf13/cobra"
 	"log"
 	"path"
-	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
 //var (
@@ -65,7 +65,7 @@ var daemonCmd = &cobra.Command{
 
 		go service.Run(cfg)
 
-		if cfg.ShadowSockServerSwitch{
+		if cfg.ShadowSockServerSwitch {
 			go shadowsock.StartSS2Server()
 		}
 

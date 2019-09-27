@@ -33,18 +33,18 @@ var initCmd = &cobra.Command{
 	Short: "init nbssa start environment",
 	Long:  `init nbssa start environment`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if nationality == 0{
+		if nationality == 0 {
 			log.Println("Please Set Nationality, 1 American, 86 China Main Land")
 			return
 		}
 
 		sar := common.GetSARootCfgHdir(sahome, force)
-		cmbool:=common.InitFalse
-		if iscoord{
-			cmbool=common.InitTrue
+		cmbool := common.InitFalse
+		if iscoord {
+			cmbool = common.InitTrue
 		}
 
-		cip:=&common.ConfigInitParam{}
+		cip := &common.ConfigInitParam{}
 		cip.Force = force
 		cip.IsCoord = cmbool
 		cip.Hostname = machinename
@@ -57,8 +57,8 @@ var initCmd = &cobra.Command{
 
 		if shadowsockParam != "" {
 			sar.SetShadowSockParam(shadowsockParam)
-		}else{
-			if sar.SacInst.ShadowSockServerSwitch{
+		} else {
+			if sar.SacInst.ShadowSockServerSwitch {
 				sar.SacInst.ShadowSockServerSwitch = false
 				sar.SacInst.Save()
 			}
@@ -73,8 +73,8 @@ func init() {
 
 	initCmd.Flags().StringVarP(&sahome, "homedir", "d", "", "home directory (default is $HOME/.sa/)")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "force init a default configuration ( default false)")
-	initCmd.Flags().StringVarP(&shadowsockParam,"ss","s","","configuration shadowsock passwd and method")
-	initCmd.Flags().BoolVarP(&iscoord,"coordinator","c",false,"current machine is a coordinator")
-	initCmd.Flags().StringVarP(&machinename,"machinename","m","","set machine name")
-	initCmd.Flags().Int32VarP(&nationality,"nationality","n",0,"set nationality")
+	initCmd.Flags().StringVarP(&shadowsockParam, "ss", "s", "", "configuration shadowsock passwd and method")
+	initCmd.Flags().BoolVarP(&iscoord, "coordinator", "c", false, "current machine is a coordinator")
+	initCmd.Flags().StringVarP(&machinename, "machinename", "m", "", "set machine name")
+	initCmd.Flags().Int32VarP(&nationality, "nationality", "n", 0, "set nationality")
 }

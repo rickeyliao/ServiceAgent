@@ -32,7 +32,7 @@ to quickly create a Cobra application.`,
 		if !CheckProcessReady() {
 			return
 		}
-		LicenseCmdSend(2,"")
+		LicenseCmdSend(2, "")
 	},
 }
 

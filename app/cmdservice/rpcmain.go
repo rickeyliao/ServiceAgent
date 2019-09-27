@@ -6,11 +6,11 @@ import (
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/rickeyliao/ServiceAgent/service"
+	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
-	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
 var grpcServer *grpc.Server
@@ -28,12 +28,12 @@ func StartCmdService() {
 	pb.RegisterConfigchangeServer(grpcServer, &api.CmdConfigServer{})
 	pb.RegisterRemotechangeServer(grpcServer, &api.RemoteConfig{})
 	pb.RegisterBootstrapCHGServer(grpcServer, &api.CmdBootstrapServer{})
-	pb.RegisterLicenseUserChgServer(grpcServer,&api.CmdLicenseUserServer{})
-	pb.RegisterHomeIPShowSrvServer(grpcServer,&api.CmdHomeShow{})
-	pb.RegisterLicenseSrvServer(grpcServer,&api.CmdOpLicenseSrv{})
-	pb.RegisterFileuploadsrvServer(grpcServer,&api.CmdFileUpLoad{})
-	pb.RegisterFileudownloadsrvServer(grpcServer,&api.CmdFileDownload{})
-	pb.RegisterSSServerServiceServer(grpcServer,&api.CmdSSServer{})
+	pb.RegisterLicenseUserChgServer(grpcServer, &api.CmdLicenseUserServer{})
+	pb.RegisterHomeIPShowSrvServer(grpcServer, &api.CmdHomeShow{})
+	pb.RegisterLicenseSrvServer(grpcServer, &api.CmdOpLicenseSrv{})
+	pb.RegisterFileuploadsrvServer(grpcServer, &api.CmdFileUpLoad{})
+	pb.RegisterFileudownloadsrvServer(grpcServer, &api.CmdFileDownload{})
+	pb.RegisterSSServerServiceServer(grpcServer, &api.CmdSSServer{})
 	reflection.Register(grpcServer)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)

@@ -1,15 +1,15 @@
 package shadowsock
 
 import (
+	"github.com/pkg/errors"
+	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/shadowsocks/go-shadowsocks2/core"
 	"log"
+	"net"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
-	"github.com/pkg/errors"
-	"strconv"
-	"net"
-	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 var config struct {
@@ -18,10 +18,9 @@ var config struct {
 }
 
 var (
-	SSTCPListener *net.Listener
+	SSTCPListener   *net.Listener
 	SSUDPPacketConn *net.PacketConn
 )
-
 
 //var logger = log.New(os.Stderr, "", log.Lshortfile|log.LstdFlags)
 
@@ -31,28 +30,28 @@ func logf(f string, v ...interface{}) {
 	}
 }
 
-func ss2server(port int,passwd,method string) error {
+func ss2server(port int, passwd, method string) error {
 
-	if passwd == ""{
+	if passwd == "" {
 		return errors.New("Please Set Passwd")
 	}
 
 	var flags struct {
-		Server    string
-		Cipher    string
-		Password  string
+		Server   string
+		Cipher   string
+		Password string
 	}
 
 	flags.Cipher = "AES-256-CFB"
-	if method != ""{
+	if method != "" {
 		flags.Cipher = strings.ToUpper(method)
 	}
 
 	flags.Password = passwd
 
-	if port >1024{
-		flags.Server = ":"+strconv.Itoa(port)
-	}else{
+	if port > 1024 {
+		flags.Server = ":" + strconv.Itoa(port)
+	} else {
 		flags.Server = ":50812"
 	}
 
@@ -64,15 +63,12 @@ func ss2server(port int,passwd,method string) error {
 	cipher := flags.Cipher
 	password := flags.Password
 
-
-
 	ciph, err := core.PickCipher(cipher, key, password)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	go udpRemote(addr, ciph.PacketConn)
-
 
 	tcpRemote(addr, ciph.StreamConn)
 
@@ -95,18 +91,18 @@ func parseURL(s string) (addr, cipher, password string, err error) {
 }
 
 func StartSS2Server() {
-	sa:=common.GetSAConfig()
-	ss2server(int(sa.ShadowSockPort),sa.GetSSPasswd(),sa.GetSSMethod())
+	sa := common.GetSAConfig()
+	ss2server(int(sa.ShadowSockPort), sa.GetSSPasswd(), sa.GetSSMethod())
 }
 
 func StopSS2Server() {
-	if SSTCPListener != nil{
-		lis:=*SSTCPListener
+	if SSTCPListener != nil {
+		lis := *SSTCPListener
 		lis.Close()
 	}
 
-	if SSUDPPacketConn != nil{
-		sup:=*SSUDPPacketConn
+	if SSUDPPacketConn != nil {
+		sup := *SSUDPPacketConn
 		sup.Close()
 	}
 }

@@ -24,7 +24,7 @@ import (
 var ssserverlocalCmd = &cobra.Command{
 	Use:   "local",
 	Short: "Show SS Server List From Node Report",
-	Long: "Show SS Server List From Node Report",
+	Long:  "Show SS Server List From Node Report",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("local called")
 	},

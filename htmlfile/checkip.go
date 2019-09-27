@@ -5,10 +5,9 @@ import (
 	"log"
 )
 
-func NewCheckIPFile(filename string)  {
+func NewCheckIPFile(filename string) {
 
-
-	checkiphtml:=`<html>
+	checkiphtml := `<html>
 <head>
 <title>check a ip address is a world wide address</title>
 </head>
@@ -21,7 +20,7 @@ func NewCheckIPFile(filename string)  {
 </body>
 </html>`
 
-	if err:=tools.Save2File([]byte(checkiphtml),filename);err!=nil{
+	if err := tools.Save2File([]byte(checkiphtml), filename); err != nil {
 		log.Fatal("can't generator a checkip html")
 	}
 

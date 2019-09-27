@@ -3,8 +3,8 @@ package dht
 import (
 	"github.com/mr-tron/base58"
 	"github.com/rickeyliao/ServiceAgent/common"
-	"sync"
 	"math/big"
+	"sync"
 )
 
 type LocalNode struct {
@@ -22,7 +22,7 @@ func GetLocalNode() *LocalNode {
 		localNode_lock.Lock()
 		defer localNode_lock.Unlock()
 
-		if localNode == nil{
+		if localNode == nil {
 			localNode = newLocalNode()
 		}
 	}
@@ -44,7 +44,7 @@ func newLocalNode() *LocalNode {
 		node.NbsAddr = addr
 		node.Port = NbsAddr2Port(node.NbsAddr)
 	}
-	bgi:=&big.Int{}
+	bgi := &big.Int{}
 	node.Bgint = bgi.SetBytes(node.NbsAddr)
 
 	return node

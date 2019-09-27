@@ -24,7 +24,7 @@ import (
 var luaddCmd = &cobra.Command{
 	Use:   "add",
 	Short: "add a license user",
-	Long: `add a license user`,
+	Long:  `add a license user`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return

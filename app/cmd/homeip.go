@@ -22,14 +22,14 @@ import (
 var homeipCmd = &cobra.Command{
 	Use:   "homeip",
 	Short: "show home ip",
-	Long: `show home ip`,
+	Long:  `show home ip`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return
 		}
-		nbsaddr:=""
-		if len(args) > 0{
-			nbsaddr=args[0]
+		nbsaddr := ""
+		if len(args) > 0 {
+			nbsaddr = args[0]
 		}
 		HomeIPShowCmdSend(nbsaddr)
 	},

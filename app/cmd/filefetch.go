@@ -24,7 +24,7 @@ import (
 var filefetchCmd = &cobra.Command{
 	Use:   "fetch",
 	Short: "fetch a share file",
-	Long: `fetch a share file`,
+	Long:  `fetch a share file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("fetch called")
 	},

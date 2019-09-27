@@ -2,10 +2,10 @@ package file
 
 import (
 	"fmt"
+	"github.com/rickeyliao/ServiceAgent/common"
 	"io"
 	"net/http"
 	"os"
-	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 const (
@@ -44,4 +44,3 @@ func (fu *fileupload) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 	fmt.Println("save file", h.Filename, "success")
 }
-

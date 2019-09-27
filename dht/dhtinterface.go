@@ -4,10 +4,9 @@ import (
 	"github.com/kprc/nbsnetwork/common/list"
 )
 
-
 type DhtValue struct {
 	HaveData bool
-	data []byte
+	data     []byte
 }
 
 type DhtInter interface {

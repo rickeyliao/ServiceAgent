@@ -24,7 +24,7 @@ import (
 var ssservershowCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show SS Server List",
-	Long: "Show SS Server List",
+	Long:  "Show SS Server List",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("show called")
 	},

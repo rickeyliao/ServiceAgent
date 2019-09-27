@@ -24,7 +24,7 @@ import (
 var ssserverupdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update Local SS Server to Broadcast Server",
-	Long: "Update Local SS Server to Broadcast Server",
+	Long:  "Update Local SS Server to Broadcast Server",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("update called")
 	},

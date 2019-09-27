@@ -2,18 +2,17 @@ package api
 
 import (
 	"context"
-	pb "github.com/rickeyliao/ServiceAgent/app/pb"
-	"github.com/rickeyliao/ServiceAgent/app"
-	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 	"fmt"
+	"github.com/rickeyliao/ServiceAgent/app"
+	pb "github.com/rickeyliao/ServiceAgent/app/pb"
+	"github.com/rickeyliao/ServiceAgent/service/localaddress"
 	"strconv"
 )
 
 type CmdSSServer struct {
-
 }
 
-func (css *CmdSSServer)SSServerDo(ctx context.Context,req *pb.SSServerReq) (*pb.DefaultResp, error)  {
+func (css *CmdSSServer) SSServerDo(ctx context.Context, req *pb.SSServerReq) (*pb.DefaultResp, error) {
 	switch req.Op {
 	case app.CMD_SSSERVER_SHOW:
 		return css.show(req)
@@ -21,19 +20,19 @@ func (css *CmdSSServer)SSServerDo(ctx context.Context,req *pb.SSServerReq) (*pb.
 		return css.update(req)
 	}
 
-	return encResp("Command Not found"),nil
+	return encResp("Command Not found"), nil
 }
 
-func (css *CmdSSServer)show(req *pb.SSServerReq) (*pb.DefaultResp, error) {
-	remotessl:=localaddress.GetServerList()
+func (css *CmdSSServer) show(req *pb.SSServerReq) (*pb.DefaultResp, error) {
+	remotessl := localaddress.GetServerList()
 
-	if len(remotessl) == 0{
-		return encResp("No Server List"),nil
+	if len(remotessl) == 0 {
+		return encResp("No Server List"), nil
 	}
 
-	message:=""
+	message := ""
 
-	for _,ssl:=range remotessl{
+	for _, ssl := range remotessl {
 		if ssl.DeleteFlag {
 			continue
 		}
@@ -43,32 +42,32 @@ func (css *CmdSSServer)show(req *pb.SSServerReq) (*pb.DefaultResp, error) {
 			continue
 		}
 
-		if len(message) >0{
+		if len(message) > 0 {
 			message += "\r\n"
 		}
-		message += fmt.Sprintf("%-45s",ssl.NodeId)
-		message += fmt.Sprintf("%-16s",ssl.Name)
-		message += fmt.Sprintf("%-18s",ssl.IPAddress)
-		message += fmt.Sprintf("%-8s",strconv.Itoa(ssl.SSPort))
-		message += fmt.Sprintf("%-16s",ssl.SSPassword)
-		message += fmt.Sprintf("%-8s",getNodeStatus(ssl.Status))
-		message += fmt.Sprintf("%-18s",ssl.Location)
-		message += fmt.Sprintf("%-6s",getNodeNationality(ssl.Abroad))
-		message += fmt.Sprintf("%-20s",ssl.LastModify.Format("2006-01-02 15:04:05"))
+		message += fmt.Sprintf("%-45s", ssl.NodeId)
+		message += fmt.Sprintf("%-16s", ssl.Name)
+		message += fmt.Sprintf("%-18s", ssl.IPAddress)
+		message += fmt.Sprintf("%-8s", strconv.Itoa(ssl.SSPort))
+		message += fmt.Sprintf("%-16s", ssl.SSPassword)
+		message += fmt.Sprintf("%-8s", getNodeStatus(ssl.Status))
+		message += fmt.Sprintf("%-18s", ssl.Location)
+		message += fmt.Sprintf("%-6s", getNodeNationality(ssl.Abroad))
+		message += fmt.Sprintf("%-20s", ssl.LastModify.Format("2006-01-02 15:04:05"))
 	}
-	if message == ""{
+	if message == "" {
 		message = "No Server List"
 	}
 
-	return encResp(message),nil
+	return encResp(message), nil
 }
 
 func getNodeNationality(abroad int) string {
-	if abroad == 0{
+	if abroad == 0 {
 		return "ML"
 	}
 
-	if abroad == 1{
+	if abroad == 1 {
 		return "A"
 	}
 
@@ -76,17 +75,17 @@ func getNodeNationality(abroad int) string {
 }
 
 func getNodeStatus(status int) string {
-	if status == 0{
+	if status == 0 {
 		return "idle   "
 	}
 
-	if status == 1{
+	if status == 1 {
 		return "working"
 	}
 
 	return "unknow"
 }
 
-func (css *CmdSSServer)update(req *pb.SSServerReq)(*pb.DefaultResp, error) {
-	return encResp(""),nil
+func (css *CmdSSServer) update(req *pb.SSServerReq) (*pb.DefaultResp, error) {
+	return encResp(""), nil
 }

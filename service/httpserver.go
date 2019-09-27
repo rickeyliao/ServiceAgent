@@ -7,24 +7,24 @@ import (
 	"github.com/rickeyliao/ServiceAgent/agent/listallip"
 	"github.com/rickeyliao/ServiceAgent/agent/software"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/service/checkip"
 	"github.com/rickeyliao/ServiceAgent/service/file"
+	"github.com/rickeyliao/ServiceAgent/service/license"
 	"github.com/rickeyliao/ServiceAgent/service/localaddress"
+	"github.com/rickeyliao/ServiceAgent/service/login"
 	"github.com/rickeyliao/ServiceAgent/service/postsocks5"
+	"github.com/rickeyliao/ServiceAgent/service/pubkey"
 	"log"
 	"net/http"
 	"strconv"
-	"time"
-	"github.com/rickeyliao/ServiceAgent/service/login"
 	"sync"
-	"github.com/rickeyliao/ServiceAgent/service/license"
-	"github.com/rickeyliao/ServiceAgent/service/checkip"
-	"github.com/rickeyliao/ServiceAgent/service/pubkey"
+	"time"
 )
 
 var (
 	httpserver *http.Server
-	quit chan int
-	wg sync.WaitGroup
+	quit       chan int
+	wg         sync.WaitGroup
 )
 
 func Run(cfg *common.SAConfig) {
@@ -51,9 +51,9 @@ func Run(cfg *common.SAConfig) {
 	mux.Handle(cfg.PostSocks5Path, postsocks5.NewPostSocks5())
 	mux.Handle(cfg.Uploadpath, file.NewFileUpLoad())
 	mux.Handle(cfg.DownloadPath, file.NewFileDownLoad())
-	mux.Handle(cfg.LoginPath,login.NewLoginInfo())
-	mux.Handle(cfg.CheckIPPath,checkip.NewCheckPrivateIP())
-	mux.Handle(cfg.PubkeyPath,pubkey.NewHttpPubKey())
+	mux.Handle(cfg.LoginPath, login.NewLoginInfo())
+	mux.Handle(cfg.CheckIPPath, checkip.NewCheckPrivateIP())
+	mux.Handle(cfg.PubkeyPath, pubkey.NewHttpPubKey())
 
 	listenportstr := ":" + strconv.Itoa(int(cfg.HttpListenPort))
 
@@ -62,12 +62,12 @@ func Run(cfg *common.SAConfig) {
 	log.Println("LocalNbsAddress:", cfg.NbsRsaAddr)
 
 	if !cfg.IsCoordinator {
-		quit = make(chan int,0)
+		quit = make(chan int, 0)
 		wg.Add(1)
 		go reportAddress()
 	}
 
-	if cfg.IsCoordinator{
+	if cfg.IsCoordinator {
 		go localaddress.IntervalSave()
 	}
 
@@ -79,12 +79,12 @@ func Run(cfg *common.SAConfig) {
 }
 
 func Stop() {
-	if !common.GetSAConfig().IsCoordinator{
-		quit<-1
+	if !common.GetSAConfig().IsCoordinator {
+		quit <- 1
 		wg.Wait()
 	}
 
-	if common.GetSAConfig().IsCoordinator{
+	if common.GetSAConfig().IsCoordinator {
 		localaddress.Destroy()
 	}
 
@@ -94,28 +94,24 @@ func Stop() {
 	httpserver.Shutdown(ctx)
 }
 
+func report(address string) {
+	tp := http.Transport{DisableKeepAlives: true}
+	c := &http.Client{Transport: &tp}
 
-
-
-func report(address string)  {
-	tp:=http.Transport{DisableKeepAlives:true}
-	c:=&http.Client{Transport:&tp}
-
-	if req,err:=http.NewRequest("GET","http://"+address+"/localipaddress",nil);err!=nil{
+	if req, err := http.NewRequest("GET", "http://"+address+"/localipaddress", nil); err != nil {
 		return
-	}else{
+	} else {
 
-		req.Header.Add("nbsaddress",common.GetSAConfig().NbsRsaAddr)
-		ips:=common.GetAllLocalIpAddr()
-		req.Header.Add("nataddrs",localaddress.LocalIPArr2string(ips))
-		req.Header.Add("hostname",localaddress.GetMachineName())
-		req.Header.Add("nationality",strconv.Itoa(int(common.GetSAConfig().Nationality)))
+		req.Header.Add("nbsaddress", common.GetSAConfig().NbsRsaAddr)
+		ips := common.GetAllLocalIpAddr()
+		req.Header.Add("nataddrs", localaddress.LocalIPArr2string(ips))
+		req.Header.Add("hostname", localaddress.GetMachineName())
+		req.Header.Add("nationality", strconv.Itoa(int(common.GetSAConfig().Nationality)))
 
-
-		if resp,errresp:=c.Do(req);errresp != nil{
+		if resp, errresp := c.Do(req); errresp != nil {
 			log.Println(errresp)
 			return
-		}else {
+		} else {
 			resp.Body.Close()
 			//log.Println(resp)
 		}
@@ -123,30 +119,28 @@ func report(address string)  {
 	}
 }
 
-func updatemapaddr(addr string,mapaddr map[string]string)  {
-	if addr == ""{
+func updatemapaddr(addr string, mapaddr map[string]string) {
+	if addr == "" {
 		return
 	}
 
-
-
 }
 
-func reportAddress()  {
+func reportAddress() {
 	var count int64
 
-	mapaddr:=make(map[string]string)
+	mapaddr := make(map[string]string)
 
 	for {
 		count++
-		if count %300 == 0{
-			for _,addr:=range common.GetSAConfig().ReportServerIPAddress{
-				updatemapaddr(addr,mapaddr)
+		if count%300 == 0 {
+			for _, addr := range common.GetSAConfig().ReportServerIPAddress {
+				updatemapaddr(addr, mapaddr)
 				report(addr)
-				time.Sleep(time.Second*1)
+				time.Sleep(time.Second * 1)
 			}
 		}
-		time.Sleep(time.Second*1)
+		time.Sleep(time.Second * 1)
 		select {
 		case <-quit:
 			wg.Done()

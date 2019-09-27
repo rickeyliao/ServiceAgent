@@ -6,14 +6,9 @@ import (
 	"log"
 )
 
+func NewLoginFile(filename string) {
 
-
-
-
-func NewLoginFile(filename string)  {
-
-
-	loginhtml:=`<html>
+	loginhtml := `<html>
 <head>
 <title></title>
 </head>
@@ -31,7 +26,7 @@ func NewLoginFile(filename string)  {
 </body>
 </html>`
 
-	if err:=tools.Save2File([]byte(loginhtml),filename);err!=nil{
+	if err := tools.Save2File([]byte(loginhtml), filename); err != nil {
 		log.Fatal("can't generator a login html")
 	}
 

@@ -15,15 +15,15 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
 )
 
 // saveCmd represents the save command
 var homeipsaveCmd = &cobra.Command{
 	Use:   "save",
 	Short: "Save home ip address table",
-	Long: `Save home ip address table`,
+	Long:  `Save home ip address table`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return

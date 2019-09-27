@@ -24,7 +24,7 @@ import (
 var fileshareCmd = &cobra.Command{
 	Use:   "share",
 	Short: "share a file",
-	Long: `share a file`,
+	Long:  `share a file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("share called")
 	},

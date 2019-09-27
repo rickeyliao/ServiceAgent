@@ -15,8 +15,8 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/spf13/cobra"
 	"log"
 )
 
@@ -24,7 +24,7 @@ import (
 var cfgupdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "update configuration",
-	Long: `"If a secondary version flag changed, Please run this command to update the configuration. For example"`,
+	Long:  `"If a secondary version flag changed, Please run this command to update the configuration. For example"`,
 	Run: func(cmd *cobra.Command, args []string) {
 		sar := common.GetSARootCfg()
 

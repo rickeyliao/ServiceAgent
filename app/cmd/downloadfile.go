@@ -17,16 +17,16 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/spf13/cobra"
 	"net"
-	"path"
 	"os"
-	"github.com/rickeyliao/ServiceAgent/common"
-	"strings"
+	"path"
 	"strconv"
+	"strings"
 )
 
-var(
+var (
 	downloadip *string
 	outputpath *string
 )
@@ -35,14 +35,14 @@ var(
 var downloadfileCmd = &cobra.Command{
 	Use:   "downloadfile",
 	Short: "download a file from server",
-	Long: `download a file from server`,
+	Long:  `download a file from server`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if !CheckProcessReady() {
 			return
 		}
 
-		if len(args) == 0 || len(args[0])==0{
+		if len(args) == 0 || len(args[0]) == 0 {
 			fmt.Println("Please Set download file")
 			return
 		}
@@ -52,48 +52,48 @@ var downloadfileCmd = &cobra.Command{
 			return
 		}
 
-		if downloadip == nil || *downloadip == ""{
+		if downloadip == nil || *downloadip == "" {
 			fmt.Println("Please Set Host IP Address")
 			return
 		}
 
-		hiparr:=strings.Split(*downloadip,":")
-		if len(hiparr)!=2{
+		hiparr := strings.Split(*downloadip, ":")
+		if len(hiparr) != 2 {
 			fmt.Println("Please Set Host IP Address like 1.1.1.1:50810")
 			return
 		}
 
-		if net.ParseIP(hiparr[0]) == nil{
+		if net.ParseIP(hiparr[0]) == nil {
 			fmt.Println("Please Set Correct Host Ip Address")
 			return
 		}
 
-		if rport,err:=strconv.Atoi(hiparr[1]);err!=nil{
+		if rport, err := strconv.Atoi(hiparr[1]); err != nil {
 			fmt.Println("Please Set Correct Remote Port")
 			return
-		}else {
-			if rport<1024 || rport >65535{
+		} else {
+			if rport < 1024 || rport > 65535 {
 				fmt.Println("Please Set Correct Remote Port")
 				return
 			}
 		}
 
-		outputpathstr:=""
-		curdir,err:=os.Getwd()
-		if err!=nil{
+		outputpathstr := ""
+		curdir, err := os.Getwd()
+		if err != nil {
 			fmt.Println("Internal error")
 			return
 		}
-		if outputpath!=nil && len(*outputpath) >0 {
+		if outputpath != nil && len(*outputpath) > 0 {
 			outputpathstr = *outputpath
-			if outputpathstr[0]!='/'{
-				outputpathstr = path.Join(curdir,outputpathstr)
+			if outputpathstr[0] != '/' {
+				outputpathstr = path.Join(curdir, outputpathstr)
 			}
-		}else {
+		} else {
 			outputpathstr = curdir
 		}
 
-		DownloadFileCmdSend(*downloadip,args[0],outputpathstr)
+		DownloadFileCmdSend(*downloadip, args[0], outputpathstr)
 
 	},
 }
@@ -112,5 +112,3 @@ func init() {
 	outputpath = downloadfileCmd.Flags().StringP("outputpath", "o", "", "Output path")
 	downloadip = downloadfileCmd.Flags().StringP("host", "s", "", "server ip")
 }
-
-

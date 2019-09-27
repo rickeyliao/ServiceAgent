@@ -15,15 +15,15 @@
 package cmd
 
 import (
-"github.com/spf13/cobra"
-"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
 )
 
 // shadowsockCmd represents the shadowsock command
 var shadowsockCmd = &cobra.Command{
 	Use:   "shadowsock",
 	Short: "show shadowsock config",
-	Long: `show shadowsock config`,
+	Long:  `show shadowsock config`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return

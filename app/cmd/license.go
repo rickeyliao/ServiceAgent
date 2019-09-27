@@ -22,16 +22,16 @@ import (
 var licenseCmd = &cobra.Command{
 	Use:   "license",
 	Short: "show license count",
-	Long: `show license count`,
+	Long:  `show license count`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return
 		}
-		req:=""
-		if len(args) > 0{
+		req := ""
+		if len(args) > 0 {
 			req = args[0]
 		}
-		LicenseCmdSend(0,req)
+		LicenseCmdSend(0, req)
 	},
 }
 

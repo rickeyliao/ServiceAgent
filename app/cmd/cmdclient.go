@@ -42,7 +42,7 @@ func (conn *CmdConnection) Close() {
 
 func DefaultCmdSend(cmd int32) {
 
-	if !CheckProcessReady(){
+	if !CheckProcessReady() {
 		return
 	}
 
@@ -106,7 +106,7 @@ func CheckProcessReady() bool {
 	sar.LoadRsaKey()
 	cfg := sar.SacInst
 	//if the program started, quit
-	if !tools.CheckPortUsed(cfg.ListenTyp,cfg.CmdListenIP, cfg.CmdListenPort) {
+	if !tools.CheckPortUsed(cfg.ListenTyp, cfg.CmdListenIP, cfg.CmdListenPort) {
 		log.Println("nbssa not started")
 		return false
 	}
@@ -125,7 +125,7 @@ func CheckProcessCanStarted() bool {
 	sar.LoadRsaKey()
 	cfg := sar.SacInst
 	//if the program started, quit
-	if tools.CheckPortUsed(cfg.ListenTyp,cfg.CmdListenIP, cfg.CmdListenPort) {
+	if tools.CheckPortUsed(cfg.ListenTyp, cfg.CmdListenIP, cfg.CmdListenPort) {
 		log.Println("nbssa have started")
 		return false
 	}
@@ -163,76 +163,75 @@ func LicenseUserCmdSend(op bool, req string) {
 
 }
 
-func HomeIPShowCmdSend(req string)  {
-	request:=&pb.HomeIPShowReq{Nbsaddr:req}
-	conn:=DialToCmdService()
+func HomeIPShowCmdSend(req string) {
+	request := &pb.HomeIPShowReq{Nbsaddr: req}
+	conn := DialToCmdService()
 	defer conn.Close()
 
-	client:=pb.NewHomeIPShowSrvClient(conn.c)
+	client := pb.NewHomeIPShowSrvClient(conn.c)
 
-	if resp,err:=client.ShowHomeIP(conn.ctx,request);err!=nil{
+	if resp, err := client.ShowHomeIP(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(resp.Message)
 	}
 
 }
 
-func LicenseCmdSend(op int32,req string)  {
-	request:=&pb.LicenseReq{Op:op,Sofaaddress:req}
-	conn:=DialToCmdService()
+func LicenseCmdSend(op int32, req string) {
+	request := &pb.LicenseReq{Op: op, Sofaaddress: req}
+	conn := DialToCmdService()
 	defer conn.Close()
 
-	client:=pb.NewLicenseSrvClient(conn.c)
-	if resp,err:=client.OpLicense(conn.ctx,request);err!=nil{
+	client := pb.NewLicenseSrvClient(conn.c)
+	if resp, err := client.OpLicense(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(resp.Message)
 	}
 
 }
 
-func UploadFileCmdSend(hostip string,filepath string)  {
-	request:=&pb.Fileuploadreq{Hostip:hostip,Filepath:filepath}
-	conn:=DialToCmdService()
+func UploadFileCmdSend(hostip string, filepath string) {
+	request := &pb.Fileuploadreq{Hostip: hostip, Filepath: filepath}
+	conn := DialToCmdService()
 	defer conn.Close()
 
-	client:=pb.NewFileuploadsrvClient(conn.c)
-	if resp,err:=client.Uploadfile(conn.ctx,request);err!=nil{
+	client := pb.NewFileuploadsrvClient(conn.c)
+	if resp, err := client.Uploadfile(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(resp.Message)
 	}
 
 }
 
-func DownloadFileCmdSend(hostip string,filename string,filesavepath string)  {
-	request:=&pb.Filedownloadreq{Hostip:hostip,Filehash:filename,Savepath:filesavepath}
-	conn:=DialToCmdService()
+func DownloadFileCmdSend(hostip string, filename string, filesavepath string) {
+	request := &pb.Filedownloadreq{Hostip: hostip, Filehash: filename, Savepath: filesavepath}
+	conn := DialToCmdService()
 	defer conn.Close()
 
-	client:=pb.NewFileudownloadsrvClient(conn.c)
-	if resp,err:=client.Downloadfile(conn.ctx,request);err!=nil{
+	client := pb.NewFileudownloadsrvClient(conn.c)
+	if resp, err := client.Downloadfile(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(resp.Message)
 	}
 }
 
-func SServerCmdSend(op int32,nas int32,local bool)  {
-	req:=&pb.SSServerReq{}
+func SServerCmdSend(op int32, nas int32, local bool) {
+	req := &pb.SSServerReq{}
 	req.Op = op
 	req.Nationality = nas
 	req.Local = local
-	conn:=DialToCmdService()
+	conn := DialToCmdService()
 	defer conn.Close()
 
-	client:=pb.NewSSServerServiceClient(conn.c)
-	if resp,err:=client.SSServerDo(conn.ctx,req);err!=nil{
+	client := pb.NewSSServerServiceClient(conn.c)
+	if resp, err := client.SSServerDo(conn.ctx, req); err != nil {
 		fmt.Println(err)
-	}else {
+	} else {
 		fmt.Println(resp.Message)
 	}
-
 
 }
