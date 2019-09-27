@@ -218,3 +218,21 @@ func DownloadFileCmdSend(hostip string,filename string,filesavepath string)  {
 		fmt.Println(resp.Message)
 	}
 }
+
+func SServerCmdSend(op int32,nas int32,local bool)  {
+	req:=&pb.SSServerReq{}
+	req.Op = op
+	req.Nationality = nas
+	req.Local = local
+	conn:=DialToCmdService()
+	defer conn.Close()
+
+	client:=pb.NewSSServerServiceClient(conn.c)
+	if resp,err:=client.SSServerDo(conn.ctx,req);err!=nil{
+		fmt.Println(err)
+	}else {
+		fmt.Println(resp.Message)
+	}
+
+
+}

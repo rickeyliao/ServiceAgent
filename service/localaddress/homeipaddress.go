@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"os"
+	"strconv"
 )
 
 var (
@@ -44,6 +45,7 @@ type Homeipdesc struct {
 	NbsAddress  string `json:"-"`
 	InternetAddress string `json:"IAddress"`
 	NatAddress []string `json:"nAddress"`
+	Nationality int32   `json:"nationality"`
 }
 
 func String2arr(ips string)  []string{
@@ -64,7 +66,7 @@ func LocalIPArr2string(iparr []string) string {
 }
 
 
-func Insert(nbsaddress string,mn string,interAddress string,natAddress string) error {
+func Insert(nbsaddress string,mn string,interAddress string,natAddress string,nationality int32) error {
 
 	if interAddress == "" || len(interAddress) == 0{
 		return errors.New("No Internat address")
@@ -76,7 +78,7 @@ func Insert(nbsaddress string,mn string,interAddress string,natAddress string) e
 
 
 
-	hid:=&Homeipdesc{MachineName:mn,InternetAddress:interAddress,NatAddress:String2arr(natAddress)}
+	hid:=&Homeipdesc{MachineName:mn,InternetAddress:interAddress,NatAddress:String2arr(natAddress),Nationality:nationality}
 
 	if bhid,err:=json.Marshal(hid);err!=nil{
 		return err
@@ -101,10 +103,12 @@ func CmdShowAddress(nbsaddr string) string  {
 	}
 
 	r:="NbsAddr:"+nbsaddr
-	r+="\r\n"
+	r+="\t"
 	r+="MachineName:"+hid.MachineName
-	r+="\r\n"
+	r+="\t"
 	r+="InternetAddress:"+hid.InternetAddress
+	r+="\t"
+	r+="Nationality:"+strconv.Itoa(int(hid.Nationality))
 	r+="\r\n"
 
 	nataddrs:=""

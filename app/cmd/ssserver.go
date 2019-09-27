@@ -15,33 +15,41 @@
 package cmd
 
 import (
-"github.com/spf13/cobra"
-"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
+	"github.com/rickeyliao/ServiceAgent/app"
 )
 
-// shadowsockCmd represents the shadowsock command
-var shadowsockCmd = &cobra.Command{
-	Use:   "shadowsock",
-	Short: "show shadowsock config",
-	Long: `show shadowsock config`,
+
+var ssserverNationality int32
+
+// ssserverCmd represents the ssserver command
+var ssserverCmd = &cobra.Command{
+	Use:   "ssserver",
+	Short: "Show Shadowsock Server List",
+	Long: `Show Shadowsock Server List`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !CheckProcessReady() {
+		if !CheckProcessReady(){
 			return
 		}
-		DefaultCmdSend(app.CMD_SHADOWSOCK_SHOW)
+		SServerCmdSend(app.CMD_SSSERVER_SHOW,ssserverNationality,false)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(shadowsockCmd)
+	rootCmd.AddCommand(ssserverCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// shadowsockCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// ssserverCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// shadowsockCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// ssserverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	ssserverCmd.PersistentFlags().Int32VarP(&ssserverNationality,"nationality","n",0,"set nationality:American 1,china mainland 86")
 }
+
+
+

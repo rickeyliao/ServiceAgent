@@ -57,6 +57,7 @@ type SAConfig struct {
 	ShadowSockMethod         string			 `json:"ssmethod"`
 	HostName                 string          `json:"hostname"`
 	IsCoordinator            bool            `json:"iscoordinator"`
+	Nationality              int32           `json:"nationality"`
 
 	PrivKey                  *rsa.PrivateKey `json:"-"`
 	Root					 *SARootConfig   `json:"-"`
@@ -243,6 +244,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.HostName =""
 	sa.IsCoordinator = false
 	sa.LicenseAdminUser = [][]string{{"sofaadmin","J1jdNR8vQb"},{"nbsadmin","Dkf44u3Ad8"},}
+	sa.Nationality = 1   //1 American 86 China
 
 	return sa
 }
@@ -307,13 +309,22 @@ const (
 	InitFalse int =2
 )
 
-func (sar *SARootConfig) InitConfig(force bool,iscoord int,hostname string) *SARootConfig {
+type ConfigInitParam struct {
+	Force bool
+	IsCoord int
+	Hostname string
+	SS string
+	Nationality int32
+}
+
+
+func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 	var nds bool
 	if sar.HomeDir == "" || sar.CfgDir == "" || sar.CfgFileName == "" {
 		log.Fatal("Please Set Config Path")
 	}
 
-	if force {
+	if cip.Force {
 		os.RemoveAll(sar.HomeDir)
 		nds = true
 	}
@@ -341,17 +352,17 @@ func (sar *SARootConfig) InitConfig(force bool,iscoord int,hostname string) *SAR
 		sar.SacInst = sac
 	}
 
-	if hostname != ""{
-		if sar.SacInst.HostName != hostname{
-			sar.SacInst.HostName = hostname
+	if cip.Hostname != ""{
+		if sar.SacInst.HostName != cip.Hostname{
+			sar.SacInst.HostName = cip.Hostname
 			nds = true
 		}
 	}
 
 
-	if iscoord != InitNone{
+	if cip.IsCoord != InitNone{
 		iscoordb:=false
-		if iscoord == InitTrue{
+		if cip.IsCoord == InitTrue{
 			iscoordb = true
 		}
 		if sar.SacInst.IsCoordinator != iscoordb{
@@ -360,7 +371,9 @@ func (sar *SARootConfig) InitConfig(force bool,iscoord int,hostname string) *SAR
 		}
 	}
 
-
+	if cip.Nationality > 0{
+		sar.SacInst.Nationality = cip.Nationality
+	}
 
 	filedbdir :=""
 

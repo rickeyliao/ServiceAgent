@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+import "default.proto";
+
+
+message SSServerReq{
+    int32 op = 1;
+    int32 nationality=2;
+    bool local=3;
+}
+
+
+service SSServerService {
+    rpc SSServerDo (SSServerReq) returns (DefaultResp) {}
+}

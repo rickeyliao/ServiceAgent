@@ -28,7 +28,9 @@ var cfgupdateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		sar := common.GetSARootCfg()
 
-		sar.InitConfig(false,common.InitNone,"")
+		cip := &common.ConfigInitParam{}
+
+		sar.InitConfig(cip)
 
 		sar.SacInst.Save()
 

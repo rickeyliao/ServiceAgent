@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"strconv"
 )
 
 type localaddress struct {
@@ -30,8 +31,14 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	hostname:=r.Header.Get("hostname")
 
 	nbsaddr := r.Header.Get("nbsaddress")
+
+
+	inas,_:=strconv.Atoi(r.Header.Get("nationality"))
+
 	if len(nbsaddr) >0{
-		Insert(nbsaddr,hostname,arr[0],nataddrs)
+		Insert(nbsaddr,hostname,arr[0],nataddrs,int32(inas))
+
+
 	}
 
 

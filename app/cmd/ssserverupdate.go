@@ -15,33 +15,31 @@
 package cmd
 
 import (
-"github.com/spf13/cobra"
-"github.com/rickeyliao/ServiceAgent/app"
+	"fmt"
+
+	"github.com/spf13/cobra"
 )
 
-// shadowsockCmd represents the shadowsock command
-var shadowsockCmd = &cobra.Command{
-	Use:   "shadowsock",
-	Short: "show shadowsock config",
-	Long: `show shadowsock config`,
+// updateCmd represents the update command
+var ssserverupdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update Local SS Server to Broadcast Server",
+	Long: "Update Local SS Server to Broadcast Server",
 	Run: func(cmd *cobra.Command, args []string) {
-		if !CheckProcessReady() {
-			return
-		}
-		DefaultCmdSend(app.CMD_SHADOWSOCK_SHOW)
+		fmt.Println("update called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(shadowsockCmd)
+	ssserverCmd.AddCommand(ssserverupdateCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// shadowsockCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// updateCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// shadowsockCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// updateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

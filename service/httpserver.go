@@ -107,6 +107,7 @@ func report(address string)  {
 		ips:=common.GetAllLocalIpAddr()
 		req.Header.Add("nataddrs",localaddress.LocalIPArr2string(ips))
 		req.Header.Add("hostname",localaddress.GetMachineName())
+		req.Header.Add("nationality",strconv.Itoa(int(common.GetSAConfig().Nationality)))
 
 		if resp,errresp:=c.Do(req);errresp != nil{
 			log.Println(errresp)
