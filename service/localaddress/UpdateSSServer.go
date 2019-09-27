@@ -3,6 +3,8 @@ package localaddress
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/btcsuite/btcutil/base58"
+	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"sync"
 	"time"
@@ -105,7 +107,25 @@ func GetSSReport() *SSReport {
 	ssr.SSPort = int(sac.ShadowSockPort)
 	ssr.SSPassword = sac.ShadowSockPasswd
 	ssr.SSMethod = sac.ShadowSockMethod
+	ssr.Location = sac.Location
 
-	//to add location
+	return ssr
+}
+
+func toSSReport(ssrstr string) *SSReport {
+	bssr := base58.Decode(ssrstr)
+
+	bjson, err := nbscrypt.DecryptRsa(bssr, common.GetSAConfig().PrivKey)
+	if err != nil {
+		return nil
+	}
+
+	ssr := &SSReport{}
+
+	err = json.Unmarshal(bjson, ssr)
+	if err != nil {
+		return nil
+	}
+
 	return ssr
 }

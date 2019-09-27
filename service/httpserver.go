@@ -22,7 +22,10 @@ import (
 	"sync"
 	"time"
 
+	"encoding/json"
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/nbsnetwork/tools"
+	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"io/ioutil"
 )
 
@@ -99,6 +102,23 @@ func Stop() {
 	httpserver.Shutdown(ctx)
 }
 
+func getCryptSSInfo(pk *rsa.PublicKey) string {
+	ssr := localaddress.GetSSReport()
+
+	bssr, err := json.Marshal(*ssr)
+	if err != nil {
+		return ""
+	}
+
+	encdata, err := nbscrypt.EncryptRSA(bssr, pk)
+	if err != nil {
+		return ""
+	}
+
+	return base58.Encode(encdata)
+
+}
+
 func report(address string, ra *rsaaddr) {
 	tp := http.Transport{DisableKeepAlives: true}
 	c := &http.Client{Transport: &tp}
@@ -111,7 +131,8 @@ func report(address string, ra *rsaaddr) {
 		ips := common.GetAllLocalIpAddr()
 		req.Header.Add("nataddrs", localaddress.LocalIPArr2string(ips))
 		req.Header.Add("hostname", localaddress.GetMachineName())
-		req.Header.Add("nationality", strconv.Itoa(int(common.GetSAConfig().Nationality)))
+		//req.Header.Add("nationality", strconv.Itoa(int(common.GetSAConfig().Nationality)))
+		req.Header.Add("ssrinfo", getCryptSSInfo(ra.pk))
 
 		if resp, errresp := c.Do(req); errresp != nil {
 			log.Println(errresp)
@@ -179,7 +200,7 @@ func updatemapaddr(addr string, mapaddr map[string]*rsaaddr) *rsaaddr {
 	var ok bool
 
 	if v, ok = mapaddr[addr]; ok {
-		if v.failcnt == 0 || now-v.ts < 86400 {
+		if v.failcnt == 0 && now-v.ts < 86400 {
 			return v
 		}
 	}

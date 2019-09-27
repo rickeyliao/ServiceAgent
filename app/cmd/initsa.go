@@ -26,6 +26,7 @@ var iscoord bool
 var machinename string
 var shadowsockParam string
 var nationality int32
+var sslocation string
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -50,6 +51,7 @@ var initCmd = &cobra.Command{
 		cip.Hostname = machinename
 		cip.Nationality = nationality
 		cip.SS = shadowsockParam
+		cip.Location = sslocation
 
 		sar.InitConfig(cip)
 		sar.InitRSAKey(force)
@@ -76,5 +78,6 @@ func init() {
 	initCmd.Flags().StringVarP(&shadowsockParam, "ss", "s", "", "configuration shadowsock passwd and method")
 	initCmd.Flags().BoolVarP(&iscoord, "coordinator", "c", false, "current machine is a coordinator")
 	initCmd.Flags().StringVarP(&machinename, "machinename", "m", "", "set machine name")
+	initCmd.Flags().StringVarP(&sslocation, "location", "l", "", "set shadowsock server vps location")
 	initCmd.Flags().Int32VarP(&nationality, "nationality", "n", 0, "set nationality")
 }

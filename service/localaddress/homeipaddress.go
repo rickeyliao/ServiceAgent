@@ -46,6 +46,10 @@ type Homeipdesc struct {
 	InternetAddress string   `json:"IAddress"`
 	NatAddress      []string `json:"nAddress"`
 	Nationality     int32    `json:"nationality"`
+	SSPort          int      `json:"port"`
+	SSPassword      string   `json:"password"`
+	Location        string   `json:"location"`
+	SSMethod        string   `json:"ssmethod"`
 }
 
 func String2arr(ips string) []string {
@@ -65,7 +69,7 @@ func LocalIPArr2string(iparr []string) string {
 	return ips
 }
 
-func Insert(nbsaddress string, mn string, interAddress string, natAddress string, nationality int32) error {
+func Insert(nbsaddress string, mn string, interAddress string, natAddress string, ssr *SSReport) error {
 
 	if interAddress == "" || len(interAddress) == 0 {
 		return errors.New("No Internat address")
@@ -75,7 +79,15 @@ func Insert(nbsaddress string, mn string, interAddress string, natAddress string
 		return errors.New("nbsaddress not found")
 	}
 
-	hid := &Homeipdesc{MachineName: mn, InternetAddress: interAddress, NatAddress: String2arr(natAddress), Nationality: nationality}
+	var hid *Homeipdesc
+
+	if ssr == nil {
+		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress, NatAddress: String2arr(natAddress)}
+	} else {
+		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress, NatAddress: String2arr(natAddress),
+			Nationality: ssr.Nationality,
+			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort, Location: ssr.Location, SSMethod: ssr.SSMethod}
+	}
 
 	if bhid, err := json.Marshal(hid); err != nil {
 		return err

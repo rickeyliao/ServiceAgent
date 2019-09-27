@@ -59,6 +59,7 @@ type SAConfig struct {
 	HostName                 string     `json:"hostname"`
 	IsCoordinator            bool       `json:"iscoordinator"`
 	Nationality              int32      `json:"nationality"`
+	Location                 string     `json:"location"`
 
 	PrivKey *rsa.PrivateKey `json:"-"`
 	Root    *SARootConfig   `json:"-"`
@@ -315,6 +316,7 @@ type ConfigInitParam struct {
 	Hostname    string
 	SS          string
 	Nationality int32
+	Location    string
 }
 
 func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
@@ -371,6 +373,11 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 
 	if cip.Nationality > 0 {
 		sar.SacInst.Nationality = cip.Nationality
+		nds = true
+	}
+
+	if cip.Location != sar.SacInst.Location {
+		sar.SacInst.Location = cip.Location
 		nds = true
 	}
 

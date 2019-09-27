@@ -3,7 +3,6 @@ package localaddress
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -31,10 +30,15 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	nbsaddr := r.Header.Get("nbsaddress")
 
-	inas, _ := strconv.Atoi(r.Header.Get("nationality"))
-
 	if len(nbsaddr) > 0 {
-		Insert(nbsaddr, hostname, arr[0], nataddrs, int32(inas))
+
+		var ssr *SSReport
+		ssrinfo := r.Header.Get("ssrinfo")
+		if ssrinfo != "" {
+			ssr = toSSReport(ssrinfo)
+		}
+		//Insert(nbsaddr, hostname, arr[0], nataddrs, int32(inas))
+		Insert(nbsaddr, hostname, arr[0], nataddrs, ssr)
 
 	}
 
