@@ -28,6 +28,7 @@ type SAConfig struct {
 	ListIpsPath              string          `json:"listipspath"`
 	EmailPath                string          `json:"emailpath"`
 	UpdateClientSoftwarePath string          `json:"updateclientsoftwarepath"`
+	PubkeyPath               string          `json:"pubkeypath"`
 	KeyDir                   string          `json:"keydir"`
 	PidDir                   string          `json:"piddir"`
 	FileDBDir                string          `json:"filedbdir"`
@@ -215,6 +216,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.TestIPAddressPath = "/localipaddress"
 	sa.ListIpsPath = "/public/servers/list"
 	sa.PostSocks5Path = "/postsocks5"
+	sa.PubkeyPath = "/pubkey/fetch"
 	sa.KeyDir = "key"
 	sa.PidDir = "piddir"
 	sa.FileDBDir = "filedb"
@@ -373,6 +375,7 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 
 	if cip.Nationality > 0{
 		sar.SacInst.Nationality = cip.Nationality
+		nds = true
 	}
 
 	filedbdir :=""

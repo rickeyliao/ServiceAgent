@@ -74,8 +74,6 @@ func GetServerList() []SSServerList {
 		return nil
 	}
 
-	//fmt.Println(p)
-
 	ret, code, err := common.Post(common.GetRemoteUrlInst().GetHostName(common.GetSAConfig().ListIpsPath), p)
 	if err != nil {
 		return nil
@@ -84,18 +82,9 @@ func GetServerList() []SSServerList {
 		return nil
 	}
 
-	//fmt.Println(ret)
-
-
-	//ssl:=make([]SSServerList,0)
-
 	var ssl []SSServerList
 
 	err = json.Unmarshal([]byte(ret),&ssl)
-
-	//fmt.Println(err)
-
-	//fmt.Println(ssl)
 
 	return ssl
 }

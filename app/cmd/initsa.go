@@ -33,6 +33,10 @@ var initCmd = &cobra.Command{
 	Short: "init nbssa start environment",
 	Long:  `init nbssa start environment`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if nationality == 0{
+			log.Println("Please Set Nationality, 1 American, 86 China Main Land")
+			return
+		}
 
 		sar := common.GetSARootCfgHdir(sahome, force)
 		cmbool:=common.InitFalse
@@ -72,5 +76,5 @@ func init() {
 	initCmd.Flags().StringVarP(&shadowsockParam,"ss","s","","configuration shadowsock passwd and method")
 	initCmd.Flags().BoolVarP(&iscoord,"coordinator","c",false,"current machine is a coordinator")
 	initCmd.Flags().StringVarP(&machinename,"machinename","m","","set machine name")
-	initCmd.Flags().Int32VarP(&nationality,"nationality","n",1,"set nationality")
+	initCmd.Flags().Int32VarP(&nationality,"nationality","n",0,"set nationality")
 }

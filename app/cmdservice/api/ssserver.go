@@ -37,28 +37,22 @@ func (css *CmdSSServer)show(req *pb.SSServerReq) (*pb.DefaultResp, error) {
 		if ssl.DeleteFlag {
 			continue
 		}
-		if !((req.Nationality == 1 && ssl.Abroad == 1) || (req.Nationality == 0) || (req.Nationality == 86 && ssl.Abroad == 0)) {
+		if !((req.Nationality == app.NATIONALITY_AMERICAN && ssl.Abroad == app.ABROAD_AMERICAN) ||
+			(req.Nationality == 0) ||
+			(req.Nationality == app.NATIONALITY_CHINA_MAINLAND && ssl.Abroad == app.ABROAD_CHINA_MAINLAND)) {
 			continue
 		}
 
 		if len(message) >0{
 			message += "\r\n"
 		}
-		//message += ssl.NodeId
 		message += fmt.Sprintf("%-45s",ssl.NodeId)
-		//message += ""
 		message += fmt.Sprintf("%-16s",ssl.Name)
-		//message += "\t"
 		message += fmt.Sprintf("%-18s",ssl.IPAddress)
-		//message += "\t"
 		message += fmt.Sprintf("%-8s",strconv.Itoa(ssl.SSPort))
-		//message += "\t"
 		message += fmt.Sprintf("%-16s",ssl.SSPassword)
-		//message += "\t"
 		message += fmt.Sprintf("%-8s",getNodeStatus(ssl.Status))
-		//message += "\t"
 		message += fmt.Sprintf("%-18s",ssl.Location)
-		//message += "\t"
 		message += fmt.Sprintf("%-6s",getNodeNationality(ssl.Abroad))
 		message += fmt.Sprintf("%-20s",ssl.LastModify.Format("2006-01-02 15:04:05"))
 	}
@@ -79,7 +73,6 @@ func getNodeNationality(abroad int) string {
 	}
 
 	return ""
-
 }
 
 func getNodeStatus(status int) string {
@@ -93,7 +86,6 @@ func getNodeStatus(status int) string {
 
 	return "unknow"
 }
-
 
 func (css *CmdSSServer)update(req *pb.SSServerReq)(*pb.DefaultResp, error) {
 	return encResp(""),nil

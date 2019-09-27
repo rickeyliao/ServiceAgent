@@ -18,6 +18,7 @@ import (
 	"sync"
 	"github.com/rickeyliao/ServiceAgent/service/license"
 	"github.com/rickeyliao/ServiceAgent/service/checkip"
+	"github.com/rickeyliao/ServiceAgent/service/pubkey"
 )
 
 var (
@@ -52,6 +53,7 @@ func Run(cfg *common.SAConfig) {
 	mux.Handle(cfg.DownloadPath, file.NewFileDownLoad())
 	mux.Handle(cfg.LoginPath,login.NewLoginInfo())
 	mux.Handle(cfg.CheckIPPath,checkip.NewCheckPrivateIP())
+	mux.Handle(cfg.PubkeyPath,pubkey.NewHttpPubKey())
 
 	listenportstr := ":" + strconv.Itoa(int(cfg.HttpListenPort))
 
@@ -109,6 +111,7 @@ func report(address string)  {
 		req.Header.Add("hostname",localaddress.GetMachineName())
 		req.Header.Add("nationality",strconv.Itoa(int(common.GetSAConfig().Nationality)))
 
+
 		if resp,errresp:=c.Do(req);errresp != nil{
 			log.Println(errresp)
 			return
@@ -120,13 +123,25 @@ func report(address string)  {
 	}
 }
 
+func updatemapaddr(addr string,mapaddr map[string]string)  {
+	if addr == ""{
+		return
+	}
+
+
+
+}
+
 func reportAddress()  {
 	var count int64
+
+	mapaddr:=make(map[string]string)
 
 	for {
 		count++
 		if count %300 == 0{
 			for _,addr:=range common.GetSAConfig().ReportServerIPAddress{
+				updatemapaddr(addr,mapaddr)
 				report(addr)
 				time.Sleep(time.Second*1)
 			}
