@@ -124,9 +124,6 @@ func report(address string, ra *rsaaddr) {
 	}
 }
 
-
-
-
 type rsaaddr struct {
 	pk      *rsa.PublicKey
 	addr    string
@@ -158,7 +155,7 @@ func reqrsaaddr(addr string) *rsaaddr {
 				ra.pk = rsapk
 				ra.addr = addr
 				ra.nbsaddr = nbsaddr
-				ra.ts = tools.GetNowMsTime()/1000
+				ra.ts = tools.GetNowMsTime() / 1000
 			} else {
 				log.Println(err)
 			}
@@ -173,7 +170,7 @@ func reqrsaaddr(addr string) *rsaaddr {
 }
 
 func updatemapaddr(addr string, mapaddr map[string]*rsaaddr) *rsaaddr {
-	now := tools.GetNowMsTime()/1000
+	now := tools.GetNowMsTime() / 1000
 	if addr == "" {
 		return nil
 	}

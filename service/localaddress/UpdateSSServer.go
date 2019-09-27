@@ -87,3 +87,25 @@ func GetServerList() []SSServerList {
 
 	return ssl
 }
+
+type SSReport struct {
+	Nationality int32  `json:"nationality"`
+	SSPort      int    `json:"port"`
+	SSPassword  string `json:"password"`
+	Location    string `json:"location"`
+	SSMethod    string `json:"ssmethod"`
+}
+
+func GetSSReport() *SSReport {
+	ssr := &SSReport{}
+
+	sac := common.GetSAConfig()
+
+	ssr.Nationality = sac.Nationality
+	ssr.SSPort = int(sac.ShadowSockPort)
+	ssr.SSPassword = sac.ShadowSockPasswd
+	ssr.SSMethod = sac.ShadowSockMethod
+
+	//to add location
+	return ssr
+}

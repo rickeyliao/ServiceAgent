@@ -36,7 +36,10 @@ func (css *CmdSSServer) show(req *pb.SSServerReq) (*pb.DefaultResp, error) {
 		if ssl.DeleteFlag {
 			continue
 		}
-		if !((req.Nationality == app.NATIONALITY_AMERICAN && ssl.Abroad == app.ABROAD_AMERICAN) ||
+		if !(((req.Nationality == app.NATIONALITY_AMERICAN ||
+			req.Nationality == app.NATIONALITY_JAPANESE ||
+			req.Nationality == app.NATIONALITY_SINGAPORE ||
+			req.Nationality == app.NATIONALITY_ENGLAND) && ssl.Abroad == app.ABROAD_AMERICAN) ||
 			(req.Nationality == 0) ||
 			(req.Nationality == app.NATIONALITY_CHINA_MAINLAND && ssl.Abroad == app.ABROAD_CHINA_MAINLAND)) {
 			continue
