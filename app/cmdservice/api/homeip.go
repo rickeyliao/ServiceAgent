@@ -25,5 +25,3 @@ func (chs *CmdHomeShow) ShowHomeIP(cxt context.Context, hi *pb.HomeIPShowReq) (*
 		}
 	}
 }
-
-

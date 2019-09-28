@@ -2,6 +2,7 @@ package localaddress
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kprc/nbsnetwork/db"
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/common"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"fmt"
 )
 
 var (
@@ -112,15 +112,15 @@ func CmdShowAddress(nbsaddr string) string {
 		return "Internal error"
 	}
 
-	r:=fmt.Sprint("%-48s",nbsaddr)
+	r := fmt.Sprintf("%-48s", nbsaddr)
 
-	r += fmt.Sprint("%-16s",hid.MachineName)
-	r += fmt.Sprint("%-18s",hid.InternetAddress)
-	r += fmt.Sprintf("%-6s",strconv.Itoa(int(hid.Nationality)))
-	r += fmt.Sprintf("%-6s",strconv.Itoa(int(hid.SSPort)))
-	r += fmt.Sprintf("%-16s",hid.SSPassword)
-	r += fmt.Sprintf("%-16s",hid.SSMethod)
-	r += fmt.Sprintf("%-16s",hid.Location)
+	r += fmt.Sprintf("%-16s", hid.MachineName)
+	r += fmt.Sprintf("%-18s", hid.InternetAddress)
+	r += fmt.Sprintf("%-6s", strconv.Itoa(int(hid.Nationality)))
+	r += fmt.Sprintf("%-6s", strconv.Itoa(int(hid.SSPort)))
+	r += fmt.Sprintf("%-16s", hid.SSPassword)
+	r += fmt.Sprintf("%-16s", hid.SSMethod)
+	r += fmt.Sprintf("%-16s", hid.Location)
 
 	//nataddrs := ""
 	for _, nip := range hid.NatAddress {
@@ -128,7 +128,7 @@ func CmdShowAddress(nbsaddr string) string {
 		//	nataddrs += "\t"
 		//}
 		//nataddrs += nip
-		r += fmt.Sprintf("%-16s",nip)
+		r += fmt.Sprintf("%-16s", nip)
 	}
 
 	//r += "InternalAddress:" + nataddrs
