@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"log"
 	"sync"
 	"time"
 )
@@ -113,10 +114,13 @@ func GetSSReport() *SSReport {
 }
 
 func toSSReport(ssrstr string) *SSReport {
+	fmt.Println("get crypt ssinfo :", ssrstr)
+
 	bssr := base58.Decode(ssrstr)
 
 	bjson, err := nbscrypt.DecryptRsa(bssr, common.GetSAConfig().PrivKey)
 	if err != nil {
+		log.Println(err)
 		return nil
 	}
 
@@ -124,6 +128,7 @@ func toSSReport(ssrstr string) *SSReport {
 
 	err = json.Unmarshal(bjson, ssr)
 	if err != nil {
+		log.Println(err)
 		return nil
 	}
 

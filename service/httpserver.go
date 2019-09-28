@@ -22,7 +22,9 @@ import (
 	"sync"
 	"time"
 
+	"crypto/x509"
 	"encoding/json"
+	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/nbsnetwork/tools"
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
@@ -115,6 +117,9 @@ func getCryptSSInfo(pk *rsa.PublicKey) string {
 		return ""
 	}
 
+	//for debug
+	fmt.Println("for send crypt ssinfo :", base58.Encode(encdata))
+
 	return base58.Encode(encdata)
 
 }
@@ -153,6 +158,17 @@ type rsaaddr struct {
 	failcnt int32
 }
 
+func (ra *rsaaddr) print() {
+	bpk := x509.MarshalPKCS1PublicKey(ra.pk)
+	base58pk := base58.Encode(bpk)
+
+	fmt.Println("rsaaddr.pk", base58pk)
+	fmt.Println("rsaaddr.addr")
+	fmt.Println("rsaaddr.nbsaddr")
+	fmt.Println("rsaaddr.ts")
+	fmt.Println("rsaaddr.failcnt")
+}
+
 func reqrsaaddr(addr string) *rsaaddr {
 	tp := http.Transport{DisableKeepAlives: true}
 	c := &http.Client{Transport: &tp}
@@ -162,11 +178,11 @@ func reqrsaaddr(addr string) *rsaaddr {
 	r := bytes.NewReader([]byte(pubkey.GetNbsPubkey()))
 
 	if req, err := http.NewRequest("POST", "http://"+addr+common.GetSAConfig().PubkeyPath, r); err != nil {
+		log.Println(err)
 		return nil
 	} else {
 		if resp, errresp := c.Do(req); errresp != nil {
 			log.Println(errresp)
-
 			return nil
 		} else {
 
@@ -182,8 +198,6 @@ func reqrsaaddr(addr string) *rsaaddr {
 			}
 
 			resp.Body.Close()
-
-			//log.Println(resp)
 		}
 	}
 
@@ -205,6 +219,7 @@ func updatemapaddr(addr string, mapaddr map[string]*rsaaddr) *rsaaddr {
 		}
 	}
 	ra := reqrsaaddr(addr)
+	ra.print()
 
 	if ra == nil {
 		if v != nil {

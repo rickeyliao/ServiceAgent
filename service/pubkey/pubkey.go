@@ -43,6 +43,7 @@ func (pk *pubkey) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func GetNbsPubkey() string {
 	sac := common.GetSAConfig()
 	addr := &pubkey{NbsAddr: sac.NbsRsaAddr, Pubkey: sac.GetPubKey()}
+	fmt.Println("send to my pk:", addr.Pubkey)
 	if v, err := json.Marshal(*addr); err != nil {
 		log.Println(err)
 		return "{}"
