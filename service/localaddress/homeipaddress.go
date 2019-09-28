@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"fmt"
 )
 
 var (
@@ -111,24 +112,26 @@ func CmdShowAddress(nbsaddr string) string {
 		return "Internal error"
 	}
 
-	r := "NbsAddr:" + nbsaddr
-	r += "\t"
-	r += "MachineName:" + hid.MachineName
-	r += "\t"
-	r += "InternetAddress:" + hid.InternetAddress
-	r += "\t"
-	r += "Nationality:" + strconv.Itoa(int(hid.Nationality))
-	r += "\r\n"
+	r:=fmt.Sprint("%-48s",nbsaddr)
 
-	nataddrs := ""
+	r += fmt.Sprint("%-16s",hid.MachineName)
+	r += fmt.Sprint("%-18s",hid.InternetAddress)
+	r += fmt.Sprintf("%-6s",strconv.Itoa(int(hid.Nationality)))
+	r += fmt.Sprintf("%-6s",strconv.Itoa(int(hid.SSPort)))
+	r += fmt.Sprintf("%-16s",hid.SSPassword)
+	r += fmt.Sprintf("%-16s",hid.SSMethod)
+	r += fmt.Sprintf("%-16s",hid.Location)
+
+	//nataddrs := ""
 	for _, nip := range hid.NatAddress {
-		if nataddrs != "" {
-			nataddrs += "\t"
-		}
-		nataddrs += nip
+		//if nataddrs != "" {
+		//	nataddrs += "\t"
+		//}
+		//nataddrs += nip
+		r += fmt.Sprintf("%-16s",nip)
 	}
 
-	r += "InternalAddress:" + nataddrs
+	//r += "InternalAddress:" + nataddrs
 
 	return r
 }
