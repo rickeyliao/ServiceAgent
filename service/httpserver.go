@@ -240,7 +240,7 @@ func reportAddress() {
 
 	for {
 		count++
-		if count%300 == 0 {
+		if count%30 == 0 {
 			for _, addr := range common.GetSAConfig().ReportServerIPAddress {
 				ra := updatemapaddr(addr, mapaddr)
 				if ra != nil {
