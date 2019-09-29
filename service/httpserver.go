@@ -163,10 +163,10 @@ func (ra *rsaaddr) print() {
 	base58pk := base58.Encode(bpk)
 
 	fmt.Println("rsaaddr.pk", base58pk)
-	fmt.Println("rsaaddr.addr")
-	fmt.Println("rsaaddr.nbsaddr")
-	fmt.Println("rsaaddr.ts")
-	fmt.Println("rsaaddr.failcnt")
+	fmt.Println("rsaaddr.addr",ra.addr)
+	fmt.Println("rsaaddr.nbsaddr",ra.nbsaddr)
+	fmt.Println("rsaaddr.ts",strconv.FormatInt(ra.ts,10))
+	fmt.Println("rsaaddr.failcnt",strconv.Itoa(int(ra.failcnt)))
 }
 
 func reqrsaaddr(addr string) *rsaaddr {
