@@ -114,7 +114,6 @@ func GetSSReport() *SSReport {
 }
 
 func toSSReport(ssrstr string) *SSReport {
-	fmt.Println("get crypt ssinfo :", ssrstr)
 
 	bssr := base58.Decode(ssrstr)
 

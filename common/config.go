@@ -207,8 +207,8 @@ func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
 func DefaultInitConfig() *SAConfig {
 	sa := &SAConfig{}
 
-	sa.BootstrapIPAddress = []string{"103.45.98.72:59811", "24.86.164.242:59811"}
-	sa.ReportServerIPAddress = []string{"103.45.98.72:59810", "24.86.164.242:59810"}
+	sa.BootstrapIPAddress = []string{"103.45.98.72:50811", "24.86.164.242:50811"}
+	sa.ReportServerIPAddress = []string{"103.45.98.72:50810", "24.86.164.242:50810"}
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadPath = "/download"
 	sa.EmailPath = "/public/key/refresh"
@@ -229,10 +229,10 @@ func DefaultInitConfig() *SAConfig {
 	sa.VerifyPath = "/public/keys/verify"
 	sa.RemoteServerIP = "207.148.9.49"
 	sa.RemoteServerPort = 80
-	sa.HttpListenPort = 59810
+	sa.HttpListenPort = 50810
 	sa.CmdListenIP = "127.0.0.1"
-	sa.CmdListenPort = 59811
-	sa.DhtListenPort = 59811
+	sa.CmdListenPort = 50811
+	sa.DhtListenPort = 50811
 	sa.ListenTyp = "tcp4"
 	sa.StaticFileDir = "staticfile"
 	sa.LoginPath = "/login"
@@ -240,7 +240,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.Loginfile = "login.gptl"
 	sa.CheckIPFile = "checkip.gptl"
 	sa.ShadowSockServerSwitch = false
-	sa.ShadowSockPort = 59812
+	sa.ShadowSockPort = 50812
 
 	sa.ShadowSockPasswd = ""
 	sa.ShadowSockMethod = ""

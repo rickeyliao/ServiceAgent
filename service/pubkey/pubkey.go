@@ -43,8 +43,8 @@ func (pk *pubkey) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func GetNbsPubkey() string {
 	sac := common.GetSAConfig()
 	addr := &pubkey{NbsAddr: sac.NbsRsaAddr, Pubkey: sac.GetPubKey()}
-	fmt.Println("send to my pk:", addr.Pubkey)
-	fmt.Println("nbsaddr:", sac.NbsRsaAddr)
+	//fmt.Println("send to my pk:", addr.Pubkey)
+	//fmt.Println("nbsaddr:", sac.NbsRsaAddr)
 	if v, err := json.Marshal(*addr); err != nil {
 		log.Println(err)
 		return "{}"
@@ -63,7 +63,7 @@ func UnMarshalPubKey(pkjson []byte) (addr string, pk *rsa.PublicKey) {
 
 	pk = common.ToPubKey(p.Pubkey)
 
-	fmt.Println("----->",p.NbsAddr,p.Pubkey)
+	//fmt.Println("----->",p.NbsAddr,p.Pubkey)
 
 	return p.NbsAddr, pk
 }

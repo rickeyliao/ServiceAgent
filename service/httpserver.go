@@ -115,12 +115,12 @@ func getCryptSSInfo(pk *rsa.PublicKey) string {
 
 	encdata, err := nbscrypt.EncryptRSA(bssr, pk)
 	if err != nil {
-		log.Println(err,pk.Size()-11)
+		log.Println(err, pk.Size()-11)
 		return ""
 	}
 
 	//for debug
-	fmt.Println("for send crypt ssinfo :", base58.Encode(encdata))
+	//fmt.Println("for send crypt ssinfo :", base58.Encode(encdata))
 
 	return base58.Encode(encdata)
 
@@ -166,10 +166,10 @@ func (ra *rsaaddr) print() {
 	base58pk := base58.Encode(bpk)
 
 	fmt.Println("rsaaddr.pk", base58pk)
-	fmt.Println("rsaaddr.addr",ra.addr)
-	fmt.Println("rsaaddr.nbsaddr",ra.nbsaddr)
-	fmt.Println("rsaaddr.ts",strconv.FormatInt(ra.ts,10))
-	fmt.Println("rsaaddr.failcnt",strconv.Itoa(int(ra.failcnt)))
+	fmt.Println("rsaaddr.addr", ra.addr)
+	fmt.Println("rsaaddr.nbsaddr", ra.nbsaddr)
+	fmt.Println("rsaaddr.ts", strconv.FormatInt(ra.ts, 10))
+	fmt.Println("rsaaddr.failcnt", strconv.Itoa(int(ra.failcnt)))
 }
 
 func reqrsaaddr(addr string) *rsaaddr {
@@ -203,7 +203,6 @@ func reqrsaaddr(addr string) *rsaaddr {
 			resp.Body.Close()
 		}
 	}
-
 
 	return ra
 }
@@ -244,12 +243,10 @@ func reportAddress() {
 
 	for {
 		count++
-		if count%30 == 0 {
+		if count%300 == 0 {
 			for _, addr := range common.GetSAConfig().ReportServerIPAddress {
 				ra := updatemapaddr(addr, mapaddr)
 				if ra != nil {
-					fmt.Println("======----===")
-					ra.print()
 					report(addr, ra)
 				}
 				time.Sleep(time.Second * 1)

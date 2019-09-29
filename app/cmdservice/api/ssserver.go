@@ -48,7 +48,7 @@ func (css *CmdSSServer) show(req *pb.SSServerReq) (*pb.DefaultResp, error) {
 		if len(message) > 0 {
 			message += "\r\n"
 		}
-		message += fmt.Sprintf("%-45s", ssl.NodeId)
+		message += fmt.Sprintf("%-48s", ssl.NodeId)
 		message += fmt.Sprintf("%-16s", ssl.Name)
 		message += fmt.Sprintf("%-18s", ssl.IPAddress)
 		message += fmt.Sprintf("%-8s", strconv.Itoa(ssl.SSPort))

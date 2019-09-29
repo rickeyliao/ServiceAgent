@@ -23,8 +23,6 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	arr := strings.Split(ra, ":")
 
-	//log.Println(r.RemoteAddr,r.Header.Get("nbsaddress"))
-
 	nataddrs := r.Header.Get("nataddrs")
 	hostname := r.Header.Get("hostname")
 
@@ -37,7 +35,7 @@ func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if ssrinfo != "" {
 			ssr = toSSReport(ssrinfo)
 		}
-		//Insert(nbsaddr, hostname, arr[0], nataddrs, int32(inas))
+
 		Insert(nbsaddr, hostname, arr[0], nataddrs, ssr)
 
 	}

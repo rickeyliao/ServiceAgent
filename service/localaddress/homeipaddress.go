@@ -14,31 +14,64 @@ import (
 	"time"
 )
 
-var (
+type HomeIPDB struct {
 	homeipdb     db.NbsDbInter
 	homeipdblock sync.Mutex
 	quit         chan int
 	wg           *sync.WaitGroup
+	memdb        map[string]*Homeipdesc
+	memdblock    sync.Mutex
+}
+
+var (
+	homeipdbinst     *HomeIPDB
+	homeipdbinstlock sync.Mutex
 )
 
-func GetHomeIPDB() db.NbsDbInter {
-	if homeipdb == nil {
-		homeipdblock.Lock()
-		defer homeipdblock.Unlock()
+func GetHomeIPDB() *HomeIPDB {
+	if homeipdbinst == nil {
+		homeipdbinstlock.Lock()
+		defer homeipdbinstlock.Unlock()
 
-		if homeipdb == nil {
-			homeipdb = newHomeIPDB()
+		if homeipdbinst == nil {
+			homeipdbinst = newHomeIPDB()
 		}
 
 	}
-	return homeipdb
+	return homeipdbinst
 }
 
-func newHomeIPDB() db.NbsDbInter {
-	quit = make(chan int, 0)
-	wg = &sync.WaitGroup{}
+func memDBLoad(memdb map[string]*Homeipdesc, fdb db.NbsDbInter) {
+	dbcusor := fdb.DBIterator()
+
+	if dbcusor == nil {
+		return
+	}
+
+	for {
+		k, v := dbcusor.Next()
+		hid := &Homeipdesc{}
+		err := json.Unmarshal([]byte(v), hid)
+		if err != nil {
+			continue
+		}
+
+		memdb[k] = hid
+	}
+}
+
+func newHomeIPDB() *HomeIPDB {
+
+	hi := &HomeIPDB{}
+	hi.quit = make(chan int, 0)
+	hi.wg = &sync.WaitGroup{}
+
 	cfg := common.GetSAConfig()
-	return db.NewFileDb(path.Join(cfg.GetFileDbDir(), cfg.HomeIPDBFile)).Load()
+	hi.homeipdb = db.NewFileDb(path.Join(cfg.GetFileDbDir(), cfg.HomeIPDBFile)).Load()
+	hi.memdb = make(map[string]*Homeipdesc)
+	memDBLoad(hi.memdb, hi.homeipdb)
+
+	return hi
 }
 
 type Homeipdesc struct {
@@ -90,26 +123,51 @@ func Insert(nbsaddress string, mn string, interAddress string, natAddress string
 			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort, Location: ssr.Location, SSMethod: ssr.SSMethod}
 	}
 
-	if bhid, err := json.Marshal(hid); err != nil {
+	GetHomeIPDB().Insert(nbsaddress, hid)
+
+	return nil
+}
+
+func (hi *HomeIPDB) Insert(nbsaddr string, hid *Homeipdesc) error {
+	if len(nbsaddr) == 0 {
+		return errors.New("nbs address not found")
+	}
+
+	hi.memdbInsert(nbsaddr, hid)
+
+	if bhid, err := json.Marshal(*hid); err != nil {
 		return err
 	} else {
-		GetHomeIPDB().Update(nbsaddress, string(bhid))
+		hi.homeipdblock.Lock()
+		defer hi.homeipdblock.Unlock()
+
+		hi.homeipdb.Update(nbsaddr, string(bhid))
 	}
 
 	return nil
 }
 
+func (hi *HomeIPDB) memdbInsert(nbsaddr string, hid *Homeipdesc) {
+	hi.memdblock.Lock()
+	defer hi.memdblock.Unlock()
+
+	hi.memdb[nbsaddr] = hid
+}
+
 func CmdShowAddress(nbsaddr string) string {
-	v, err := GetHomeIPDB().Find(nbsaddr)
-	if err != nil {
+	hi := GetHomeIPDB()
+
+	hi.memdblock.Lock()
+	defer hi.memdblock.Unlock()
+
+	return hi.CmdShowAddress(nbsaddr)
+}
+
+func (hi *HomeIPDB) CmdShowAddress(nbsaddr string) string {
+
+	hid, ok := hi.memdb[nbsaddr]
+	if !ok {
 		return "Not found"
-	}
-	hid := &Homeipdesc{}
-
-	err = json.Unmarshal([]byte(v), hid)
-
-	if err != nil {
-		return "Internal error"
 	}
 
 	r := fmt.Sprintf("%-48s", nbsaddr)
@@ -122,34 +180,32 @@ func CmdShowAddress(nbsaddr string) string {
 	r += fmt.Sprintf("%-16s", hid.SSMethod)
 	r += fmt.Sprintf("%-16s", hid.Location)
 
-	//nataddrs := ""
 	for _, nip := range hid.NatAddress {
-		//if nataddrs != "" {
-		//	nataddrs += "\t"
-		//}
-		//nataddrs += nip
+
 		r += fmt.Sprintf("%-16s", nip)
 	}
-
-	//r += "InternalAddress:" + nataddrs
 
 	return r
 }
 
 func CmdShowAddressAll() string {
-	dbcusor := GetHomeIPDB().DBIterator()
+	hi := GetHomeIPDB()
+
+	hi.memdblock.Lock()
+	defer hi.memdblock.Unlock()
+
+	return hi.CmdShowAddressAll()
+
+}
+
+func (hi *HomeIPDB) CmdShowAddressAll() string {
 
 	alls := ""
-
-	for {
-		k, _ := dbcusor.Next()
-		if k == "" {
-			break
-		}
+	for k, _ := range hi.memdb {
 		if alls != "" {
 			alls += "\r\n"
 		}
-		alls += CmdShowAddress(k)
+		alls += hi.CmdShowAddress(k)
 	}
 
 	return alls
@@ -167,15 +223,17 @@ func GetMachineName() string {
 }
 
 func Save() {
-	GetHomeIPDB().Save()
+	hi := GetHomeIPDB()
+	hi.homeipdblock.Lock()
+	defer hi.homeipdblock.Unlock()
+	hi.homeipdb.Save()
 }
 
 func IntervalSave() {
-	if wg == nil {
-		GetHomeIPDB()
-	}
-	wg.Add(1)
-	defer wg.Done()
+	hi := GetHomeIPDB()
+
+	hi.wg.Add(1)
+	defer hi.wg.Done()
 	var count int64 = 0
 	for {
 
@@ -185,7 +243,7 @@ func IntervalSave() {
 		count++
 
 		select {
-		case <-quit:
+		case <-hi.quit:
 			return
 		default:
 		}
@@ -195,9 +253,10 @@ func IntervalSave() {
 }
 
 func Destroy() {
-	quit <- 1
+	hi := GetHomeIPDB()
+	hi.quit <- 1
 
 	Save()
 
-	wg.Wait()
+	hi.wg.Wait()
 }
