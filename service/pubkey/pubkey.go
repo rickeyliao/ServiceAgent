@@ -44,6 +44,7 @@ func GetNbsPubkey() string {
 	sac := common.GetSAConfig()
 	addr := &pubkey{NbsAddr: sac.NbsRsaAddr, Pubkey: sac.GetPubKey()}
 	fmt.Println("send to my pk:", addr.Pubkey)
+	fmt.Println("nbsaddr:", sac.NbsRsaAddr)
 	if v, err := json.Marshal(*addr); err != nil {
 		log.Println(err)
 		return "{}"
