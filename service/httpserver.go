@@ -115,7 +115,7 @@ func getCryptSSInfo(pk *rsa.PublicKey) string {
 
 	encdata, err := nbscrypt.EncryptRSA(bssr, pk)
 	if err != nil {
-		log.Println(err)
+		log.Println(err,pk.Size()-11)
 		return ""
 	}
 
