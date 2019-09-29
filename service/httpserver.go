@@ -190,7 +190,9 @@ func reqrsaaddr(addr string) *rsaaddr {
 				nbsaddr, rsapk := pubkey.UnMarshalPubKey(pkjson)
 				ra = &rsaaddr{}
 				ra.pk = rsapk
+				fmt.Println("addr",addr)
 				ra.addr = addr
+				fmt.Println("nbsaddr",nbsaddr)
 				ra.nbsaddr = nbsaddr
 				ra.ts = tools.GetNowMsTime() / 1000
 			} else {
@@ -201,6 +203,9 @@ func reqrsaaddr(addr string) *rsaaddr {
 		}
 	}
 
+	fmt.Println("=---===")
+	ra.print()
+	fmt.Println("=---===")
 	return ra
 }
 
