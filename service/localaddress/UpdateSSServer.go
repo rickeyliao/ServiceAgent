@@ -106,8 +106,8 @@ func GetSSReport() *SSReport {
 
 	ssr.Nationality = sac.Nationality
 	ssr.SSPort = int(sac.ShadowSockPort)
-	ssr.SSPassword = sac.ShadowSockPasswd
-	ssr.SSMethod = sac.ShadowSockMethod
+	ssr.SSPassword = sac.GetSSPasswd()
+	ssr.SSMethod = sac.GetSSMethod()
 	ssr.Location = sac.Location
 
 	return ssr
