@@ -63,5 +63,7 @@ func UnMarshalPubKey(pkjson []byte) (addr string, pk *rsa.PublicKey) {
 
 	pk = common.ToPubKey(p.Pubkey)
 
+	fmt.Println("----->",p.NbsAddr,p.Pubkey)
+
 	return p.NbsAddr, pk
 }
