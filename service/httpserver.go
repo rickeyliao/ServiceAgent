@@ -109,11 +109,13 @@ func getCryptSSInfo(pk *rsa.PublicKey) string {
 
 	bssr, err := json.Marshal(*ssr)
 	if err != nil {
+		log.Println(err)
 		return ""
 	}
 
 	encdata, err := nbscrypt.EncryptRSA(bssr, pk)
 	if err != nil {
+		log.Println(err)
 		return ""
 	}
 
@@ -128,7 +130,8 @@ func report(address string, ra *rsaaddr) {
 	tp := http.Transport{DisableKeepAlives: true}
 	c := &http.Client{Transport: &tp}
 
-	if req, err := http.NewRequest("GET", "http://"+address+"/localipaddress", nil); err != nil {
+	if req, err := http.NewRequest("GET", "http://"+address+common.GetSAConfig().TestIPAddressPath, nil); err != nil {
+		log.Println(err)
 		return
 	} else {
 
@@ -190,9 +193,7 @@ func reqrsaaddr(addr string) *rsaaddr {
 				nbsaddr, rsapk := pubkey.UnMarshalPubKey(pkjson)
 				ra = &rsaaddr{}
 				ra.pk = rsapk
-				fmt.Println("addr",addr)
 				ra.addr = addr
-				fmt.Println("nbsaddr",nbsaddr)
 				ra.nbsaddr = nbsaddr
 				ra.ts = tools.GetNowMsTime() / 1000
 			} else {
@@ -203,9 +204,7 @@ func reqrsaaddr(addr string) *rsaaddr {
 		}
 	}
 
-	fmt.Println("=---===")
-	ra.print()
-	fmt.Println("=---===")
+
 	return ra
 }
 
@@ -224,7 +223,7 @@ func updatemapaddr(addr string, mapaddr map[string]*rsaaddr) *rsaaddr {
 		}
 	}
 	ra := reqrsaaddr(addr)
-	ra.print()
+	//ra.print()
 
 	if ra == nil {
 		if v != nil {
@@ -249,6 +248,8 @@ func reportAddress() {
 			for _, addr := range common.GetSAConfig().ReportServerIPAddress {
 				ra := updatemapaddr(addr, mapaddr)
 				if ra != nil {
+					fmt.Println("======----===")
+					ra.print()
 					report(addr, ra)
 				}
 				time.Sleep(time.Second * 1)
