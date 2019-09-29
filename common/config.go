@@ -26,6 +26,8 @@ type SAConfig struct {
 	VerifyPath               string     `json:"verifypath"`
 	ConsumePath              string     `json:"consumepath"`
 	ListIpsPath              string     `json:"listipspath"`
+	ServerDelete             string     `json:"serverdel"`
+	ServerAdd                string     `json:"serveradd"`
 	EmailPath                string     `json:"emailpath"`
 	UpdateClientSoftwarePath string     `json:"updateclientsoftwarepath"`
 	PubkeyPath               string     `json:"pubkeypath"`
@@ -59,7 +61,7 @@ type SAConfig struct {
 	HostName                 string     `json:"hostname"`
 	IsCoordinator            bool       `json:"iscoordinator"`
 	Nationality              int32      `json:"nationality"`
-	Location                 string     `json:"location"`
+	//Location                 string     `json:"location"`
 
 	PrivKey *rsa.PrivateKey `json:"-"`
 	Root    *SARootConfig   `json:"-"`
@@ -216,6 +218,8 @@ func DefaultInitConfig() *SAConfig {
 	sa.Uploadpath = "/upload"
 	sa.TestIPAddressPath = "/localipaddress"
 	sa.ListIpsPath = "/public/servers/list"
+	sa.ServerAdd = "/public/servers/add"
+	sa.ServerDelete = "/public/servers/delete"
 	sa.PostSocks5Path = "/postsocks5"
 	sa.PubkeyPath = "/pubkey/fetch"
 	sa.KeyDir = "key"
@@ -316,7 +320,6 @@ type ConfigInitParam struct {
 	Hostname    string
 	SS          string
 	Nationality int32
-	Location    string
 }
 
 func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
@@ -376,10 +379,10 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 		nds = true
 	}
 
-	if cip.Location != sar.SacInst.Location {
-		sar.SacInst.Location = cip.Location
-		nds = true
-	}
+	//if cip.Location != sar.SacInst.Location {
+	//	sar.SacInst.Location = cip.Location
+	//	nds = true
+	//}
 
 	filedbdir := ""
 

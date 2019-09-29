@@ -75,15 +75,14 @@ func newHomeIPDB() *HomeIPDB {
 }
 
 type Homeipdesc struct {
-	MachineName     string   `json:"MachineName"`
+	MachineName     string   `json:"MachineName,omitempty"`
 	NbsAddress      string   `json:"-"`
-	InternetAddress string   `json:"IAddress"`
-	NatAddress      []string `json:"nAddress"`
-	Nationality     int32    `json:"nationality"`
-	SSPort          int      `json:"port"`
-	SSPassword      string   `json:"password"`
-	Location        string   `json:"location"`
-	SSMethod        string   `json:"ssmethod"`
+	InternetAddress string   `json:"IAddress,omitempty"`
+	NatAddress      []string `json:"nAddress,omitempty"`
+	Nationality     int32    `json:"nationality,omitempty"`
+	SSPort          int      `json:"port,omitempty"`
+	SSPassword      string   `json:"password,omitempty"`
+	SSMethod        string   `json:"ssmethod,omitempty"`
 }
 
 func String2arr(ips string) []string {
@@ -120,7 +119,7 @@ func Insert(nbsaddress string, mn string, interAddress string, natAddress string
 	} else {
 		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress, NatAddress: String2arr(natAddress),
 			Nationality: ssr.Nationality,
-			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort, Location: ssr.Location, SSMethod: ssr.SSMethod}
+			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort,  SSMethod: ssr.SSMethod}
 	}
 
 	GetHomeIPDB().Insert(nbsaddress, hid)
@@ -178,7 +177,6 @@ func (hi *HomeIPDB) CmdShowAddress(nbsaddr string) string {
 	r += fmt.Sprintf("%-6s", strconv.Itoa(int(hid.SSPort)))
 	r += fmt.Sprintf("%-16s", hid.SSPassword)
 	r += fmt.Sprintf("%-16s", hid.SSMethod)
-	r += fmt.Sprintf("%-16s", hid.Location)
 
 	for _, nip := range hid.NatAddress {
 

@@ -7,6 +7,7 @@ import (
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
@@ -37,19 +38,19 @@ func (t *SATime) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type SSServerList struct {
-	CreateDate  SATime `json:"createdDate"`
-	LastModify  SATime `json:"lastModifiedDate"`
-	Version     int    `json:"version"`
-	NodeId      string `json:"id"`
+type SSServerListNode struct {
+	CreateDate  SATime `json:"createdDate,omitempty"`
+	LastModify  SATime `json:"lastModifiedDate,omitempty"`
+	Version     int    `json:"version,omitempty"`
+	NodeId      string `json:"id,omitempty"`
 	Name        string `json:"name"`
 	IPAddress   string `json:"ip"`
 	SSPort      int    `json:"port"`
 	SSPassword  string `json:"password"`
 	Location    string `json:"location"`
-	LosingTimes int    `json:"losingTimes"`
+	LosingTimes int    `json:"losingTimes,omitempty"`
 	Status      int    `json:"status"`
-	DeleteFlag  bool   `json:"deleteFlag"`
+	DeleteFlag  bool   `json:"deleteFlag,omitempty"`
 	Abroad      int    `json:"abroad"`
 }
 
@@ -67,7 +68,7 @@ func getServersListPostParam(platform string) (string, error) {
 	}
 }
 
-func GetServerList() []SSServerList {
+func GetServerList() []SSServerListNode {
 
 	var p string
 	var err error
@@ -84,7 +85,7 @@ func GetServerList() []SSServerList {
 		return nil
 	}
 
-	var ssl []SSServerList
+	var ssl []SSServerListNode
 
 	err = json.Unmarshal([]byte(ret), &ssl)
 
@@ -95,7 +96,6 @@ type SSReport struct {
 	Nationality int32  `json:"nationality"`
 	SSPort      int    `json:"port"`
 	SSPassword  string `json:"password"`
-	Location    string `json:"location"`
 	SSMethod    string `json:"ssmethod"`
 }
 
@@ -108,7 +108,6 @@ func GetSSReport() *SSReport {
 	ssr.SSPort = int(sac.ShadowSockPort)
 	ssr.SSPassword = sac.GetSSPasswd()
 	ssr.SSMethod = sac.GetSSMethod()
-	ssr.Location = sac.Location
 
 	return ssr
 }
@@ -132,4 +131,74 @@ func toSSReport(ssrstr string) *SSReport {
 	}
 
 	return ssr
+}
+
+func DeleteServer(ip string) {
+	jsonip := []string{ip}
+
+	bjip, err := json.Marshal(jsonip)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	fmt.Println(string(bjip))
+
+	ret, code, err := common.Post(common.GetRemoteUrlInst().GetHostName(common.GetSAConfig().ServerDelete), string(bjip))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if code != 200 {
+		log.Println("ServerDelete Post response code", code)
+		return
+	}
+
+	if !strings.Contains(strings.ToUpper(ret), "OK") {
+		log.Println("Delete Server Internal error", ip)
+		return
+	}
+
+	return
+
+}
+
+func AddServer(nbsaddr string,hi *Homeipdesc) {
+
+	ssnode:=&SSServerListNode{}
+	ssnode.SSPort = hi.SSPort
+	ssnode.SSPassword = hi.SSPassword
+	ssnode.IPAddress = hi.InternetAddress
+	ssnode.Location = hi.MachineName
+	if hi.Nationality == 86{
+		ssnode.Abroad = 0
+	}else{
+		ssnode.Abroad = 1
+	}
+	ssnode.Name = nbsaddr
+	ssnode.Status = 1
+
+
+	hdarr := []*SSServerListNode{ssnode}
+	bjhda, err := json.Marshal(hdarr)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	fmt.Println(string(bjhda))
+
+	ret, code, err := common.Post(common.GetRemoteUrlInst().GetHostName(common.GetSAConfig().ServerAdd), string(bjhda))
+	if err != nil {
+		log.Println(err)
+	}
+	if code != 200 {
+		log.Println("ServerAdd Post response code", code)
+		return
+	}
+	if !strings.Contains(strings.ToUpper(ret), "OK") {
+		log.Println("ServerAdd Server Internal error", hi.InternetAddress)
+		return
+	}
+
 }
