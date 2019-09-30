@@ -219,11 +219,12 @@ func DownloadFileCmdSend(hostip string, filename string, filesavepath string) {
 	}
 }
 
-func SServerCmdSend(op int32, nas int32, local bool) {
+func SServerCmdSend(op int32, nas int32, local bool, ip string) {
 	req := &pb.SSServerReq{}
 	req.Op = op
 	req.Nationality = nas
 	req.Local = local
+	req.Ip = ip
 	conn := DialToCmdService()
 	defer conn.Close()
 

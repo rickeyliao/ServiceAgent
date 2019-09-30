@@ -15,38 +15,31 @@
 package cmd
 
 import (
-	"github.com/rickeyliao/ServiceAgent/app"
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
-var ssserverNationality int32
-
-// ssserverCmd represents the ssserver command
-var ssserverCmd = &cobra.Command{
-	Use:   "ssserver",
-	Short: "Show Shadowsock Server List",
-	Long:  `Show Shadowsock Server List`,
+// removeCmd represents the remove command
+var removeCmd = &cobra.Command{
+	Use:   "remove",
+	Short: "remove remote server",
+	Long:  `remove remote server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !CheckProcessReady() {
-			return
-		}
-		SServerCmdSend(app.CMD_SSSERVER_SHOW, ssserverNationality, false, "")
+		fmt.Println("remove called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(ssserverCmd)
+	ssserverCmd.AddCommand(removeCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// ssserverCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// removeCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// ssserverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-	ssserverCmd.PersistentFlags().Int32VarP(&ssserverNationality, "nationality", "n", 0,
-		"set nationality:American 1,china mainland 86")
+	// removeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

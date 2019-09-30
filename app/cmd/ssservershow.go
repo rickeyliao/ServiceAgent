@@ -15,10 +15,11 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/rickeyliao/ServiceAgent/app"
 	"github.com/spf13/cobra"
 )
+
+var ssservershowlocal bool
 
 // showCmd represents the show command
 var ssservershowCmd = &cobra.Command{
@@ -26,7 +27,10 @@ var ssservershowCmd = &cobra.Command{
 	Short: "Show SS Server List",
 	Long:  "Show SS Server List",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("show called")
+		if !CheckProcessReady() {
+			return
+		}
+		SServerCmdSend(app.CMD_SSSERVER_SHOW, ssserverNationality, ssservershowlocal, "")
 	},
 }
 
@@ -42,4 +46,8 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// showCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	ssservershowCmd.Flags().BoolVarP(&ssservershowlocal, "local", "l", false,
+		"show reported servers or show remote server configuration")
+
 }
