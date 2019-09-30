@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
+	"github.com/pkg/errors"
+	"github.com/rickeyliao/ServiceAgent/app"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -22,6 +25,7 @@ type SATime struct {
 }
 
 func (t *SATime) MarshalJSON() ([]byte, error) {
+
 	satime := fmt.Sprintf("\"%s\"", t.Format("2006-01-02 15:04:05"))
 
 	return []byte(satime), nil
@@ -39,19 +43,19 @@ func (t *SATime) UnmarshalJSON(data []byte) error {
 }
 
 type SSServerListNode struct {
-	CreateDate  SATime `json:"createdDate,omitempty"`
-	LastModify  SATime `json:"lastModifiedDate,omitempty"`
-	Version     int    `json:"version,omitempty"`
-	NodeId      string `json:"id,omitempty"`
-	Name        string `json:"name"`
-	IPAddress   string `json:"ip"`
-	SSPort      int    `json:"port"`
-	SSPassword  string `json:"password"`
-	Location    string `json:"location"`
-	LosingTimes int    `json:"losingTimes,omitempty"`
-	Status      int    `json:"status"`
-	DeleteFlag  bool   `json:"deleteFlag,omitempty"`
-	Abroad      int    `json:"abroad"`
+	CreateDate  *SATime `json:"createdDate,omitempty"`
+	LastModify  *SATime `json:"lastModifiedDate,omitempty"`
+	Version     int     `json:"version,omitempty"`
+	NodeId      string  `json:"id,omitempty"`
+	Name        string  `json:"name"`
+	IPAddress   string  `json:"ip"`
+	SSPort      int     `json:"port"`
+	SSPassword  string  `json:"password"`
+	Location    string  `json:"location"`
+	LosingTimes int     `json:"losingTimes,omitempty"`
+	Status      int     `json:"status"`
+	DeleteFlag  bool    `json:"deleteFlag,omitempty"`
+	Abroad      int     `json:"abroad"`
 }
 
 type ServerListPost struct {
@@ -133,13 +137,12 @@ func toSSReport(ssrstr string) *SSReport {
 	return ssr
 }
 
-func DeleteServer(ip string) {
-	jsonip := []string{ip}
+func DeleteServer(ips []string) error {
 
-	bjip, err := json.Marshal(jsonip)
+	bjip, err := json.Marshal(ips)
 	if err != nil {
 		log.Println(err)
-		return
+		return errors.New("Internal Error")
 	}
 
 	fmt.Println(string(bjip))
@@ -147,43 +150,42 @@ func DeleteServer(ip string) {
 	ret, code, err := common.Post(common.GetRemoteUrlInst().GetHostName(common.GetSAConfig().ServerDelete), string(bjip))
 	if err != nil {
 		log.Println(err)
-		return
+		return errors.New("Can't interactive with remote server")
 	}
 	if code != 200 {
 		log.Println("ServerDelete Post response code", code)
-		return
+		return errors.New("Remote Server Response error code:" + strconv.Itoa(code))
 	}
 
 	if !strings.Contains(strings.ToUpper(ret), "OK") {
-		log.Println("Delete Server Internal error", ip)
-		return
+		log.Println("Delete Server Internal error", ips)
+		return errors.New("Remote Server Response a error message:" + ret)
 	}
 
-	return
+	return nil
 
 }
 
-func AddServer(nbsaddr string,hi *Homeipdesc) {
+func AddServer(nbsaddr string, hi *Homeipdesc) error {
 
-	ssnode:=&SSServerListNode{}
+	ssnode := &SSServerListNode{}
 	ssnode.SSPort = hi.SSPort
 	ssnode.SSPassword = hi.SSPassword
 	ssnode.IPAddress = hi.InternetAddress
 	ssnode.Location = hi.MachineName
-	if hi.Nationality == 86{
+	if hi.Nationality == 86 {
 		ssnode.Abroad = 0
-	}else{
+	} else {
 		ssnode.Abroad = 1
 	}
 	ssnode.Name = nbsaddr
 	ssnode.Status = 1
 
-
 	hdarr := []*SSServerListNode{ssnode}
 	bjhda, err := json.Marshal(hdarr)
 	if err != nil {
 		log.Println(err)
-		return
+		return errors.New("Internal Error")
 	}
 
 	fmt.Println(string(bjhda))
@@ -191,14 +193,79 @@ func AddServer(nbsaddr string,hi *Homeipdesc) {
 	ret, code, err := common.Post(common.GetRemoteUrlInst().GetHostName(common.GetSAConfig().ServerAdd), string(bjhda))
 	if err != nil {
 		log.Println(err)
+		return errors.New("Can't interactive with remote server")
 	}
 	if code != 200 {
 		log.Println("ServerAdd Post response code", code)
-		return
+		return errors.New("Remote Server Response error code:" + strconv.Itoa(code))
 	}
 	if !strings.Contains(strings.ToUpper(ret), "OK") {
 		log.Println("ServerAdd Server Internal error", hi.InternetAddress)
-		return
+		return errors.New("Remote Server Response a error message:" + ret)
 	}
 
+	return nil
+
+}
+
+func CmdDeleteServer(nationality int32) string {
+	l := GetServerList()
+
+	ips := make([]string, 0)
+
+	for _, n := range l {
+		if nationality == app.NATIONALITY_AMERICAN && n.Abroad == app.ABROAD_AMERICAN {
+			ips = append(ips, n.IPAddress)
+		}
+		if nationality != 0 && nationality > app.NATIONALITY_AMERICAN && n.Abroad == app.ABROAD_CHINA_MAINLAND {
+			ips = append(ips, n.IPAddress)
+		}
+		if nationality == 0 {
+			ips = append(ips, n.IPAddress)
+		}
+
+	}
+
+	err := DeleteServer(ips)
+	if err != nil {
+		log.Println(err)
+		return "Internal error,Please check the error log"
+	} else {
+		return deleteCmdMsg(ips)
+	}
+
+}
+
+func CmdDeleteServerByIP(ip string) string {
+	ips := []string{ip}
+
+	err := DeleteServer(ips)
+	if err != nil {
+		log.Println(err)
+		return "Internal error,Please check the error log"
+	} else {
+		return deleteCmdMsg(ips)
+	}
+
+}
+
+func deleteCmdMsg(ips []string) string {
+	message := ""
+
+	if len(ips) > 0 {
+
+		for _, ip := range ips {
+			if message == "" {
+				message = "Delete Server List:"
+			}
+			message += "\r\n"
+
+			message += fmt.Sprintf("        %-20s", ip)
+		}
+
+	} else {
+		message = "no IP delete"
+	}
+
+	return message
 }

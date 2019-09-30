@@ -119,7 +119,7 @@ func Insert(nbsaddress string, mn string, interAddress string, natAddress string
 	} else {
 		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress, NatAddress: String2arr(natAddress),
 			Nationality: ssr.Nationality,
-			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort,  SSMethod: ssr.SSMethod}
+			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort, SSMethod: ssr.SSMethod}
 	}
 
 	GetHomeIPDB().Insert(nbsaddress, hid)

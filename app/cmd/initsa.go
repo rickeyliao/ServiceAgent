@@ -26,6 +26,7 @@ var iscoord bool
 var machinename string
 var shadowsockParam string
 var nationality int32
+
 //var sslocation string
 
 // initCmd represents the init command
