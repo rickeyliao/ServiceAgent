@@ -333,7 +333,7 @@ func CmdShowAddressAll(nas int32) string {
 
 	fmt.Println("CmdShowAddressAll......")
 	hi := GetHomeIPDB()
-
+	fmt.Println("CmdShowAddressAll.=======")
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
 
