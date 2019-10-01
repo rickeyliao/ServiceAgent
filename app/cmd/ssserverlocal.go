@@ -15,8 +15,7 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/rickeyliao/ServiceAgent/app"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +25,10 @@ var ssserverlocalCmd = &cobra.Command{
 	Short: "Show SS Server List From Node Report",
 	Long:  "Show SS Server List From Node Report",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("local called")
+		if !CheckProcessReady() {
+			return
+		}
+		SServerCmdSend(app.CMD_SSSERVER_SHOW, ssserverNationality, true, "","")
 	},
 }
 

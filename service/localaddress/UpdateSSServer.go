@@ -173,10 +173,10 @@ func AddServer(nbsaddr string, hi *Homeipdesc) error {
 	ssnode.SSPassword = hi.SSPassword
 	ssnode.IPAddress = hi.InternetAddress
 	ssnode.Location = hi.MachineName
-	if hi.Nationality == 86 {
-		ssnode.Abroad = 0
+	if hi.Nationality == app.NATIONALITY_CHINA_MAINLAND {
+		ssnode.Abroad = app.ABROAD_CHINA_MAINLAND
 	} else {
-		ssnode.Abroad = 1
+		ssnode.Abroad = app.ABROAD_AMERICAN
 	}
 	ssnode.Name = nbsaddr
 	ssnode.Status = 1
@@ -266,6 +266,111 @@ func deleteCmdMsg(ips []string) string {
 	} else {
 		message = "no IP delete"
 	}
+
+	return message
+}
+
+func getServer(srvl []SSServerListNode,nbsaddr string) *SSServerListNode  {
+	for _,ssl:=range srvl{
+		if ssl.Name == nbsaddr{
+			return &ssl
+		}
+	}
+
+	return nil
+}
+
+
+func UpdateServer(nas int32, ip string, nbsaddr string) string {
+	srvl := GetServerList()
+
+	delsrv := make([]string, 0)
+	addsrv := make([]*Homeipdesc, 0)
+
+	if ip != "" {
+		nbsaddr = GetNbsAddrByIP(ip)
+		if nbsaddr == "" {
+			return "Not found the Server by ip"
+		}
+	}
+
+	if nbsaddr != ""{
+		ssl:=getServer(srvl,nbsaddr)
+		if ssl != nil{
+			d,a,hid:=UpdateToServer(ssl)
+			if d{
+				delsrv = append(delsrv,ssl.IPAddress)
+			}
+			if a{
+				addsrv = append(addsrv,hid)
+			}
+		}else{
+			hid:=GetHomeIPDescByNbsaddr(nbsaddr)
+			addsrv = append(addsrv,hid)
+		}
+	}else{
+		arrssl:=make([]*SSServerListNode,0)
+
+		for _,ssl:=range srvl{
+			if (nas == 0) ||
+				(nas==app.NATIONALITY_CHINA_MAINLAND && ssl.Abroad == app.ABROAD_CHINA_MAINLAND) ||
+				((nas ==app.NATIONALITY_AMERICAN ||
+					nas == app.NATIONALITY_JAPANESE ||
+					nas == app.NATIONALITY_SINGAPORE ||
+					nas == app.NATIONALITY_ENGLAND) && ssl.Abroad == app.ABROAD_AMERICAN){
+				arrssl = append(arrssl,&ssl)
+			}
+		}
+
+		UpdateToServers(arrssl,delsrv,addsrv,nas)
+
+	}
+
+	messageDel := ""
+
+	delfault := false
+
+	if len(delsrv) > 0{
+		if err:=DeleteServer(delsrv);err==nil{
+			messageDel = "Delete ips:\r\n" + deleteCmdMsg(delsrv)
+		}else{
+			log.Println("del ips failed",delsrv)
+			delfault = true
+		}
+	}
+
+	messageAdd := ""
+
+	addfault := false
+
+	if len(addsrv)>0{
+
+		for _,add:=range addsrv{
+			if err:=AddServer(add.NbsAddress,add);err==nil{
+				if messageAdd == ""{
+					messageAdd += "Add Server List:\r\n"
+				}
+				messageAdd += fmt.Sprintf("%-48s",add.NbsAddress)
+				messageAdd += fmt.Sprintf("%-18s",add.InternetAddress)
+				messageAdd += "\r\n"
+			}else{
+				addfault = true
+			}
+		}
+	}
+
+	if messageDel != ""{
+		messageDel += "\r\n"
+	}
+
+	message:=messageDel + messageAdd
+
+	if message == ""{
+		if delfault || addfault {
+			message = "Something wrong"
+		}
+	}
+
 
 	return message
 }

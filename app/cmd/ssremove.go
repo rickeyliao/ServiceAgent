@@ -15,23 +15,40 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/rickeyliao/ServiceAgent/app"
 	"github.com/spf13/cobra"
+	"log"
+	"net"
 )
 
 // removeCmd represents the remove command
-var removeCmd = &cobra.Command{
+var ssremoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "remove remote server",
 	Long:  `remove remote server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("remove called")
+		if !CheckProcessReady() {
+			return
+		}
+
+		ip := ""
+
+		if len(args) > 0 {
+			if len(args[0]) > 0 {
+				if _, err := net.ResolveIPAddr("ip", args[0]); err != nil {
+					log.Println("ip address error", args[0], err)
+					return
+				}
+				ip = args[0]
+			}
+		}
+
+		SServerCmdSend(app.CMD_SSSERVER_REMOVE, ssserverNationality, false, ip,"")
 	},
 }
 
 func init() {
-	ssserverCmd.AddCommand(removeCmd)
+	ssserverCmd.AddCommand(ssremoveCmd)
 
 	// Here you will define your flags and configuration settings.
 

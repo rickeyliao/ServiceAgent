@@ -20,6 +20,9 @@ func (css *CmdSSServer) SSServerDo(ctx context.Context, req *pb.SSServerReq) (*p
 		return css.show(req)
 	case app.CMD_SSSERVER_UPDATE:
 		return css.update(req)
+	case app.CMD_SSSERVER_REMOVE:
+		return css.remove(req)
+
 	}
 
 	return encResp("Command Not found"), nil
@@ -55,7 +58,14 @@ func (css *CmdSSServer) show(req *pb.SSServerReq) (*pb.DefaultResp, error) {
 }
 
 func (css *CmdSSServer) showlocal(req *pb.SSServerReq) (*pb.DefaultResp, error) {
-	return nil, nil
+
+	message := localaddress.CmdShowAddressAll(req.Nationality)
+
+	if message == "" {
+		message = "No Server List"
+	}
+
+	return encResp(message), nil
 }
 func (css *CmdSSServer) showremote(req *pb.SSServerReq) (*pb.DefaultResp, error) {
 
@@ -144,5 +154,20 @@ func getNodeStatus(status int) string {
 }
 
 func (css *CmdSSServer) update(req *pb.SSServerReq) (*pb.DefaultResp, error) {
-	return encResp(""), nil
+	message:=localaddress.UpdateServer(req.Nationality,req.Ip,req.Nbsaddr)
+	if message == ""{
+		message = "Nothing to do..."
+	}
+	return encResp(message), nil
+}
+
+func (css *CmdSSServer) remove(req *pb.SSServerReq) (*pb.DefaultResp, error) {
+	msg := ""
+	if req.Ip != "" {
+		msg = localaddress.CmdDeleteServerByIP(req.Ip)
+	} else {
+		msg = localaddress.CmdDeleteServer(req.Nationality)
+	}
+
+	return encResp(msg), nil
 }

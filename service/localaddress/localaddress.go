@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-type localaddress struct {
+type localaddresssrv struct {
 }
 
 func NewLocalAddress() http.Handler {
-	return &localaddress{}
+	return &localaddresssrv{}
 }
 
-func (la *localaddress) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (la *localaddresssrv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		fmt.Fprintf(w, "{}")
 		return

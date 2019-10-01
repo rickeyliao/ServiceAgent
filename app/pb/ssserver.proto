@@ -10,6 +10,7 @@ message SSServerReq{
     int32 nationality=2;
     bool local=3;
     string ip=4;
+    string nbsaddr=5;
 }
 
 

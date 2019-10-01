@@ -30,7 +30,7 @@ var ssserverCmd = &cobra.Command{
 		if !CheckProcessReady() {
 			return
 		}
-		SServerCmdSend(app.CMD_SSSERVER_SHOW, ssserverNationality, false, "")
+		SServerCmdSend(app.CMD_SSSERVER_SHOW, ssserverNationality, false, "","")
 	},
 }
 

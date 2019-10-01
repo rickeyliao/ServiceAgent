@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/rickeyliao/ServiceAgent/app"
 )
 
 type HomeIPDB struct {
@@ -55,6 +56,8 @@ func memDBLoad(memdb map[string]*Homeipdesc, fdb db.NbsDbInter) {
 		if err != nil {
 			continue
 		}
+
+		hid.NbsAddress = k
 
 		memdb[k] = hid
 	}
@@ -101,6 +104,117 @@ func LocalIPArr2string(iparr []string) string {
 
 	return ips
 }
+
+func GetNbsAddrByIP(ip string) string {
+	hi := GetHomeIPDB()
+
+	hi.memdblock.Lock()
+	defer hi.memdblock.Unlock()
+
+	for k, v := range hi.memdb {
+		if v.InternetAddress == ip {
+			return k
+		}
+	}
+
+	return ""
+
+}
+
+func GetHomeIPDescByNbsaddr(nbsaddr string) *Homeipdesc {
+	hi := GetHomeIPDB()
+	hi.memdblock.Lock()
+	defer hi.memdblock.Unlock()
+
+	v,_:=hi.memdb[nbsaddr]
+
+	return v.Clone()
+}
+
+
+func (hid *Homeipdesc)Clone() *Homeipdesc {
+	hid1:=&Homeipdesc{}
+
+	*hid1 = *hid
+
+	nataddrs:=make([]string,0)
+
+	for _,addr:=range hid.NatAddress{
+		nataddrs = append(nataddrs,addr)
+	}
+
+	hid1.NatAddress = nataddrs
+
+	return hid1
+}
+
+
+func UpdateToServer(sn *SSServerListNode) (del,add bool, hid *Homeipdesc) {
+	hi:=GetHomeIPDB()
+	hi.memdblock.Lock()
+	defer hi.memdblock.Unlock()
+
+	delflag:=false
+	addflag:=false
+
+	v,ok:=hi.memdb[sn.Name]
+	if !ok{
+		delflag = true
+	}else{
+		if sn.IPAddress != v.InternetAddress || sn.SSPassword != v.SSPassword || sn.SSPort != v.SSPort {
+			delflag = true
+			addflag = true
+		}
+	}
+
+	return delflag,addflag,v.Clone()
+}
+
+func UpdateToServers(srvl []*SSServerListNode,delsrv []string,addsrv []*Homeipdesc,nas int32)  {
+	hi:=GetHomeIPDB()
+	hi.memdblock.Lock()
+	defer hi.memdblock.Unlock()
+
+	memhids:=make(map[string]*Homeipdesc,0)
+
+	for k,v:=range hi.memdb{
+		if nas == 0 ||
+			(nas == app.NATIONALITY_CHINA_MAINLAND && v.Nationality == nas) ||
+			(nas >0 && v.Nationality == app.NATIONALITY_AMERICAN) ||
+			(nas >0 && v.Nationality == app.NATIONALITY_JAPANESE) ||
+			(nas >0 && v.Nationality == app.NATIONALITY_SINGAPORE) ||
+			(nas >0 && v.Nationality == app.NATIONALITY_ENGLAND){
+			memhids[k] = v
+		}
+	}
+
+	keys:=make(map[string]struct{},0)
+
+	for _,ssl:=range srvl{
+		keys[ssl.Name]= struct{}{}
+		v,ok:=memhids[ssl.Name]
+		if !ok{
+			delsrv = append(delsrv,v.NbsAddress)
+		}else{
+			if ssl.IPAddress != v.InternetAddress || ssl.SSPassword != v.SSPassword || ssl.SSPort !=  v.SSPort{
+				delsrv = append(delsrv,ssl.Name)
+				v.NbsAddress = ssl.Name
+				addsrv = append(addsrv,v)
+			}
+		}
+	}
+
+	for k,v:=range memhids{
+		if _,ok:=keys[k];!ok{
+			v.NbsAddress = k
+			addsrv = append(addsrv,v)
+		}
+	}
+
+	return
+}
+
+
 
 func Insert(nbsaddress string, mn string, interAddress string, natAddress string, ssr *SSReport) error {
 
@@ -150,6 +264,7 @@ func (hi *HomeIPDB) memdbInsert(nbsaddr string, hid *Homeipdesc) {
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
 
+	hid.NbsAddress = nbsaddr
 	hi.memdb[nbsaddr] = hid
 }
 
@@ -186,20 +301,23 @@ func (hi *HomeIPDB) CmdShowAddress(nbsaddr string) string {
 	return r
 }
 
-func CmdShowAddressAll() string {
+func CmdShowAddressAll(nas int32) string {
 	hi := GetHomeIPDB()
 
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
 
-	return hi.CmdShowAddressAll()
+	return hi.CmdShowAddressAll(nas)
 
 }
 
-func (hi *HomeIPDB) CmdShowAddressAll() string {
+func (hi *HomeIPDB) CmdShowAddressAll(nas int32) string {
 
 	alls := ""
-	for k, _ := range hi.memdb {
+	for k, v := range hi.memdb {
+		if v.Nationality != 0 && v.Nationality != nas {
+			continue
+		}
 		if alls != "" {
 			alls += "\r\n"
 		}
