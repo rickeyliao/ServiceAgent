@@ -51,6 +51,9 @@ func memDBLoad(memdb map[string]*Homeipdesc, fdb db.NbsDbInter) {
 
 	for {
 		k, v := dbcusor.Next()
+		if k == ""{
+			return
+		}
 		hid := &Homeipdesc{}
 		err := json.Unmarshal([]byte(v), hid)
 		if err != nil {
