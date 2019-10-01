@@ -106,10 +106,14 @@ func LocalIPArr2string(iparr []string) string {
 }
 
 func GetNbsAddrByIP(ip string) string {
+
+	fmt.Println("GetNbsAddrByIP......")
 	hi := GetHomeIPDB()
 
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
+
+	fmt.Println("GetNbsAddrByIP------")
 
 	for k, v := range hi.memdb {
 		if v.InternetAddress == ip {
@@ -122,9 +126,12 @@ func GetNbsAddrByIP(ip string) string {
 }
 
 func GetHomeIPDescByNbsaddr(nbsaddr string) *Homeipdesc {
+
+	fmt.Println("GetHomeIPDescByNbsaddr......")
 	hi := GetHomeIPDB()
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
+	fmt.Println("GetHomeIPDescByNbsaddr-----")
 
 	v,_:=hi.memdb[nbsaddr]
 
@@ -150,9 +157,12 @@ func (hid *Homeipdesc)Clone() *Homeipdesc {
 
 
 func UpdateToServer(sn *SSServerListNode) (del,add bool, hid *Homeipdesc) {
+
+	fmt.Println("UpdateToServer......")
 	hi:=GetHomeIPDB()
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
+	fmt.Println("UpdateToServer-----")
 
 	delflag:=false
 	addflag:=false
@@ -176,9 +186,13 @@ func UpdateToServer(sn *SSServerListNode) (del,add bool, hid *Homeipdesc) {
 }
 
 func UpdateToServers(srvl []*SSServerListNode,delsrv []string,addsrv []*Homeipdesc,nas int32)  {
+
+	fmt.Println("UpdateToServers......")
 	hi:=GetHomeIPDB()
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
+
+	fmt.Println("UpdateToServers------")
 
 	memhids:=make(map[string]*Homeipdesc,0)
 
@@ -268,8 +282,10 @@ func (hi *HomeIPDB) Insert(nbsaddr string, hid *Homeipdesc) error {
 }
 
 func (hi *HomeIPDB) memdbInsert(nbsaddr string, hid *Homeipdesc) {
+	fmt.Println("memdbInsert......")
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
+	fmt.Println("memdbInsert.-----")
 
 	hid.NbsAddress = nbsaddr
 	hi.memdb[nbsaddr] = hid
@@ -277,11 +293,14 @@ func (hi *HomeIPDB) memdbInsert(nbsaddr string, hid *Homeipdesc) {
 
 func CmdShowAddress(nbsaddr string) string {
 
+	fmt.Println("CmdShowAddress...")
 
 	hi := GetHomeIPDB()
 
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
+
+	fmt.Println("CmdShowAddress---")
 
 	return hi.CmdShowAddress(nbsaddr)
 }
@@ -312,13 +331,13 @@ func (hi *HomeIPDB) CmdShowAddress(nbsaddr string) string {
 
 func CmdShowAddressAll(nas int32) string {
 
-	fmt.Println("test......")
+	fmt.Println("CmdShowAddressAll......")
 	hi := GetHomeIPDB()
 
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
 
-	fmt.Println("CmdShowAddressAll...")
+	fmt.Println("CmdShowAddressAll----")
 
 	return hi.CmdShowAddressAll(nas)
 
