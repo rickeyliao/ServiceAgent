@@ -157,7 +157,12 @@ func UpdateToServer(sn *SSServerListNode) (del,add bool, hid *Homeipdesc) {
 	delflag:=false
 	addflag:=false
 
+
+
 	v,ok:=hi.memdb[sn.Name]
+	if v.SSPassword == ""{
+		return
+	}
 	if !ok{
 		delflag = true
 	}else{
@@ -184,7 +189,9 @@ func UpdateToServers(srvl []*SSServerListNode,delsrv []string,addsrv []*Homeipde
 			(nas >0 && v.Nationality == app.NATIONALITY_JAPANESE) ||
 			(nas >0 && v.Nationality == app.NATIONALITY_SINGAPORE) ||
 			(nas >0 && v.Nationality == app.NATIONALITY_ENGLAND){
-			memhids[k] = v
+				if v.SSPassword != ""{
+					memhids[k] = v
+				}
 		}
 	}
 

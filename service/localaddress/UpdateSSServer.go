@@ -306,7 +306,9 @@ func UpdateServer(nas int32, ip string, nbsaddr string) string {
 			}
 		}else{
 			hid:=GetHomeIPDescByNbsaddr(nbsaddr)
-			addsrv = append(addsrv,hid)
+			if hid.SSPassword != ""{
+				addsrv = append(addsrv,hid)
+			}
 		}
 	}else{
 		arrssl:=make([]*SSServerListNode,0)
