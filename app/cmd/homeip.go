@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"fmt"
 )
 
 // homeipCmd represents the homeip command
@@ -27,6 +28,7 @@ var homeipCmd = &cobra.Command{
 		if !CheckProcessReady() {
 			return
 		}
+		fmt.Println("homeip cmd ...")
 		nbsaddr := ""
 		if len(args) > 0 {
 			nbsaddr = args[0]

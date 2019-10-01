@@ -276,6 +276,8 @@ func (hi *HomeIPDB) memdbInsert(nbsaddr string, hid *Homeipdesc) {
 }
 
 func CmdShowAddress(nbsaddr string) string {
+
+
 	hi := GetHomeIPDB()
 
 	hi.memdblock.Lock()
@@ -309,10 +311,14 @@ func (hi *HomeIPDB) CmdShowAddress(nbsaddr string) string {
 }
 
 func CmdShowAddressAll(nas int32) string {
+
+	fmt.Println("test......")
 	hi := GetHomeIPDB()
 
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
+
+	fmt.Println("CmdShowAddressAll...")
 
 	return hi.CmdShowAddressAll(nas)
 
