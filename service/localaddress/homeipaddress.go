@@ -172,14 +172,18 @@ func UpdateToServer(sn *SSServerListNode) (del,add bool, hid *Homeipdesc) {
 	}
 	if !ok{
 		delflag = true
+
 	}else{
 		if sn.IPAddress != v.InternetAddress || sn.SSPassword != v.SSPassword || sn.SSPort != v.SSPort {
 			delflag = true
 			addflag = true
+			hid = v.Clone()
 		}
 	}
 
-	return delflag,addflag,v.Clone()
+
+
+	return delflag,addflag,hid
 }
 
 func UpdateToServers(srvl []*SSServerListNode,delsrv []string,addsrv []*Homeipdesc,nas int32)  {
@@ -210,7 +214,7 @@ func UpdateToServers(srvl []*SSServerListNode,delsrv []string,addsrv []*Homeipde
 		keys[ssl.Name]= struct{}{}
 		v,ok:=memhids[ssl.Name]
 		if !ok{
-			delsrv = append(delsrv,v.NbsAddress)
+			delsrv = append(delsrv,ssl.Name)
 		}else{
 			if ssl.IPAddress != v.InternetAddress || ssl.SSPassword != v.SSPassword || ssl.SSPort !=  v.SSPort{
 				delsrv = append(delsrv,ssl.Name)
