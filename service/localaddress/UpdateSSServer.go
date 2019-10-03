@@ -348,7 +348,7 @@ func UpdateServer(nas int32, ip string, nbsaddr string) string {
 	if len(addsrv)>0{
 
 		for _,add:=range addsrv{
-			if err:=AddServer(add.NbsAddress,add);err==nil{
+			if err:=AddServer(add.NbsAddress[0:16],add);err==nil{
 				if messageAdd == ""{
 					messageAdd += "Add Server List:\r\n"
 				}
