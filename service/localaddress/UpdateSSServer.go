@@ -324,7 +324,7 @@ func UpdateServer(nas int32, ip string, nbsaddr string) string {
 			}
 		}
 
-		UpdateToServers(arrssl,delsrv,addsrv,nas)
+		UpdateToServers(arrssl,&delsrv,&addsrv,nas)
 
 	}
 

@@ -186,7 +186,7 @@ func UpdateToServer(sn *SSServerListNode) (del,add bool, hid *Homeipdesc) {
 	return delflag,addflag,hid
 }
 
-func UpdateToServers(srvl []*SSServerListNode,delsrv []string,addsrv []*Homeipdesc,nas int32)  {
+func UpdateToServers(srvl []*SSServerListNode,delsrv *[]string,addsrv *[]*Homeipdesc,nas int32)  {
 
 	hi:=GetHomeIPDB()
 	hi.memdblock.Lock()
@@ -214,20 +214,21 @@ func UpdateToServers(srvl []*SSServerListNode,delsrv []string,addsrv []*Homeipde
 		keys[ssl.Name]= struct{}{}
 		v,ok:=memhids[ssl.Name]
 		if !ok{
-			delsrv = append(delsrv,ssl.Name)
+			*delsrv = append(*delsrv,ssl.Name)
 		}else{
 			if ssl.IPAddress != v.InternetAddress || ssl.SSPassword != v.SSPassword || ssl.SSPort !=  v.SSPort{
-				delsrv = append(delsrv,ssl.Name)
+				*delsrv = append(*delsrv,ssl.Name)
 				v.NbsAddress = ssl.Name
-				addsrv = append(addsrv,v)
+				*addsrv = append(*addsrv,v)
 			}
 		}
 	}
 
 	for k,v:=range memhids{
+
 		if _,ok:=keys[k];!ok{
 			v.NbsAddress = k
-			addsrv = append(addsrv,v)
+			*addsrv = append(*addsrv,v)
 		}
 	}
 
