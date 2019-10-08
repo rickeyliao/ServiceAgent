@@ -340,7 +340,7 @@ func (hi *HomeIPDB) CmdShowAddressAll(nas int32) string {
 
 	alls := ""
 	for k, v := range hi.memdb {
-		if v.Nationality != 0 && v.Nationality != nas {
+		if nas != 0 && v.Nationality != nas {
 			continue
 		}
 		if alls != "" {
