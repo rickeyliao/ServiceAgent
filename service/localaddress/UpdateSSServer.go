@@ -361,14 +361,16 @@ func UpdateServer(nas int32, ip string, nbsaddr string) string {
 	}else{
 		arrssl:=make([]*SSServerListNode,0)
 
-		for _,ssl:=range srvl{
+
+		for i:=0;i<len(srvl);i++{
+			ssl:=&srvl[i]
 			if (nas == 0) ||
 				(nas==app.NATIONALITY_CHINA_MAINLAND && ssl.Abroad == app.ABROAD_CHINA_MAINLAND) ||
 				((nas ==app.NATIONALITY_AMERICAN ||
 					nas == app.NATIONALITY_JAPANESE ||
 					nas == app.NATIONALITY_SINGAPORE ||
-					nas == app.NATIONALITY_ENGLAND) && ssl.Abroad == app.ABROAD_AMERICAN){
-				arrssl = append(arrssl,&ssl)
+					nas == app.NATIONALITY_ENGLAND) && ssl.Abroad == app.ABROAD_AMERICAN) {
+				arrssl = append(arrssl,ssl)
 			}
 		}
 
