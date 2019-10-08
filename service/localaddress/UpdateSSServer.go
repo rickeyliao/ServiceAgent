@@ -145,7 +145,7 @@ func DeleteServer(ips []string) error {
 		return errors.New("Internal Error")
 	}
 
-	fmt.Println(string(bjip))
+	//fmt.Println(string(bjip))
 
 	ret, code, err := common.Post(common.GetRemoteUrlInst().GetHostName(common.GetSAConfig().ServerDelete), string(bjip))
 	if err != nil {

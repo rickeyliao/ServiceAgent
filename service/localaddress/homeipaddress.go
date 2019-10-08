@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/rickeyliao/ServiceAgent/app"
+	"log"
 )
 
 type HomeIPDB struct {
@@ -215,6 +216,7 @@ func UpdateToServers(srvl []*SSServerListNode,delsrv *[]string,addsrv *[]*Homeip
 		v,ok:=memhids[ssl.Name]
 		if !ok{
 			*delsrv = append(*delsrv,ssl.IPAddress)
+			log.Println(ssl.IPAddress)
 		}else{
 			if ssl.IPAddress != v.InternetAddress || ssl.SSPassword != v.SSPassword || ssl.SSPort !=  v.SSPort{
 				*delsrv = append(*delsrv,ssl.IPAddress)
