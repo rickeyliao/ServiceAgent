@@ -3,12 +3,10 @@ package api
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"github.com/kprc/nbsnetwork/common/list"
 	"github.com/rickeyliao/ServiceAgent/app"
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"github.com/rickeyliao/ServiceAgent/service/localaddress"
-	"strconv"
 )
 
 type CmdSSServer struct {
@@ -104,14 +102,7 @@ func (css *CmdSSServer) showremote(req *pb.SSServerReq) (*pb.DefaultResp, error)
 		if len(message) > 0 {
 			message += "\r\n"
 		}
-		message += fmt.Sprintf("%-48s", trim(ssl.Name, 46))
-		message += fmt.Sprintf("%-18s", ssl.IPAddress)
-		message += fmt.Sprintf("%-8s", strconv.Itoa(ssl.SSPort))
-		message += fmt.Sprintf("%-20s", trim(ssl.SSPassword, 18))
-		message += fmt.Sprintf("%-8s", getNodeStatus(ssl.Status))
-		message += fmt.Sprintf("%-20s", trim(ssl.Location, 18))
-		message += fmt.Sprintf("%-6s", getNodeNationality(ssl.Abroad))
-		message += fmt.Sprintf("%-20s", ssl.LastModify.Format("2006-01-02 15:04:05"))
+		message += ssl.String()
 	}
 
 	if message == "" {
@@ -121,37 +112,6 @@ func (css *CmdSSServer) showremote(req *pb.SSServerReq) (*pb.DefaultResp, error)
 	return encResp(message), nil
 }
 
-func trim(s string, length int) string {
-	if len(s) > length {
-		return s[:length]
-	}
-
-	return s
-}
-
-func getNodeNationality(abroad int) string {
-	if abroad == 0 {
-		return "ML"
-	}
-
-	if abroad == 1 {
-		return "A"
-	}
-
-	return ""
-}
-
-func getNodeStatus(status int) string {
-	if status == 0 {
-		return "idle   "
-	}
-
-	if status == 1 {
-		return "working"
-	}
-
-	return "unknow"
-}
 
 func (css *CmdSSServer) update(req *pb.SSServerReq) (*pb.DefaultResp, error) {
 	message:=localaddress.UpdateServer(req.Nationality,req.Ip,req.Nbsaddr)

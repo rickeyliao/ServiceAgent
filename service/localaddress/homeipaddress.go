@@ -212,6 +212,7 @@ func UpdateToServers(srvl []*SSServerListNode,delsrv *[]string,addsrv *[]*Homeip
 	keys:=make(map[string]struct{},0)
 
 	for _,ssl:=range srvl{
+		fmt.Sprintf(ssl.String())
 		keys[ssl.Name]= struct{}{}
 		v,ok:=memhids[ssl.Name]
 		if !ok{

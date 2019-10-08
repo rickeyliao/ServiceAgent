@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 # The name of the executable (default is current directory name)
 BASENAME := $(shell echo $${PWD\#\#*/})
-TARGET := nbssaarmlnx
+TARGET := nbssalnx
 .DEFAULT_GOAL: $(TARGET)
 
 # These will be provided to the target
@@ -36,7 +36,7 @@ proto:
 	protoc -I=$(dhtrpc)  --go_out=plugins=grpc:${dhtrpc}   ${dhtrpc}/*.proto
 
 $(TARGET): proto $(SRC)
-	@GOOS=linux GOARM=7 GOARCH=arm go build $(LDFLAGS) -o $(TARGET)
+	@GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o $(TARGET)
 
 build: $(TARGET)
 	@true

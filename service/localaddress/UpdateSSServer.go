@@ -58,6 +58,54 @@ type SSServerListNode struct {
 	Abroad      int     `json:"abroad"`
 }
 
+
+
+func trim(s string, length int) string {
+	if len(s) > length {
+		return s[:length]
+	}
+
+	return s
+}
+
+func getNodeNationality(abroad int) string {
+	if abroad == 0 {
+		return "ML"
+	}
+
+	if abroad == 1 {
+		return "A"
+	}
+
+	return ""
+}
+
+func getNodeStatus(status int) string {
+	if status == 0 {
+		return "idle   "
+	}
+
+	if status == 1 {
+		return "working"
+	}
+
+	return "unknow"
+}
+
+func (sn *SSServerListNode)String() string {
+	message := fmt.Sprintf("%-48s", trim(sn.Name, 46))
+	message += fmt.Sprintf("%-18s", sn.IPAddress)
+	message += fmt.Sprintf("%-8s", strconv.Itoa(sn.SSPort))
+	message += fmt.Sprintf("%-20s", trim(sn.SSPassword, 18))
+	message += fmt.Sprintf("%-8s", getNodeStatus(sn.Status))
+	message += fmt.Sprintf("%-20s", trim(sn.Location, 18))
+	message += fmt.Sprintf("%-6s", getNodeNationality(sn.Abroad))
+	message += fmt.Sprintf("%-20s", sn.LastModify.Format("2006-01-02 15:04:05"))
+
+	return message
+}
+
+
 type ServerListPost struct {
 	Platform string `json:"platform"`
 }
