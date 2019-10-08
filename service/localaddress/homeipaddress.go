@@ -1,17 +1,17 @@
 package localaddress
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/kprc/nbsnetwork/db"
-	"github.com/pkg/errors"
-	"github.com/rickeyliao/ServiceAgent/common"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"encoding/json"
+	"github.com/kprc/nbsnetwork/db"
+	"github.com/pkg/errors"
+	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/rickeyliao/ServiceAgent/app"
 )
 
@@ -214,10 +214,10 @@ func UpdateToServers(srvl []*SSServerListNode,delsrv *[]string,addsrv *[]*Homeip
 		keys[ssl.Name]= struct{}{}
 		v,ok:=memhids[ssl.Name]
 		if !ok{
-			*delsrv = append(*delsrv,ssl.Name)
+			*delsrv = append(*delsrv,ssl.IPAddress)
 		}else{
 			if ssl.IPAddress != v.InternetAddress || ssl.SSPassword != v.SSPassword || ssl.SSPort !=  v.SSPort{
-				*delsrv = append(*delsrv,ssl.Name)
+				*delsrv = append(*delsrv,ssl.IPAddress)
 				v.NbsAddress = ssl.Name
 				*addsrv = append(*addsrv,v)
 			}
