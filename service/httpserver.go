@@ -208,13 +208,14 @@ func reqrsaaddr(addr string) *rsaaddr {
 }
 
 func updatemapaddr(addr string, mapaddr map[string]*rsaaddr) *rsaaddr {
-	now := tools.GetNowMsTime() / 1000
+
 	if addr == "" {
 		return nil
 	}
-
 	var v *rsaaddr
 	var ok bool
+
+	now := tools.GetNowMsTime() / 1000
 
 	if v, ok = mapaddr[addr]; ok {
 		if v.failcnt == 0 && now-v.ts < 86400 {
@@ -222,7 +223,6 @@ func updatemapaddr(addr string, mapaddr map[string]*rsaaddr) *rsaaddr {
 		}
 	}
 	ra := reqrsaaddr(addr)
-	//ra.print()
 
 	if ra == nil {
 		if v != nil {
