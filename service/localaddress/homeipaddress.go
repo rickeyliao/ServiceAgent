@@ -155,6 +155,33 @@ func (hid *Homeipdesc)Clone() *Homeipdesc {
 	return hid1
 }
 
+func (hid *Homeipdesc)String() string  {
+	r := fmt.Sprintf("%-48s", trim(hid.NbsAddress,46))
+
+	r += fmt.Sprintf("%-20s", trim(hid.MachineName,18))
+	r += fmt.Sprintf("%-18s", hid.InternetAddress)
+	r += fmt.Sprintf("%-6s", strconv.Itoa(int(hid.Nationality)))
+	r += fmt.Sprintf("%-6s", strconv.Itoa(int(hid.SSPort)))
+	r += fmt.Sprintf("%-20s", trim(hid.SSPassword,18))
+	r += fmt.Sprintf("%-18s", trim(hid.SSMethod,16))
+
+	for _, nip := range hid.NatAddress {
+
+		r += fmt.Sprintf("%-16s", nip)
+	}
+
+	return r
+}
+
+func getHomeIPDesc(memdb map[string]*Homeipdesc,srvName string) (hid *Homeipdesc, ok bool)  {
+	for k,v:=range memdb{
+		if k[:16] == srvName{
+			return v,true
+		}
+	}
+
+	return nil,false
+}
 
 func UpdateToServer(sn *SSServerListNode) (del,add bool, hid *Homeipdesc) {
 
@@ -167,14 +194,15 @@ func UpdateToServer(sn *SSServerListNode) (del,add bool, hid *Homeipdesc) {
 
 
 
-	v,ok:=hi.memdb[sn.Name]
-	if v.SSPassword == ""{
-		return
-	}
+	v,ok:=getHomeIPDesc(hi.memdb,sn.Name)
 	if !ok{
 		delflag = true
 
 	}else{
+		if v.SSPassword == ""{
+			return
+		}
+
 		if sn.IPAddress != v.InternetAddress || sn.SSPassword != v.SSPassword || sn.SSPort != v.SSPort {
 			delflag = true
 			addflag = true
@@ -199,10 +227,10 @@ func UpdateToServers(srvl []*SSServerListNode,delsrv *[]string,addsrv *[]*Homeip
 	for k,v:=range hi.memdb{
 		if nas == 0 ||
 			(nas == app.NATIONALITY_CHINA_MAINLAND && v.Nationality == nas) ||
-			(nas >0 && v.Nationality == app.NATIONALITY_AMERICAN) ||
-			(nas >0 && v.Nationality == app.NATIONALITY_JAPANESE) ||
-			(nas >0 && v.Nationality == app.NATIONALITY_SINGAPORE) ||
-			(nas >0 && v.Nationality == app.NATIONALITY_ENGLAND){
+			(nas == app.NATIONALITY_AMERICAN && v.Nationality == app.NATIONALITY_AMERICAN) ||
+			(nas == app.NATIONALITY_AMERICAN && v.Nationality == app.NATIONALITY_JAPANESE) ||
+			(nas == app.NATIONALITY_AMERICAN && v.Nationality == app.NATIONALITY_SINGAPORE) ||
+			(nas == app.NATIONALITY_AMERICAN && v.Nationality == app.NATIONALITY_ENGLAND){
 				if v.SSPassword != ""{
 					memhids[k] = v
 				}
@@ -227,7 +255,6 @@ func UpdateToServers(srvl []*SSServerListNode,delsrv *[]string,addsrv *[]*Homeip
 	}
 
 	for k,v:=range memhids{
-
 		if _,ok:=keys[k];!ok{
 			v.NbsAddress = k
 			*addsrv = append(*addsrv,v)
@@ -310,19 +337,7 @@ func (hi *HomeIPDB) CmdShowAddress(nbsaddr string) string {
 		return "Not found"
 	}
 
-	r := fmt.Sprintf("%-48s", nbsaddr)
-
-	r += fmt.Sprintf("%-16s", hid.MachineName)
-	r += fmt.Sprintf("%-18s", hid.InternetAddress)
-	r += fmt.Sprintf("%-6s", strconv.Itoa(int(hid.Nationality)))
-	r += fmt.Sprintf("%-6s", strconv.Itoa(int(hid.SSPort)))
-	r += fmt.Sprintf("%-16s", hid.SSPassword)
-	r += fmt.Sprintf("%-16s", hid.SSMethod)
-
-	for _, nip := range hid.NatAddress {
-
-		r += fmt.Sprintf("%-16s", nip)
-	}
+	r:=hid.String()
 
 	return r
 }

@@ -343,7 +343,7 @@ func UpdateServer(nas int32, ip string, nbsaddr string) string {
 	}
 
 	if nbsaddr != ""{
-		ssl:=getServer(srvl,nbsaddr)
+		ssl:=getServer(srvl,nbsaddr[:16])
 		if ssl != nil{
 			d,a,hid:=UpdateToServer(ssl)
 			if d{
