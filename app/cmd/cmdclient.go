@@ -178,6 +178,21 @@ func HomeIPShowCmdSend(req string) {
 
 }
 
+func HomeIPRemoveCmdSend(addr string,ip string)  {
+	request:=&pb.HomeIPRemoveReq{Nbsaddr:addr,Ipaddr:ip}
+	conn:=DialToCmdService()
+	defer conn.Close()
+
+	client:=pb.NewHomeIPRemoveSrvClient(conn.c)
+	if resp,err:=client.RemoveHomeIP(conn.ctx,request);err!=nil {
+		fmt.Println(err)
+	}else{
+		fmt.Println(resp.Message)
+	}
+
+}
+
+
 func LicenseCmdSend(op int32, req string) {
 	request := &pb.LicenseReq{Op: op, Sofaaddress: req}
 	conn := DialToCmdService()

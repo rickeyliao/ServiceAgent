@@ -8,7 +8,17 @@ message HomeIPShowReq{
     string nbsaddr=1;
 }
 
+message HomeIPRemoveReq{
+    string nbsaddr=1;
+    string ipaddr=2;
+}
+
 
 service HomeIPShowSrv{
     rpc ShowHomeIP (HomeIPShowReq) returns (DefaultResp) {}
+}
+
+
+service HomeIPRemoveSrv{
+    rpc RemoveHomeIP (HomeIPRemoveReq) returns (DefaultResp) {}
 }

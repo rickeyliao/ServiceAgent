@@ -81,6 +81,33 @@ func newHomeIPDB() *HomeIPDB {
 	return hi
 }
 
+func (hidb *HomeIPDB)Find(nbsaddr string) *Homeipdesc  {
+	hidb.memdblock.Lock()
+	defer hidb.memdblock.Unlock()
+
+
+	if v,ok:=hidb.memdb[nbsaddr];!ok{
+		return nil
+	}else{
+		return v.Clone()
+	}
+
+}
+
+func (hidb *HomeIPDB)FindByIP(ipaddr string) (hid *Homeipdesc,nbsaddr string)  {
+	hidb.memdblock.Lock()
+	defer hidb.memdblock.Unlock()
+
+	for k,v:=range hidb.memdb{
+		if v.InternetAddress == ipaddr{
+			return v.Clone(),k
+		}
+	}
+
+	return nil,""
+}
+
+
 type Homeipdesc struct {
 	MachineName     string   `json:"MachineName,omitempty"`
 	NbsAddress      string   `json:"-"`
