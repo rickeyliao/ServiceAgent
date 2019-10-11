@@ -18,10 +18,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 var homeipremove string
 var homeipnbsaddrremove string
-
 
 // removeCmd represents the remove command
 var homeipremoveCmd = &cobra.Command{
@@ -41,7 +39,7 @@ to quickly create a Cobra application.`,
 		if len(args) > 0 {
 			homeipnbsaddrremove = args[0]
 		}
-		HomeIPRemoveCmdSend(homeipnbsaddrremove,homeipremove)
+		HomeIPRemoveCmdSend(homeipnbsaddrremove, homeipremove)
 	},
 }
 
@@ -58,6 +56,6 @@ func init() {
 	// is called directly, e.g.:
 	// removeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	homeipremoveCmd.Flags().StringVarP(&homeipremove,"ipaddr","i","","remove homeip item by ip address")
+	homeipremoveCmd.Flags().StringVarP(&homeipremove, "ipaddr", "i", "", "remove homeip item by ip address")
 
 }

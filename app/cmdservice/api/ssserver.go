@@ -112,10 +112,9 @@ func (css *CmdSSServer) showremote(req *pb.SSServerReq) (*pb.DefaultResp, error)
 	return encResp(message), nil
 }
 
-
 func (css *CmdSSServer) update(req *pb.SSServerReq) (*pb.DefaultResp, error) {
-	message:=localaddress.UpdateServer(req.Nationality,req.Ip,req.Nbsaddr)
-	if message == ""{
+	message := localaddress.UpdateServer(req.Nationality, req.Ip, req.Nbsaddr)
+	if message == "" {
 		message = "Nothing to do..."
 	}
 	return encResp(message), nil

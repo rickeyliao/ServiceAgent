@@ -28,7 +28,7 @@ var ssserverlocalCmd = &cobra.Command{
 		if !CheckProcessReady() {
 			return
 		}
-		SServerCmdSend(app.CMD_SSSERVER_SHOW, ssserverNationality, true, "","")
+		SServerCmdSend(app.CMD_SSSERVER_SHOW, ssserverNationality, true, "", "")
 	},
 }
 

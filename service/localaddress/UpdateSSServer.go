@@ -58,8 +58,6 @@ type SSServerListNode struct {
 	Abroad      int     `json:"abroad"`
 }
 
-
-
 func trim(s string, length int) string {
 	if len(s) > length {
 		return s[:length]
@@ -92,7 +90,7 @@ func getNodeStatus(status int) string {
 	return "unknow"
 }
 
-func (sn *SSServerListNode)String() string {
+func (sn *SSServerListNode) String() string {
 	message := fmt.Sprintf("%-48s", trim(sn.Name, 46))
 	message += fmt.Sprintf("%-18s", sn.IPAddress)
 	message += fmt.Sprintf("%-8s", strconv.Itoa(sn.SSPort))
@@ -104,7 +102,6 @@ func (sn *SSServerListNode)String() string {
 
 	return message
 }
-
 
 type ServerListPost struct {
 	Platform string `json:"platform"`
@@ -318,16 +315,15 @@ func deleteCmdMsg(ips []string) string {
 	return message
 }
 
-func getServer(srvl []SSServerListNode,nbsaddr string) *SSServerListNode  {
-	for _,ssl:=range srvl{
-		if ssl.Name == nbsaddr{
+func getServer(srvl []SSServerListNode, nbsaddr string) *SSServerListNode {
+	for _, ssl := range srvl {
+		if ssl.Name == nbsaddr {
 			return &ssl
 		}
 	}
 
 	return nil
 }
-
 
 func UpdateServer(nas int32, ip string, nbsaddr string) string {
 	srvl := GetServerList()
@@ -342,39 +338,38 @@ func UpdateServer(nas int32, ip string, nbsaddr string) string {
 		}
 	}
 
-	if nbsaddr != ""{
-		ssl:=getServer(srvl,nbsaddr[:16])
-		if ssl != nil{
-			d,a,hid:=UpdateToServer(ssl)
-			if d{
-				delsrv = append(delsrv,ssl.IPAddress)
+	if nbsaddr != "" {
+		ssl := getServer(srvl, nbsaddr[:16])
+		if ssl != nil {
+			d, a, hid := UpdateToServer(ssl)
+			if d {
+				delsrv = append(delsrv, ssl.IPAddress)
 			}
-			if a{
-				addsrv = append(addsrv,hid)
+			if a {
+				addsrv = append(addsrv, hid)
 			}
-		}else{
-			hid:=GetHomeIPDescByNbsaddr(nbsaddr)
-			if hid.SSPassword != ""{
-				addsrv = append(addsrv,hid)
+		} else {
+			hid := GetHomeIPDescByNbsaddr(nbsaddr)
+			if hid.SSPassword != "" {
+				addsrv = append(addsrv, hid)
 			}
 		}
-	}else{
-		arrssl:=make([]*SSServerListNode,0)
+	} else {
+		arrssl := make([]*SSServerListNode, 0)
 
-
-		for i:=0;i<len(srvl);i++{
-			ssl:=&srvl[i]
+		for i := 0; i < len(srvl); i++ {
+			ssl := &srvl[i]
 			if (nas == 0) ||
-				(nas==app.NATIONALITY_CHINA_MAINLAND && ssl.Abroad == app.ABROAD_CHINA_MAINLAND) ||
-				((nas ==app.NATIONALITY_AMERICAN ||
+				(nas == app.NATIONALITY_CHINA_MAINLAND && ssl.Abroad == app.ABROAD_CHINA_MAINLAND) ||
+				((nas == app.NATIONALITY_AMERICAN ||
 					nas == app.NATIONALITY_JAPANESE ||
 					nas == app.NATIONALITY_SINGAPORE ||
 					nas == app.NATIONALITY_ENGLAND) && ssl.Abroad == app.ABROAD_AMERICAN) {
-				arrssl = append(arrssl,ssl)
+				arrssl = append(arrssl, ssl)
 			}
 		}
 
-		UpdateToServers(arrssl,&delsrv,&addsrv,nas)
+		UpdateToServers(arrssl, &delsrv, &addsrv, nas)
 
 	}
 
@@ -382,11 +377,11 @@ func UpdateServer(nas int32, ip string, nbsaddr string) string {
 
 	delfault := false
 
-	if len(delsrv) > 0{
-		if err:=DeleteServer(delsrv);err==nil{
+	if len(delsrv) > 0 {
+		if err := DeleteServer(delsrv); err == nil {
 			messageDel = "Delete ips:\r\n" + deleteCmdMsg(delsrv)
-		}else{
-			log.Println("del ips failed",delsrv)
+		} else {
+			log.Println("del ips failed", delsrv)
 			delfault = true
 		}
 	}
@@ -395,34 +390,33 @@ func UpdateServer(nas int32, ip string, nbsaddr string) string {
 
 	addfault := false
 
-	if len(addsrv)>0{
+	if len(addsrv) > 0 {
 
-		for _,add:=range addsrv{
-			if err:=AddServer(add.NbsAddress[0:16],add);err==nil{
-				if messageAdd == ""{
+		for _, add := range addsrv {
+			if err := AddServer(add.NbsAddress[0:16], add); err == nil {
+				if messageAdd == "" {
 					messageAdd += "Add Server List:\r\n"
 				}
-				messageAdd += fmt.Sprintf("%-48s",add.NbsAddress)
-				messageAdd += fmt.Sprintf("%-18s",add.InternetAddress)
+				messageAdd += fmt.Sprintf("%-48s", add.NbsAddress)
+				messageAdd += fmt.Sprintf("%-18s", add.InternetAddress)
 				messageAdd += "\r\n"
-			}else{
+			} else {
 				addfault = true
 			}
 		}
 	}
 
-	if messageDel != ""{
+	if messageDel != "" {
 		messageDel += "\r\n"
 	}
 
-	message:=messageDel + messageAdd
+	message := messageDel + messageAdd
 
-	if message == ""{
+	if message == "" {
 		if delfault || addfault {
 			message = "Something wrong"
 		}
 	}
-
 
 	return message
 }

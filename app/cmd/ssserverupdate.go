@@ -15,15 +15,14 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/rickeyliao/ServiceAgent/app"
+	"github.com/spf13/cobra"
 )
 
-var(
-	ipforssserver2del string
+var (
+	ipforssserver2del   string
 	nbsaddrforssser2del string
 )
-
 
 // updateCmd represents the update command
 var ssserverupdateCmd = &cobra.Command{
@@ -35,7 +34,7 @@ var ssserverupdateCmd = &cobra.Command{
 			return
 		}
 
-		SServerCmdSend(app.CMD_SSSERVER_UPDATE, ssserverNationality, false, ipforssserver2del,nbsaddrforssser2del)
+		SServerCmdSend(app.CMD_SSSERVER_UPDATE, ssserverNationality, false, ipforssserver2del, nbsaddrforssser2del)
 	},
 }
 
@@ -51,7 +50,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// updateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	ssserverupdateCmd.Flags().StringVarP(&ipforssserver2del,"hostip","i","","ip for del server")
-	ssserverupdateCmd.Flags().StringVarP(&nbsaddrforssser2del,"nbsaddr","a","","nbs addr for delete")
+	ssserverupdateCmd.Flags().StringVarP(&ipforssserver2del, "hostip", "i", "", "ip for del server")
+	ssserverupdateCmd.Flags().StringVarP(&nbsaddrforssser2del, "nbsaddr", "a", "", "nbs addr for delete")
 
 }

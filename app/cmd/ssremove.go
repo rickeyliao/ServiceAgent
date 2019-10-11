@@ -43,7 +43,7 @@ var ssremoveCmd = &cobra.Command{
 			}
 		}
 
-		SServerCmdSend(app.CMD_SSSERVER_REMOVE, ssserverNationality, false, ip,"")
+		SServerCmdSend(app.CMD_SSSERVER_REMOVE, ssserverNationality, false, ip, "")
 	},
 }
 

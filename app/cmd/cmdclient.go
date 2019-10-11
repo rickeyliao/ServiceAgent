@@ -178,20 +178,19 @@ func HomeIPShowCmdSend(req string) {
 
 }
 
-func HomeIPRemoveCmdSend(addr string,ip string)  {
-	request:=&pb.HomeIPRemoveReq{Nbsaddr:addr,Ipaddr:ip}
-	conn:=DialToCmdService()
+func HomeIPRemoveCmdSend(addr string, ip string) {
+	request := &pb.HomeIPRemoveReq{Nbsaddr: addr, Ipaddr: ip}
+	conn := DialToCmdService()
 	defer conn.Close()
 
-	client:=pb.NewHomeIPRemoveSrvClient(conn.c)
-	if resp,err:=client.RemoveHomeIP(conn.ctx,request);err!=nil {
+	client := pb.NewHomeIPRemoveSrvClient(conn.c)
+	if resp, err := client.RemoveHomeIP(conn.ctx, request); err != nil {
 		fmt.Println(err)
-	}else{
+	} else {
 		fmt.Println(resp.Message)
 	}
 
 }
-
 
 func LicenseCmdSend(op int32, req string) {
 	request := &pb.LicenseReq{Op: op, Sofaaddress: req}
@@ -234,7 +233,7 @@ func DownloadFileCmdSend(hostip string, filename string, filesavepath string) {
 	}
 }
 
-func SServerCmdSend(op int32, nas int32, local bool, ip string,nbsaddr string) {
+func SServerCmdSend(op int32, nas int32, local bool, ip string, nbsaddr string) {
 	req := &pb.SSServerReq{}
 	req.Op = op
 	req.Nationality = nas
