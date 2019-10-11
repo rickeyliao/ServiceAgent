@@ -259,10 +259,13 @@ func CmdDeleteServer(nationality int32) string {
 	ips := make([]string, 0)
 
 	for _, n := range l {
-		if nationality == app.NATIONALITY_AMERICAN && n.Abroad == app.ABROAD_AMERICAN {
+		if (nationality == app.NATIONALITY_AMERICAN ||
+			nationality == app.NATIONALITY_JAPANESE ||
+			nationality == app.NATIONALITY_SINGAPORE ||
+			nationality == app.NATIONALITY_ENGLAND) && n.Abroad == app.ABROAD_AMERICAN {
 			ips = append(ips, n.IPAddress)
 		}
-		if nationality != 0 && nationality > app.NATIONALITY_AMERICAN && n.Abroad == app.ABROAD_CHINA_MAINLAND {
+		if nationality == app.NATIONALITY_CHINA_MAINLAND && n.Abroad == app.ABROAD_CHINA_MAINLAND {
 			ips = append(ips, n.IPAddress)
 		}
 		if nationality == 0 {
