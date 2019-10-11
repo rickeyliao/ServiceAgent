@@ -6,9 +6,11 @@ TARGET := nbssalnx
 .DEFAULT_GOAL: $(TARGET)
 
 # These will be provided to the target
-VERSION := 1.0.1
-BUILD := `git rev-parse HEAD`
-BUILDTIME := `date "+%Y-%m-%d/%H:%M:%S/%Z"`
+#VERSION := 1.0.1
+#BUILD := `git rev-parse HEAD`
+#BUILDTIME := `date "+%Y-%m-%d/%H:%M:%S/%Z"`
+
+include .Makefile
 
 # Use linker flags to provide version/build settings to the target
 #LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -X=main.BuildTime=$(BUILDTIME) -linkmode=external -v"
