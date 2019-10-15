@@ -21,7 +21,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
@@ -29,6 +28,7 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"io/ioutil"
+	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
 var (
@@ -82,6 +82,7 @@ func Run(cfg *common.SAConfig) {
 	}
 
 	go license.IntervalSave()
+	go shadowsock.GetSSInst().IntervalSave()
 
 	httpserver = &http.Server{Addr: listenportstr, Handler: mux}
 
@@ -99,6 +100,7 @@ func Stop() {
 	}
 
 	license.Destroy()
+	shadowsock.GetSSInst().Quit()
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)
