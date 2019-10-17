@@ -1,16 +1,12 @@
 package shadowsock
 
 import (
+	"github.com/shadowsocks/go-shadowsocks2/socks"
 	"io"
+	"log"
 	"net"
 	"time"
-	"github.com/shadowsocks/go-shadowsocks2/socks"
-	"log"
 )
-
-
-
-
 
 // Create a SOCKS server listening on addr and proxy to server.
 func socksLocal(addr, server string, shadow func(net.Conn) net.Conn) {
@@ -138,7 +134,7 @@ func tcpRemote(addr string, shadow func(net.Conn) net.Conn) {
 					return // ignore i/o timeout
 				}
 				logf("relay error: %v", err1)
-			}else{
+			} else {
 				GetSSInst().IncUP(u)
 				GetSSInst().IncDown(d)
 			}

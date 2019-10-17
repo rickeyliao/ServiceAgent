@@ -56,7 +56,7 @@ type SAConfig struct {
 	CheckIPFile              string     `json:"checkipfile"`
 	LicenseAdminUser         [][]string `json:"licenseadminuser"`
 	ShadowSockServerSwitch   bool       `json:"shadowsockserverswitch"`
-	ShadowSockPort           uint16     `json:"shadowsockport"`  //50812
+	ShadowSockPort           uint16     `json:"shadowsockport"` //50812
 	ShadowSockPasswd         string     `json:"sspasswd"`
 	ShadowSockMethod         string     `json:"ssmethod"`
 	ShadowSockStatFile       string     `json:"ssstatefile"`
@@ -252,7 +252,6 @@ func DefaultInitConfig() *SAConfig {
 	sa.ShadowSockStatFile = "shadowsock.stat"
 	sa.StatisticDir = "stat"
 
-
 	sa.ShadowSockPasswd = ""
 	sa.ShadowSockMethod = ""
 	sa.HostName = ""
@@ -445,9 +444,9 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 		htmlfile.NewCheckIPFile(checkipfilename)
 	}
 
-	statdir:=path.Join(sar.HomeDir,sar.SacInst.StatisticDir)
-	if !tools.FileExists(statdir){
-		os.MkdirAll(statdir,0755)
+	statdir := path.Join(sar.HomeDir, sar.SacInst.StatisticDir)
+	if !tools.FileExists(statdir) {
+		os.MkdirAll(statdir, 0755)
 	}
 
 	sar.SacInst.Root = sar
@@ -489,8 +488,8 @@ func (sac *SAConfig) GetFileDbDir() string {
 	return path.Join(sac.Root.HomeDir, sac.FileDBDir)
 }
 
-func (sac *SAConfig)GetSSStatFile() string  {
-	return path.Join(sac.Root.HomeDir,sac.StatisticDir,sac.ShadowSockStatFile)
+func (sac *SAConfig) GetSSStatFile() string {
+	return path.Join(sac.Root.HomeDir, sac.StatisticDir, sac.ShadowSockStatFile)
 }
 
 func (sac *SAConfig) GetFileStoreDir() string {

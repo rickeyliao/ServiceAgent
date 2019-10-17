@@ -6,10 +6,10 @@ import (
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/rickeyliao/ServiceAgent/service/localaddress"
+	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 	"golang.org/x/net/context"
 	"strconv"
 	"time"
-	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
 type CmdDefaultServer struct {
@@ -102,8 +102,8 @@ func (ss *CmdDefaultServer) shadowsockshow() (*pb.DefaultResp, error) {
 	resp.Message += "\r\nPort: " + strconv.Itoa(int(sac.ShadowSockPort))
 	resp.Message += "\r\nPasswd : " + sac.GetSSPasswd()
 	resp.Message += "\r\nMethod : " + sac.GetSSMethod()
-	resp.Message += "\r\nUp Bytes: "+ strconv.FormatInt(shadowsock.GetSSInst().GetUPBytes(),10)
-	resp.Message += "\r\nDown Bytes: "+ strconv.FormatInt(shadowsock.GetSSInst().GetDownBytes(),10)
+	resp.Message += "\r\nUp Bytes: " + strconv.FormatInt(shadowsock.GetSSInst().GetUPBytes(), 10)
+	resp.Message += "\r\nDown Bytes: " + strconv.FormatInt(shadowsock.GetSSInst().GetDownBytes(), 10)
 
 	return resp, nil
 

@@ -25,7 +25,7 @@ var homeipnbsaddrremove string
 var homeipremoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "remove a home ip item",
-	Long: `remove a home ip item`,
+	Long:  `remove a home ip item`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !CheckProcessReady() {
 			return
