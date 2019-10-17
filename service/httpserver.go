@@ -29,6 +29,7 @@ import (
 	"github.com/kprc/nbsnetwork/tools/crypt/nbscrypt"
 	"io/ioutil"
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
+	"github.com/rickeyliao/ServiceAgent/ui"
 )
 
 var (
@@ -83,6 +84,7 @@ func Run(cfg *common.SAConfig) {
 
 	go license.IntervalSave()
 	go shadowsock.GetSSInst().IntervalSave()
+	go ui.StartWebDaemon()
 
 	httpserver = &http.Server{Addr: listenportstr, Handler: mux}
 
@@ -101,6 +103,8 @@ func Stop() {
 
 	license.Destroy()
 	shadowsock.GetSSInst().Quit()
+
+	ui.StopWebDaemon()
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)

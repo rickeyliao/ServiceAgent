@@ -48,6 +48,7 @@ type SAConfig struct {
 	CmdListenIP              string     `json:"cmdlistenip"`
 	CmdListenPort            uint16     `json:"cmdlistenport"` //50811 tcp for cmd
 	DhtListenPort            uint16     `json:"dhtlistenport"` //50811 udp for control message
+	WebServerPort            uint16     `json:"webserverport"` //50814
 	StaticFileDir            string     `json:"staticfiledir"`
 	LoginPath                string     `json:"logindir"`
 	Loginfile                string     `json:"loginfile"`
@@ -55,7 +56,7 @@ type SAConfig struct {
 	CheckIPFile              string     `json:"checkipfile"`
 	LicenseAdminUser         [][]string `json:"licenseadminuser"`
 	ShadowSockServerSwitch   bool       `json:"shadowsockserverswitch"`
-	ShadowSockPort           uint16     `json:"shadowsockport"`
+	ShadowSockPort           uint16     `json:"shadowsockport"`  //50812
 	ShadowSockPasswd         string     `json:"sspasswd"`
 	ShadowSockMethod         string     `json:"ssmethod"`
 	ShadowSockStatFile       string     `json:"ssstatefile"`
@@ -239,6 +240,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.CmdListenIP = "127.0.0.1"
 	sa.CmdListenPort = 50811
 	sa.DhtListenPort = 50811
+	sa.WebServerPort = 50814
 	sa.ListenTyp = "tcp4"
 	sa.StaticFileDir = "staticfile"
 	sa.LoginPath = "/login"
@@ -353,7 +355,7 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 			log.Fatal(err)
 		}
 
-		sac := &SAConfig{}
+		sac := DefaultInitConfig()
 		err = json.Unmarshal(bjson, sac)
 		if err != nil {
 			log.Fatal(err)

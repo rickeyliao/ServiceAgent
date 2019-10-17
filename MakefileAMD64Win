@@ -32,12 +32,16 @@ Test:
 
 rpcservice := app/pb
 dhtrpc := dht/pb
+assetdir := ui/asset
 
 proto:
 	protoc -I=$(rpcservice)  --go_out=plugins=grpc:${rpcservice}   ${rpcservice}/*.proto
 	protoc -I=$(dhtrpc)  --go_out=plugins=grpc:${dhtrpc}   ${dhtrpc}/*.proto
 
-$(TARGET): proto $(SRC)
+staticfile2bin:
+	go-bindata -o $(assetdir)/res.go -pkg=asset ui/xadmin/...
+
+$(TARGET): staticfile2bin proto $(SRC)
 	@GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(TARGET)
 
 build: $(TARGET)
@@ -45,7 +49,7 @@ build: $(TARGET)
 
 clean:
 	@rm -f $(TARGET)
-	@rm -f $(rpcservice)/*.pb.go
+	@rm -f $(rpcservice)/*.pb.go $(assetdir)/res.go
 #install: preinst
 #	#@go install $(LDFLAGS)
 #	@mv $$(which ${BASENAME})  $(subst ${BASENAME},$(TARGET),$$(which ${BASENAME}))
