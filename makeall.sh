@@ -1,5 +1,7 @@
 #/bin/sh
 
+go get -u github.com/jteeuwen/go-bindata/...
+
 make
 
 make -f MakefileAMD64Lnx
