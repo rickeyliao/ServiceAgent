@@ -2,5 +2,5 @@ ServiceAgent
 nbssa*
 main
 test/
-ui/asset/res.go
+ui/asset/*.go
 .DS_Store
