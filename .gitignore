@@ -3,4 +3,6 @@ nbssa*
 main
 test/
 ui/asset/*.go
+app/pb/*.go
+dht/pb/*.go
 .DS_Store
