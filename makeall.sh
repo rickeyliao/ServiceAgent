@@ -1,5 +1,7 @@
 #/bin/sh
 
+go get -u -v github.com/inconshreveable/mousetrap
+
 go get -u -v github.com/elazarl/go-bindata-assetfs
 
 go get -u -v github.com/jteeuwen/go-bindata/...
