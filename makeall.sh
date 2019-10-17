@@ -1,6 +1,8 @@
 #/bin/sh
 
-go get -u github.com/jteeuwen/go-bindata/...
+go get -u -v github.com/elazarl/go-bindata-assetfs
+
+go get -u -v github.com/jteeuwen/go-bindata/...
 
 make
 
