@@ -64,7 +64,6 @@ type SAConfig struct {
 	HostName                 string     `json:"hostname"`
 	IsCoordinator            bool       `json:"iscoordinator"`
 	Nationality              int32      `json:"nationality"`
-	//Location                 string     `json:"location"`
 
 	PrivKey *rsa.PrivateKey `json:"-"`
 	Root    *SARootConfig   `json:"-"`
