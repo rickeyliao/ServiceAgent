@@ -24,6 +24,7 @@ func StartWebDaemon() {
 
 	mux.Handle("/", http.FileServer(&fs))
 
+
 	addr := ":" + strconv.Itoa(int(common.GetSAConfig().WebServerPort))
 
 	log.Println("Web Server Start at", addr)

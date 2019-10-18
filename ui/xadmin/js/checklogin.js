@@ -14,8 +14,8 @@ function getCookie(cname) {
     return "";
 }
 function checkCookie() {
-    var username = getCookie("username");
-    if (username == "") {
+    var na = getCookie("nbsadmin");
+    if (na == "") {
         // alert("Welcome again " + username);
         window.location.href = "login.html"
     }

@@ -42,10 +42,15 @@
               //   });
               //监听提交
               form.on('submit(login)', function(data){
-                // alert(888)
-                layer.msg(JSON.stringify(data.field),function(){
-                    location.href='index.html'
-                });
+                alert(JSON.stringify(data.field))
+                  alert(data.field.username)
+                  alert(data.field.password)
+                // layer.msg(JSON.stringify(data.field),function(){
+                //     location.href='index.html'
+                // });
+
+
+
                 return false;
               });
             });

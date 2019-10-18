@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"crypto/sha1"
+	"math/rand"
 )
 
 func CheckNbsCotentHash(hv string) bool {
@@ -145,4 +147,33 @@ func ToPubKey(b58pk string) *rsa.PublicKey {
 	} else {
 		return pk
 	}
+}
+
+
+func GetRandPasswd(length int) string {
+	buf := make([]byte, 256)
+	for {
+		n, err := rand.Read(buf[:])
+		if err != nil {
+			continue
+		}
+
+		if n < len(buf) {
+			continue
+		}
+
+		break
+	}
+
+	s1 := sha1.New()
+	s1.Write(buf)
+	b := s1.Sum(nil)
+
+	passwd := base58.Encode(b)
+	l := len(passwd)
+	if l > length {
+		return passwd[l-length : l]
+	}
+
+	return passwd
 }

@@ -2,10 +2,7 @@ package api
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/sha1"
 	"encoding/json"
-	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/nbsnetwork/tools"
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"github.com/rickeyliao/ServiceAgent/common"
@@ -24,7 +21,7 @@ func (clus *CmdLicenseUserServer) ChgLicenseUser(ctx context.Context, req *pb.Li
 	if len(userpair) == 1 {
 		user = userpair[0]
 		passwdgen = true
-		passwd = getRandPasswd()
+		passwd = common.GetRandPasswd(10)
 	} else if len(userpair) == 2 {
 		user = userpair[0]
 		passwd = userpair[1]
@@ -79,30 +76,3 @@ func (clus *CmdLicenseUserServer) ChgLicenseUser(ctx context.Context, req *pb.Li
 
 }
 
-func getRandPasswd() string {
-	buf := make([]byte, 256)
-	for {
-		n, err := rand.Read(buf[:])
-		if err != nil {
-			continue
-		}
-
-		if n < len(buf) {
-			continue
-		}
-
-		break
-	}
-
-	s1 := sha1.New()
-	s1.Write(buf)
-	b := s1.Sum(nil)
-
-	passwd := base58.Encode(b)
-	l := len(passwd)
-	if l > 10 {
-		return passwd[l-10 : l]
-	}
-
-	return passwd
-}
