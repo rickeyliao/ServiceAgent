@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/kprc/nbsnetwork/tools"
 )
 
 type HomeIPDB struct {
@@ -115,6 +116,7 @@ type Homeipdesc struct {
 	SSPort          int      `json:"port,omitempty"`
 	SSPassword      string   `json:"password,omitempty"`
 	SSMethod        string   `json:"ssmethod,omitempty"`
+	LastUpdate      int64    `json:"-"`
 }
 
 func String2arr(ips string) []string {
@@ -295,11 +297,13 @@ func Insert(nbsaddress string, mn string, interAddress string, natAddress string
 	var hid *Homeipdesc
 
 	if ssr == nil {
-		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress, NatAddress: String2arr(natAddress)}
+		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress,
+						NatAddress: String2arr(natAddress),LastUpdate:tools.GetNowMsTime()}
 	} else {
 		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress, NatAddress: String2arr(natAddress),
 			Nationality: ssr.Nationality,
-			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort, SSMethod: ssr.SSMethod}
+			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort, SSMethod: ssr.SSMethod,
+			LastUpdate:tools.GetNowMsTime()}
 	}
 
 	GetHomeIPDB().Insert(nbsaddress, hid)
@@ -429,6 +433,40 @@ func Save() {
 	hi.homeipdb.Save()
 }
 
+func timeout2deletes() []string  {
+
+	keys:=make([]string,0)
+
+	now:=tools.GetNowMsTime()
+	hi := GetHomeIPDB()
+	hi.memdblock.Lock()
+	defer hi.memdblock.Unlock()
+
+	for k,v:=range hi.memdb{
+		if v.LastUpdate == 0 || now - v.LastUpdate < 36000{
+			continue
+		}
+
+		keys = append(keys,k)
+
+	}
+
+	return keys
+}
+
+
+func TimeOut()  {
+
+	keys:=timeout2deletes()
+
+	hi:=GetHomeIPDB()
+	hi.homeipdblock.Lock()
+	defer hi.homeipdblock.Unlock()
+	for _,key:=range keys{
+		hi.homeipdb.Delete(key)
+	}
+}
+
 func IntervalSave() {
 	hi := GetHomeIPDB()
 
@@ -438,6 +476,7 @@ func IntervalSave() {
 	for {
 
 		if count%86400 == 0 {
+			TimeOut()
 			Save()
 		}
 		count++
