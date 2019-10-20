@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"github.com/rickeyliao/ServiceAgent/ui/router"
 )
 
 var webserver *http.Server
@@ -19,6 +20,9 @@ func StartWebDaemon() {
 	//}
 
 	mux := http.NewServeMux()
+
+	mux.Handle("/ajax/",&router.AjaxRouter{})
+
 
 	fs := assetfs.AssetFS{Asset: asset.Asset, AssetDir: asset.AssetDir, AssetInfo: asset.AssetInfo, Prefix: "ui/xadmin"}
 

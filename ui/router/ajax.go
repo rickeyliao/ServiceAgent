@@ -3,8 +3,9 @@ package router
 import (
 	"net/http"
 	"strings"
-	"github.com/rickeyliao/ServiceAgent/test/oldui/controller"
+	"github.com/rickeyliao/ServiceAgent/ui/controller"
 	"reflect"
+	"fmt"
 )
 
 type AjaxRouter struct {
@@ -12,6 +13,9 @@ type AjaxRouter struct {
 }
 
 func (ar *AjaxRouter)ServeHTTP(w http.ResponseWriter,r *http.Request)  {
+
+	fmt.Println(r.URL.Path)
+
 
 	pathInfo := strings.Trim(r.URL.Path, "/")
 	parts := strings.Split(pathInfo, "/")

@@ -7,6 +7,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/common"
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice/api"
+	"fmt"
 )
 
 
@@ -30,6 +31,7 @@ type ChgPwdReq struct {
 
 func (ac *AjaxController)LoginDo(w http.ResponseWriter,r *http.Request)  {
 	formjson,err:=ioutil.ReadAll(r.Body)
+	fmt.Println(string(formjson),err)
 	if err!=nil{
 		w.Write([]byte("false"))
 		return
@@ -38,29 +40,30 @@ func (ac *AjaxController)LoginDo(w http.ResponseWriter,r *http.Request)  {
 	lr:=&LoginReq{}
 
 	err=json.Unmarshal(formjson,lr)
-
 	if err!=nil{
 		w.Write([]byte("false"))
 		return
 	}
 
-	if common.CheckUserPassword(lr.Username,lr.Password){
-		w.Write([]byte("true"))
-		//w.Header().
-	}else{
+	if !common.CheckUserPassword(lr.Username,lr.Password){
+
 		w.Write([]byte("false"))
 		return
 	}
 
 	lr.Password = common.GetRandPasswd(20)
 
-	bj,_:=json.Marshal(*lr)
+	bj := lr.Username +":" + lr.Password
 
-	cookie := http.Cookie{Name: "nbsadmin", Value: string(bj), Path: "/"}
+	cookie := http.Cookie{Name: "nbsadmin", Value: bj, Path: "/"}
+
+	fmt.Println(bj)
 
 	ac.cookie = lr
 
 	http.SetCookie(w,&cookie)
+
+	w.Write([]byte("true"))
 
 	return
 
