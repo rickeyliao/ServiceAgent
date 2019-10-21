@@ -11,6 +11,7 @@
         <script src="./lib/layui/layui.js" charset="utf-8"></script>
         <script type="text/javascript" src="./js/xadmin.js"></script>
         <script type="text/javascript" src="./js/checklogin.js"></script>
+        <script type="text/javascript" src="./js/jquery.min.js"></script>
         <!-- let IE8/9 support -->
         <!--[if lt IE 9]>
           <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -172,7 +173,7 @@
                             <table class="layui-table">
                                 <tbody>
                                     <tr>
-                                        <th>nbssa</th>
+                                        <th>nbs version</th>
                                         <td id="nbsversion">1.0.2</td></tr>
                                     <tr>
                                         <th>nbs address</th>
@@ -230,6 +231,17 @@
         }else{
             document.getElementById("nbsadminid").innerHTML = "admin"
         }
+
+        $.post("/ajax/system/info",function (data){
+             var p=JSON.parse(data)
+
+            document.getElementById("nbsversion").innerHTML = p.nbsversion
+            document.getElementById("nbsaddr").innerHTML = p.nbsaddr
+            document.getElementById("nbsos").innerHTML = p.os
+            document.getElementById("golangversion").innerHTML = p.runtimeenv
+            document.getElementById("diskspaceleft").innerHTML = p.diskspaceleft
+            document.getElementById("memused").innerHTML = p.memoryused
+        } )
 
     </script>
 </html>

@@ -1,5 +1,9 @@
 #/bin/sh
 
+go get -u -v github.com/go-ole/go-ole/...
+
+go get -u -v github.com/StackExchange/wmi
+
 go get -u -v github.com/shirou/gopsutil/...
 
 go get -u -v github.com/inconshreveable/mousetrap

@@ -39,6 +39,8 @@ var rootCmd = &cobra.Command{
 		}
 
 		cfg := common.GetSAConfig()
+		cfg.SetNBSVersion(Version)
+
 
 		go service.Run(cfg)
 		if cfg.ShadowSockServerSwitch {

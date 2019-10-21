@@ -64,6 +64,7 @@ type SAConfig struct {
 	HostName                 string     `json:"hostname"`
 	IsCoordinator            bool       `json:"iscoordinator"`
 	Nationality              int32      `json:"nationality"`
+	Version                  string		`json:"-"`
 
 	PrivKey *rsa.PrivateKey `json:"-"`
 	Root    *SARootConfig   `json:"-"`
@@ -147,6 +148,11 @@ func forceInitRootConfig(hdir string) *SARootConfig {
 	cfgdir := path.Join(sahome, "config")
 
 	return &SARootConfig{HomeDir: sahome, CfgDir: cfgdir, CfgFileName: "sa.json", needSave: true}
+}
+
+func (sac *SAConfig)SetNBSVersion(ver string)  {
+
+	sac.Version = ver
 }
 
 func unforceInitRootConfig(hdir string) *SARootConfig {

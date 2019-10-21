@@ -41,6 +41,7 @@ var daemonCmd = &cobra.Command{
 		}
 
 		cfg := common.GetSAConfig()
+		cfg.SetNBSVersion(Version)
 		daemondir := cfg.GetPidDir()
 		cntxt := daemon.Context{
 			PidFileName: path.Join(daemondir, "nbssa.pid"),

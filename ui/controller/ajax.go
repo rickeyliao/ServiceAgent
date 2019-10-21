@@ -8,6 +8,9 @@ import (
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice/api"
 	"fmt"
+	"runtime"
+	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/mem"
 )
 
 
@@ -29,9 +32,9 @@ type ChgPwdReq struct {
 	newpwd string		`json:"newpwd""`
 }
 
+
 func (ac *AjaxController)LoginDo(w http.ResponseWriter,r *http.Request)  {
 	formjson,err:=ioutil.ReadAll(r.Body)
-	fmt.Println(string(formjson),err)
 	if err!=nil{
 		w.Write([]byte("false"))
 		return
@@ -57,8 +60,6 @@ func (ac *AjaxController)LoginDo(w http.ResponseWriter,r *http.Request)  {
 
 	cookie := http.Cookie{Name: "nbsadmin", Value: bj, Path: "/"}
 
-	fmt.Println(bj)
-
 	ac.cookie = lr
 
 	http.SetCookie(w,&cookie)
@@ -71,7 +72,7 @@ func (ac *AjaxController)LoginDo(w http.ResponseWriter,r *http.Request)  {
 
 //change password
 
-func (ac *AjaxController)ChgpwdDo(w http.ResponseWriter,r *http.Request)  {
+func (ac *AjaxController)ChangePasswdDo(w http.ResponseWriter,r *http.Request)  {
 	s,err:=ioutil.ReadAll(r.Body)
 	if err!=nil{
 		w.Write([]byte("false"))
@@ -103,4 +104,95 @@ func (ac *AjaxController)ChgpwdDo(w http.ResponseWriter,r *http.Request)  {
 	w.Write([]byte("true"))
 
 	return
+}
+
+type SysInfo struct {
+	NbsVersion string		`json:"nbsversion"`
+	NbsAddress string		`json:"nbsaddr"`
+	Os string           	`json:"os"`
+	RunTimeEnv string		`json:"runtimeenv"`
+	DiskSpaceLeft string	`json:"diskspaceleft"`
+	MemoryUsed	  string 	`json:"memoryused"`
+}
+
+func GetSysInfo() *SysInfo {
+	si:=&SysInfo{}
+	sac:=common.GetSAConfig()
+	si.NbsAddress = sac.NbsRsaAddr
+	si.NbsVersion = sac.Version
+	si.RunTimeEnv = runtime.Version()
+	si.Os = runtime.GOOS + "/" +runtime.GOARCH
+
+	sar:=common.GetSARootCfg()
+
+	u,_:=disk.Usage(sar.HomeDir)
+	if u!=nil{
+		si.DiskSpaceLeft = DiskUsage(u)
+	}
+
+	v,_:=mem.VirtualMemory()
+	if v!=nil{
+		si.MemoryUsed = MemoryUsage(v)
+	}
+
+
+	return si
+}
+
+var suffixStr = []string{"","K","M","G","T","P"}
+
+func getsize(f float64,base float64)string  {
+
+	cnt := 0
+	f1:=f
+	for {
+		if f1>base{
+			f1 = f1/base
+			cnt ++
+			if cnt>=len(suffixStr)-1{
+				break
+			}
+		}else{
+			break
+		}
+
+	}
+
+	s := fmt.Sprintf("%.2f",f1)
+	s += " "+suffixStr[cnt]
+	s += "Bytes"
+
+	return s
+
+}
+
+
+func DiskUsage(us *disk.UsageStat) string {
+	total:=float64(us.Total)
+
+	used:=float64(us.Used)
+
+ 	return getsize(used,1000) +"/" + getsize(total,1000)
+
+}
+
+func MemoryUsage(v *mem.VirtualMemoryStat) string {
+	total := float64(v.Total)
+	used  := float64(v.Used)
+
+	return getsize(used,1024) + "/" + getsize(total,1024)
+}
+
+func (ac *AjaxController)SystemInfoDo(w http.ResponseWriter,r *http.Request)  {
+	si:=GetSysInfo()
+
+	busage,err:=json.Marshal(*si)
+
+	if err!=nil{
+		w.Write([]byte("error"))
+	}else{
+
+		w.Write(busage)
+	}
+
 }
