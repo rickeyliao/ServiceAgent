@@ -243,5 +243,21 @@
             document.getElementById("memused").innerHTML = p.memoryused
         } )
 
+
+        function refreshCoin() {
+            $.post("/ajax/stat/info",function (data){
+                var p=JSON.parse(data)
+
+                document.getElementById("nbscnt").innerHTML = p.nbscoin
+                document.getElementById("nbsnodescnt").innerHTML = p.totalnodes
+                document.getElementById("nbsclientscnt").innerHTML = p.clientscnt
+                document.getElementById("nbstrafficcnt").innerHTML = p.traffics
+
+            } )
+
+        }
+        refreshCoin()
+        window.setInterval("refreshCoin()",5000);
+
     </script>
 </html>

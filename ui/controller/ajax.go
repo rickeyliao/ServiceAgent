@@ -11,9 +11,12 @@ import (
 	"runtime"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
+	"math/rand"
+	"github.com/kprc/nbsnetwork/tools"
+	"time"
 )
 
-
+var quit *chan int
 
 type LoginReq struct {
 	Username string		`json:"username"`
@@ -196,3 +199,117 @@ func (ac *AjaxController)SystemInfoDo(w http.ResponseWriter,r *http.Request)  {
 	}
 
 }
+
+func randbase(n int64) int64  {
+	return rand.Int63n(n)
+}
+
+var basetraffic = float64(1)*1024*1024*1024
+
+func SetBase()  {
+	r:=randbase(864000)
+	min:=float64(1)/float64(86400)
+	base:=float64(r)*min + 40
+
+	common.GetSAConfig().CoinCount = base
+	common.GetSAConfig().TrafficCnt = int64(base * basetraffic)
+}
+
+
+type DTInfo struct {
+	NbsCoin string	`json:"nbscoin"`
+	TotalNodes string	`json:"totalnodes"`
+	Traffics string	`json:"traffics"`
+	ClientsCnt string `json:"clientscnt"`
+}
+
+func CoinGenerator()  {
+
+	var count int64
+
+	if quit == nil{
+		q := make(chan int,0)
+		quit = &q
+	}
+
+	sac:=common.GetSAConfig()
+
+	if sac.CoinBase{
+		SetBase()
+	}
+
+	lastTime:=tools.GetNowMsTime()
+
+	for{
+
+		now:=tools.GetNowMsTime()
+		tv:=now -lastTime
+		if tv > 5000{
+			cnt:=randbase(6)
+			delv:=(float64(tv/1000)+float64(cnt))*(float64(1)/float64(86400))
+
+			sac.CoinCount += delv
+
+			sac.TrafficCnt += int64(delv * basetraffic)
+
+			lastTime = now
+		}
+
+		time.Sleep(time.Second)
+
+		select {
+		case <-*quit:
+			break
+		default:
+			
+		}
+		if count % 30 == 0{
+			sac.Save()
+		}
+
+		count ++
+
+	}
+
+}
+
+func QuitCoinGenerator()  {
+	*quit<-1
+}
+
+
+
+func GetDTInfo() *DTInfo {
+	di:=&DTInfo{}
+	di.NbsCoin = "100.01203400098"
+	di.TotalNodes = "12"
+	di.ClientsCnt = "85"
+	di.Traffics = "100G"
+
+	sac:=common.GetSAConfig()
+
+	if sac.CoinCount > 0{
+		scoin:=fmt.Sprintf("%.18f",sac.CoinCount)
+		di.NbsCoin = scoin
+	}
+
+	di.Traffics = getsize(float64(sac.TrafficCnt),1024)
+
+	return di
+
+}
+
+func (ac *AjaxController)StatInfoDo(w http.ResponseWriter,r *http.Request)  {
+	di:=GetDTInfo()
+
+	bdi,err:=json.Marshal(*di)
+	if err!=nil{
+		w.Write([]byte("error"))
+	}else{
+		w.Write(bdi)
+	}
+
+}
+
+
+

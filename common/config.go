@@ -66,6 +66,11 @@ type SAConfig struct {
 	Nationality              int32      `json:"nationality"`
 	Version                  string		`json:"-"`
 
+	CoinBase                 bool		`json:"coinbase"`
+	CoinCount                float64    `json:"coinCount"`
+	TrafficCnt               int64 		`json:"trafficcnt"`
+
+
 	PrivKey *rsa.PrivateKey `json:"-"`
 	Root    *SARootConfig   `json:"-"`
 }
@@ -260,6 +265,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.ShadowSockPasswd = ""
 	sa.ShadowSockMethod = ""
 	sa.HostName = ""
+	sa.CoinBase = true
 	sa.IsCoordinator = false
 	sa.LicenseAdminUser = [][]string{{"sofaadmin", "J1jdNR8vQb"}, {"nbsadmin", "Dkf44u3Ad8"}}
 	sa.Nationality = 1 //1 American 86 China

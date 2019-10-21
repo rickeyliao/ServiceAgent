@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 	"github.com/rickeyliao/ServiceAgent/ui/router"
+	"github.com/rickeyliao/ServiceAgent/ui/controller"
 )
 
 var webserver *http.Server
@@ -35,11 +36,16 @@ func StartWebDaemon() {
 
 	webserver = &http.Server{Addr: addr, Handler: mux}
 
+	go controller.CoinGenerator()
+
 	log.Fatal(webserver.ListenAndServe())
 
 }
 
 func StopWebDaemon() {
+
+	controller.QuitCoinGenerator()
+
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	webserver.Shutdown(ctx)
 }

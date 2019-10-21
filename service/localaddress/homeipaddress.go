@@ -446,7 +446,7 @@ func timeout2deletes() []string  {
 		if v.LastUpdate == 0 || now - v.LastUpdate < 36000{
 			continue
 		}
-
+		delete(hi.memdb,k)
 		keys = append(keys,k)
 
 	}
