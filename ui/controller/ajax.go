@@ -250,7 +250,7 @@ func CoinGenerator()  {
 
 			sac.CoinCount += delv
 
-			sac.TrafficCnt += int64(delv * basetraffic)
+			sac.TrafficCnt = int64(sac.CoinCount * basetraffic)
 
 			lastTime = now
 		}
