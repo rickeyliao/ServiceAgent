@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="./css/xadmin.css">
         <script src="./lib/layui/layui.js" charset="utf-8"></script>
         <script type="text/javascript" src="./js/xadmin.js"></script>
+        <script type="text/javascript" src="./js/checklogin.js"></script>
         <!-- let IE8/9 support -->
         <!--[if lt IE 9]>
           <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -52,7 +53,7 @@
                     <div class="layui-card">
                         <div class="layui-card-body ">
                             <blockquote class="layui-elem-quote">Welcome：
-                                <span class="x-red">rickey</span>！Time: &nbsp;<span id="curtime"></span>
+                                <span class="x-red" id="nbsadminid">admin</span>！Time: &nbsp;<span id="curtime"></span>
                             </blockquote>
                         </div>
                     </div>
@@ -206,7 +207,7 @@
                                     </tr>
                                     <tr>
                                         <th>Write By</th>
-                                        <td>Nbs Team(nbs.io@tutanota.com)</td></tr>
+                                        <td>NBS Team(nbs.io@tutanota.com)</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -218,4 +219,17 @@
         </div>
         </div>
     </body>
+
+    <script>
+        // close tab remember
+        // var is_remember = false;
+
+        var v=getCookie("nbsadmin")
+        if (v!=""){
+            document.getElementById("nbsadminid").innerHTML = v.split(":")[0]
+        }else{
+            document.getElementById("nbsadminid").innerHTML = "admin"
+        }
+
+    </script>
 </html>

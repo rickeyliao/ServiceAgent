@@ -22,6 +22,7 @@
             // close tab remember
             // var is_remember = false;
 
+
         </script>
     </head>
     <body class="index">
@@ -59,7 +60,7 @@
             rickey comment -->
             <ul class="layui-nav right" lay-filter="">
                 <li class="layui-nav-item">
-                    <a href="javascript:;">admin</a>
+                    <a href="javascript:;" id="nbsadmin">admin</a>
                     <dl class="layui-nav-child">
                         <!-- 二级菜单 -->
                         <!--
@@ -94,12 +95,12 @@
                                     <cite>Networking</cite></a>
                             </li>
                             <li>
-                                <a onclick="xadmin.add_tab('Storage','blank.html')">
+                                <a onclick="xadmin.add_tab('Storage','blank1.html')">
                                     <i class="iconfont">&#xe6a7;</i>
                                     <cite>Storage</cite></a>
                             </li>
                             <li>
-                                <a onclick="xadmin.add_tab('Neighbor DHT','blank.html',true)">
+                                <a onclick="xadmin.add_tab('Neighbor DHT','blank2.html',true)">
                                     <i class="iconfont">&#xe6a7;</i>
                                     <cite>Neighbor DHT</cite></a>
                             </li>
@@ -137,12 +138,12 @@
                             <i class="iconfont nav_right">&#xe697;</i></a>
                         <ul class="sub-menu">
                             <li>
-                                <a onclick="xadmin.add_tab('APSettings','blank.html')">
+                                <a onclick="xadmin.add_tab('APSettings','blank3.html')">
                                     <i class="iconfont">&#xe6a7;</i>
                                     <cite>APSettings</cite></a>
                             </li>
                             <li>
-                                <a onclick="xadmin.add_tab('Others','blank.html')">
+                                <a onclick="xadmin.add_tab('Others','blank4.html')">
                                     <i class="iconfont">&#xe6a7;</i>
                                     <cite>Others</cite></a>
                             </li>
@@ -366,5 +367,18 @@
         <!-- 右侧主体结束 -->
         <!-- 中部结束 -->
     </body>
+
+    <script>
+        // close tab remember
+        // var is_remember = false;
+
+        var v=getCookie("nbsadmin")
+        if (v!=""){
+            document.getElementById("nbsadmin").innerHTML = v.split(":")[0]
+        }else{
+            document.getElementById("nbsadmin").innerHTML = "admin"
+        }
+
+    </script>
 
 </html>
