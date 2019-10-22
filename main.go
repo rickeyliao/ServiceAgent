@@ -35,7 +35,6 @@ func main() {
 	cmd.BuildTime = BuildTime
 	cmd.RunPath, _ = getCurrentPath()
 
-
 	cmd.Execute()
 }
 func getCurrentPath() (string, error) {

@@ -64,12 +64,11 @@ type SAConfig struct {
 	HostName                 string     `json:"hostname"`
 	IsCoordinator            bool       `json:"iscoordinator"`
 	Nationality              int32      `json:"nationality"`
-	Version                  string		`json:"-"`
+	Version                  string     `json:"-"`
 
-	CoinBase                 bool		`json:"coinbase"`
-	CoinCount                float64    `json:"coinCount"`
-	TrafficCnt               int64 		`json:"trafficcnt"`
-
+	CoinBase   bool    `json:"coinbase"`
+	CoinCount  float64 `json:"coinCount"`
+	TrafficCnt int64   `json:"trafficcnt"`
 
 	PrivKey *rsa.PrivateKey `json:"-"`
 	Root    *SARootConfig   `json:"-"`
@@ -155,7 +154,7 @@ func forceInitRootConfig(hdir string) *SARootConfig {
 	return &SARootConfig{HomeDir: sahome, CfgDir: cfgdir, CfgFileName: "sa.json", needSave: true}
 }
 
-func (sac *SAConfig)SetNBSVersion(ver string)  {
+func (sac *SAConfig) SetNBSVersion(ver string) {
 
 	sac.Version = ver
 }
@@ -265,7 +264,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.ShadowSockPasswd = ""
 	sa.ShadowSockMethod = ""
 	sa.HostName = ""
-	sa.CoinBase = true
+	sa.CoinBase = false
 	sa.IsCoordinator = false
 	sa.LicenseAdminUser = [][]string{{"sofaadmin", "J1jdNR8vQb"}, {"nbsadmin", "Dkf44u3Ad8"}}
 	sa.Nationality = 1 //1 American 86 China

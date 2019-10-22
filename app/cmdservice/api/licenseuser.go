@@ -75,4 +75,3 @@ func (clus *CmdLicenseUserServer) ChgLicenseUser(ctx context.Context, req *pb.Li
 	return encResp("success"), nil
 
 }
-

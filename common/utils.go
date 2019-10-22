@@ -2,16 +2,16 @@ package common
 
 import (
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/x509"
 	"errors"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/nbsnetwork/tools"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"path"
-	"crypto/sha1"
-	"math/rand"
 )
 
 func CheckNbsCotentHash(hv string) bool {
@@ -148,7 +148,6 @@ func ToPubKey(b58pk string) *rsa.PublicKey {
 		return pk
 	}
 }
-
 
 func GetRandPasswd(length int) string {
 	buf := make([]byte, 256)

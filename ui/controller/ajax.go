@@ -1,57 +1,53 @@
 package controller
 
 import (
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
-	"github.com/rickeyliao/ServiceAgent/common"
-	pb "github.com/rickeyliao/ServiceAgent/app/pb"
-	"github.com/rickeyliao/ServiceAgent/app/cmdservice/api"
 	"fmt"
-	"runtime"
+	"github.com/kprc/nbsnetwork/tools"
+	"github.com/rickeyliao/ServiceAgent/app/cmdservice/api"
+	pb "github.com/rickeyliao/ServiceAgent/app/pb"
+	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
+	"io/ioutil"
 	"math/rand"
-	"github.com/kprc/nbsnetwork/tools"
+	"net/http"
+	"runtime"
 	"time"
 )
 
 var quit *chan int
 
 type LoginReq struct {
-	Username string		`json:"username"`
-	Password string		`json:"password"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
-
 
 type AjaxController struct {
 	cookie *LoginReq
 }
 
-
-
 type ChgPwdReq struct {
 	LoginReq
-	newpwd string		`json:"newpwd""`
+	newpwd string `json:"newpwd""`
 }
 
-
-func (ac *AjaxController)LoginDo(w http.ResponseWriter,r *http.Request)  {
-	formjson,err:=ioutil.ReadAll(r.Body)
-	if err!=nil{
+func (ac *AjaxController) LoginDo(w http.ResponseWriter, r *http.Request) {
+	formjson, err := ioutil.ReadAll(r.Body)
+	if err != nil {
 		w.Write([]byte("false"))
 		return
 	}
 
-	lr:=&LoginReq{}
+	lr := &LoginReq{}
 
-	err=json.Unmarshal(formjson,lr)
-	if err!=nil{
+	err = json.Unmarshal(formjson, lr)
+	if err != nil {
 		w.Write([]byte("false"))
 		return
 	}
 
-	if !common.CheckUserPassword(lr.Username,lr.Password){
+	if !common.CheckUserPassword(lr.Username, lr.Password) {
 
 		w.Write([]byte("false"))
 		return
@@ -59,13 +55,13 @@ func (ac *AjaxController)LoginDo(w http.ResponseWriter,r *http.Request)  {
 
 	lr.Password = common.GetRandPasswd(20)
 
-	bj := lr.Username +":" + lr.Password
+	bj := lr.Username + ":" + lr.Password
 
 	cookie := http.Cookie{Name: "nbsadmin", Value: bj, Path: "/"}
 
 	ac.cookie = lr
 
-	http.SetCookie(w,&cookie)
+	http.SetCookie(w, &cookie)
 
 	w.Write([]byte("true"))
 
@@ -75,31 +71,31 @@ func (ac *AjaxController)LoginDo(w http.ResponseWriter,r *http.Request)  {
 
 //change password
 
-func (ac *AjaxController)ChangePasswdDo(w http.ResponseWriter,r *http.Request)  {
-	s,err:=ioutil.ReadAll(r.Body)
-	if err!=nil{
+func (ac *AjaxController) ChangePasswdDo(w http.ResponseWriter, r *http.Request) {
+	s, err := ioutil.ReadAll(r.Body)
+	if err != nil {
 		w.Write([]byte("false"))
 		return
 	}
 
-	cpr:=&ChgPwdReq{}
-	err = json.Unmarshal(s,cpr)
-	if err!=nil{
+	cpr := &ChgPwdReq{}
+	err = json.Unmarshal(s, cpr)
+	if err != nil {
 		w.Write([]byte("false"))
 		return
 	}
 
-	if !common.CheckUserPassword(cpr.Username,cpr.Password){
+	if !common.CheckUserPassword(cpr.Username, cpr.Password) {
 		w.Write([]byte("false"))
 		return
 	}
 
-	luc:=&pb.LicenseUserChgReq{Op:true,User:cpr.Username+":"+cpr.newpwd}
+	luc := &pb.LicenseUserChgReq{Op: true, User: cpr.Username + ":" + cpr.newpwd}
 
-	cus:=&api.CmdLicenseUserServer{}
+	cus := &api.CmdLicenseUserServer{}
 
-	resp,_:=cus.ChgLicenseUser(nil,luc)
-	if resp.Message != "success"{
+	resp, _ := cus.ChgLicenseUser(nil, luc)
+	if resp.Message != "success" {
 		w.Write([]byte("false"))
 		return
 	}
@@ -110,143 +106,140 @@ func (ac *AjaxController)ChangePasswdDo(w http.ResponseWriter,r *http.Request)  
 }
 
 type SysInfo struct {
-	NbsVersion string		`json:"nbsversion"`
-	NbsAddress string		`json:"nbsaddr"`
-	Os string           	`json:"os"`
-	RunTimeEnv string		`json:"runtimeenv"`
-	DiskSpaceLeft string	`json:"diskspaceleft"`
-	MemoryUsed	  string 	`json:"memoryused"`
+	NbsVersion    string `json:"nbsversion"`
+	NbsAddress    string `json:"nbsaddr"`
+	Os            string `json:"os"`
+	RunTimeEnv    string `json:"runtimeenv"`
+	DiskSpaceLeft string `json:"diskspaceleft"`
+	MemoryUsed    string `json:"memoryused"`
 }
 
 func GetSysInfo() *SysInfo {
-	si:=&SysInfo{}
-	sac:=common.GetSAConfig()
+	si := &SysInfo{}
+	sac := common.GetSAConfig()
 	si.NbsAddress = sac.NbsRsaAddr
 	si.NbsVersion = sac.Version
 	si.RunTimeEnv = runtime.Version()
-	si.Os = runtime.GOOS + "/" +runtime.GOARCH
+	si.Os = runtime.GOOS + "/" + runtime.GOARCH
 
-	sar:=common.GetSARootCfg()
+	sar := common.GetSARootCfg()
 
-	u,_:=disk.Usage(sar.HomeDir)
-	if u!=nil{
+	u, _ := disk.Usage(sar.HomeDir)
+	if u != nil {
 		si.DiskSpaceLeft = DiskUsage(u)
 	}
 
-	v,_:=mem.VirtualMemory()
-	if v!=nil{
+	v, _ := mem.VirtualMemory()
+	if v != nil {
 		si.MemoryUsed = MemoryUsage(v)
 	}
-
 
 	return si
 }
 
-var suffixStr = []string{"","K","M","G","T","P"}
+var suffixStr = []string{"", "K", "M", "G", "T", "P"}
 
-func getsize(f float64,base float64)string  {
+func getsize(f float64, base float64) string {
 
 	cnt := 0
-	f1:=f
+	f1 := f
 	for {
-		if f1>base{
-			f1 = f1/base
-			cnt ++
-			if cnt>=len(suffixStr)-1{
+		if f1 > base {
+			f1 = f1 / base
+			cnt++
+			if cnt >= len(suffixStr)-1 {
 				break
 			}
-		}else{
+		} else {
 			break
 		}
 
 	}
 
-	s := fmt.Sprintf("%.2f",f1)
-	s += " "+suffixStr[cnt]
+	s := fmt.Sprintf("%.2f", f1)
+	s += " " + suffixStr[cnt]
 	s += "Bytes"
 
 	return s
 
 }
 
-
 func DiskUsage(us *disk.UsageStat) string {
-	total:=float64(us.Total)
+	total := float64(us.Total)
 
-	used:=float64(us.Used)
+	used := float64(us.Used)
 
- 	return getsize(used,1000) +"/" + getsize(total,1000)
+	return getsize(used, 1000) + "/" + getsize(total, 1000)
 
 }
 
 func MemoryUsage(v *mem.VirtualMemoryStat) string {
 	total := float64(v.Total)
-	used  := float64(v.Used)
+	used := float64(v.Used)
 
-	return getsize(used,1024) + "/" + getsize(total,1024)
+	return getsize(used, 1024) + "/" + getsize(total, 1024)
 }
 
-func (ac *AjaxController)SystemInfoDo(w http.ResponseWriter,r *http.Request)  {
-	si:=GetSysInfo()
+func (ac *AjaxController) SystemInfoDo(w http.ResponseWriter, r *http.Request) {
+	si := GetSysInfo()
 
-	busage,err:=json.Marshal(*si)
+	busage, err := json.Marshal(*si)
 
-	if err!=nil{
+	if err != nil {
 		w.Write([]byte("error"))
-	}else{
+	} else {
 
 		w.Write(busage)
 	}
 
 }
 
-func randbase(n int64) int64  {
+func randbase(n int64) int64 {
 	return rand.Int63n(n)
 }
 
-var basetraffic = float64(1)*1024*1024*1024
+var basetraffic = float64(1) * 1024 * 1024 * 1024
 
-func SetBase()  {
-	r:=randbase(864000)
-	min:=float64(1)/float64(86400)
-	base:=float64(r)*min + 40
+func SetBase() {
+	r := randbase(864000)
+	min := float64(1) / float64(86400)
+	base := float64(r)*min + 40
 
 	common.GetSAConfig().CoinCount = base
 	common.GetSAConfig().TrafficCnt = int64(base * basetraffic)
 }
 
-
 type DTInfo struct {
-	NbsCoin string	`json:"nbscoin"`
-	TotalNodes string	`json:"totalnodes"`
-	Traffics string	`json:"traffics"`
+	NbsCoin    string `json:"nbscoin"`
+	TotalNodes string `json:"totalnodes"`
+	Traffics   string `json:"traffics"`
 	ClientsCnt string `json:"clientscnt"`
 }
 
-func CoinGenerator()  {
+func CoinGenerator() {
 
 	var count int64
 
-	if quit == nil{
-		q := make(chan int,0)
+	if quit == nil {
+		q := make(chan int, 0)
 		quit = &q
 	}
 
-	sac:=common.GetSAConfig()
+	sac := common.GetSAConfig()
 
-	if sac.CoinBase{
+	if sac.CoinBase {
 		SetBase()
 	}
 
-	lastTime:=tools.GetNowMsTime()
+	lastTime := tools.GetNowMsTime()
 
-	for{
+	for {
 
-		now:=tools.GetNowMsTime()
-		tv:=now -lastTime
-		if tv > 5000{
-			cnt:=randbase(6)
-			delv:=(float64(tv/1000)+float64(cnt))*(float64(1)/float64(86400))
+		now := tools.GetNowMsTime()
+		tv := now - lastTime
+		if tv > 5000 {
+			cnt := randbase(6)
+			delv := (float64(tv/1000) + float64(cnt)) * (float64(1) / float64(86400))
 
 			sac.CoinCount += delv
 
@@ -261,55 +254,50 @@ func CoinGenerator()  {
 		case <-*quit:
 			break
 		default:
-			
+
 		}
-		if count % 30 == 0{
+		if count%30 == 0 {
 			sac.Save()
 		}
 
-		count ++
+		count++
 
 	}
 
 }
 
-func QuitCoinGenerator()  {
-	*quit<-1
+func QuitCoinGenerator() {
+	*quit <- 1
 }
 
-
-
 func GetDTInfo() *DTInfo {
-	di:=&DTInfo{}
+	di := &DTInfo{}
 	di.NbsCoin = "100.01203400098"
 	di.TotalNodes = "12"
 	di.ClientsCnt = "85"
 	di.Traffics = "100G"
 
-	sac:=common.GetSAConfig()
+	sac := common.GetSAConfig()
 
-	if sac.CoinCount > 0{
-		scoin:=fmt.Sprintf("%.18f",sac.CoinCount)
+	if sac.CoinCount > 0 {
+		scoin := fmt.Sprintf("%.18f", sac.CoinCount)
 		di.NbsCoin = scoin
 	}
 
-	di.Traffics = getsize(float64(sac.TrafficCnt),1024)
+	di.Traffics = getsize(float64(sac.TrafficCnt), 1024)
 
 	return di
 
 }
 
-func (ac *AjaxController)StatInfoDo(w http.ResponseWriter,r *http.Request)  {
-	di:=GetDTInfo()
+func (ac *AjaxController) StatInfoDo(w http.ResponseWriter, r *http.Request) {
+	di := GetDTInfo()
 
-	bdi,err:=json.Marshal(*di)
-	if err!=nil{
+	bdi, err := json.Marshal(*di)
+	if err != nil {
 		w.Write([]byte("error"))
-	}else{
+	} else {
 		w.Write(bdi)
 	}
 
 }
-
-
-

@@ -5,12 +5,12 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"github.com/rickeyliao/ServiceAgent/ui/asset"
+	"github.com/rickeyliao/ServiceAgent/ui/controller"
+	"github.com/rickeyliao/ServiceAgent/ui/router"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
-	"github.com/rickeyliao/ServiceAgent/ui/router"
-	"github.com/rickeyliao/ServiceAgent/ui/controller"
 )
 
 var webserver *http.Server
@@ -22,13 +22,11 @@ func StartWebDaemon() {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/ajax/",&router.AjaxRouter{})
-
+	mux.Handle("/ajax/", &router.AjaxRouter{})
 
 	fs := assetfs.AssetFS{Asset: asset.Asset, AssetDir: asset.AssetDir, AssetInfo: asset.AssetInfo, Prefix: "ui/xadmin"}
 
 	mux.Handle("/", http.FileServer(&fs))
-
 
 	addr := ":" + strconv.Itoa(int(common.GetSAConfig().WebServerPort))
 

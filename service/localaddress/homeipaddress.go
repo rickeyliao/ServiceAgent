@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kprc/nbsnetwork/db"
+	"github.com/kprc/nbsnetwork/tools"
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/app"
 	"github.com/rickeyliao/ServiceAgent/common"
@@ -14,7 +15,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"github.com/kprc/nbsnetwork/tools"
 )
 
 type HomeIPDB struct {
@@ -298,12 +298,12 @@ func Insert(nbsaddress string, mn string, interAddress string, natAddress string
 
 	if ssr == nil {
 		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress,
-						NatAddress: String2arr(natAddress),LastUpdate:tools.GetNowMsTime()}
+			NatAddress: String2arr(natAddress), LastUpdate: tools.GetNowMsTime()}
 	} else {
 		hid = &Homeipdesc{MachineName: mn, InternetAddress: interAddress, NatAddress: String2arr(natAddress),
 			Nationality: ssr.Nationality,
 			SSPassword:  ssr.SSPassword, SSPort: ssr.SSPort, SSMethod: ssr.SSMethod,
-			LastUpdate:tools.GetNowMsTime()}
+			LastUpdate: tools.GetNowMsTime()}
 	}
 
 	GetHomeIPDB().Insert(nbsaddress, hid)
@@ -433,36 +433,35 @@ func Save() {
 	hi.homeipdb.Save()
 }
 
-func timeout2deletes() []string  {
+func timeout2deletes() []string {
 
-	keys:=make([]string,0)
+	keys := make([]string, 0)
 
-	now:=tools.GetNowMsTime()
+	now := tools.GetNowMsTime()
 	hi := GetHomeIPDB()
 	hi.memdblock.Lock()
 	defer hi.memdblock.Unlock()
 
-	for k,v:=range hi.memdb{
-		if v.LastUpdate == 0 || now - v.LastUpdate < 36000{
+	for k, v := range hi.memdb {
+		if v.LastUpdate == 0 || now-v.LastUpdate < 36000 {
 			continue
 		}
-		delete(hi.memdb,k)
-		keys = append(keys,k)
+		delete(hi.memdb, k)
+		keys = append(keys, k)
 
 	}
 
 	return keys
 }
 
+func TimeOut() {
 
-func TimeOut()  {
+	keys := timeout2deletes()
 
-	keys:=timeout2deletes()
-
-	hi:=GetHomeIPDB()
+	hi := GetHomeIPDB()
 	hi.homeipdblock.Lock()
 	defer hi.homeipdblock.Unlock()
-	for _,key:=range keys{
+	for _, key := range keys {
 		hi.homeipdb.Delete(key)
 	}
 }
