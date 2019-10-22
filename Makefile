@@ -42,7 +42,7 @@ staticfile2bin:
 	go-bindata -o $(assetdir)/res.go -pkg=asset ui/xadmin/...
 
 $(TARGET): staticfile2bin proto $(SRC)
-	@go build $(LDFLAGS) -o $(TARGET)
+	@GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o $(TARGET)
 
 build: $(TARGET)
 	@true
