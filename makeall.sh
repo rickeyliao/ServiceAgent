@@ -14,6 +14,8 @@ go get -u -v github.com/jteeuwen/go-bindata/...
 
 make
 
+make -f MakefileAMD64Mac
+
 make -f MakefileAMD64Lnx
 
 make -f MakefileArm
