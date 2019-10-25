@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 # The name of the executable (default is current directory name)
 BASENAME := $(shell echo $${PWD\#\#*/})
-TARGET := nbssa
+TARGET := nbssamac
 .DEFAULT_GOAL: $(TARGET)
 
 # These will be provided to the target
@@ -42,7 +42,7 @@ staticfile2bin:
 	go-bindata -o $(assetdir)/res.go -pkg=asset ui/xadmin/...
 
 $(TARGET): staticfile2bin proto $(SRC)
-	@go build $(LDFLAGS) -o $(TARGET)
+	@GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o $(TARGET)
 
 build: $(TARGET)
 	@true
