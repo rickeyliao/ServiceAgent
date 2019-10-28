@@ -3,6 +3,7 @@ package dht2
 import (
 	"net"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"fmt"
 )
 
 var (
@@ -54,10 +55,43 @@ func NewP2pAddr() *P2pAddr {
 }
 
 func (pa *P2pAddr)Ping() bool  {
+
+
+
 	return false
 }
 
 
+
+func (pa *P2pAddr)String() string  {
+	var s string
+	s += fmt.Sprintf("NbsAddr: %s ",pa.NbsAddr.ID())
+	s += fmt.Sprintf("CanService: %t ",pa.CanService)
+	s += fmt.Sprintf("InternetAddr: %s ",pa.InternetAddr.To4().String())
+	s += fmt.Sprintf("Port: %d ",pa.Port)
+	if len(pa.InternetAddr) > 0{
+		var internalips string
+		for _,ip:=range pa.InternalAddr{
+			if internalips != ""{
+				internalips += " "
+			}
+			internalips += ip.To4().String()
+		}
+		s += fmt.Sprintf("Internal Address: %s ",internalips)
+	}
+
+	if len(pa.NatAddr)>0{
+		var nataddrs string
+
+		for _,pa1:=range pa.NatAddr{
+			s += pa1.String()
+		}
+
+		s += fmt.Sprintf("Nat addr: { %s } ", nataddrs)
+	}
+
+	return s
+}
 
 
 

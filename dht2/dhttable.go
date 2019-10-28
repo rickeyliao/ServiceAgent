@@ -2,6 +2,7 @@ package dht2
 
 import (
 	"sync"
+	"fmt"
 )
 
 //max node in bukcet
@@ -18,6 +19,7 @@ type DTNode struct {
 
 type PingNode struct {
 	Wait2Ping *DTNode
+	Dht *DhtTable
 }
 
 type DTBucket struct {
@@ -34,6 +36,7 @@ type DhtTable struct {
 	HashTable [257]DTBucket
 	DTLock sync.Mutex
 	PingNodeChan chan PingNode
+	Quit chan int
 }
 
 func NewDhtTable() *DhtTable  {
@@ -48,8 +51,19 @@ func NewDhtTable() *DhtTable  {
 		dt.HashTable[i].Dht = dt
 	}
 
+	dt.Quit = make(chan int,0)
+
 
 	return dt
+}
+
+func (dtn *DTNode)String() string {
+	s := (&(dtn.P2pNode)).String()
+
+	s += fmt.Sprintf("lastPingTime %d ",dtn.lastPingTime)
+	s += fmt.Sprintf("refCnt %d ",dtn.RefCnt)
+
+	return s
 }
 
 
@@ -197,6 +211,19 @@ func (dtb *DTBucket)GetLastBackup() *DTNode {
 	}
 }
 
+func (dtb *DTBucket)GetFirstBackup() *DTNode  {
+
+	root:=dtb.Root
+
+	if root != nil{
+		dtb.Root = root.Next
+	}
+
+	return root
+
+}
+
+
 func (dtb *DTBucket)Add(node *DTNode)  {
 	nxt:=dtb.Root
 	dtb.Root = node
@@ -229,7 +256,7 @@ func (dtb *DTBucket)Insert(node *DTNode) bool {
 	//rootcnt >= maxkbucket
 	pingnode:=PingNode{}
 	pingnode.Wait2Ping = dtb.GetLast().Clone()
-	//insnode.Wait2Insert = node
+	pingnode.Dht = dtb.Dht
 
 	dtb.Dht.PingNodeChan <- pingnode
 
@@ -302,6 +329,34 @@ func (dt *DhtTable)Insert(node *DTNode) error  {
 	return nil
 }
 
+func (dt *DhtTable)Update(node *DTNode)  {
+	laddr:=GetLocalNAddr()
+	dtaddr:=node.P2pNode.NbsAddr
+
+	bucketidx,_:=NbsXorLen(laddr.Bytes(),dtaddr.Bytes())
+
+	bucket := dt.HashTable[bucketidx]
+
+	bucket.BackupLock.Lock()
+
+	n1:=bucket.GetFirstBackup()
+
+	bucket.RemoveBackup(n1)
+	bucket.BackupCnt --
+
+	bucket.BackupLock.Unlock()
+
+	bucket.RootLock.Lock()
+
+	bucket.Remove(node)
+	if n1!=nil{
+		bucket.Add(n1)
+	}
+	bucket.RootLock.Unlock()
+
+}
+
+
 func (dtb *DTBucket)Remove(node *DTNode) {
 	nxt:=dtb.Root
 	prev:=nxt
@@ -325,6 +380,11 @@ func (dtb *DTBucket)Remove(node *DTNode) {
 
 
 func (dtb *DTBucket)RemoveBackup(node *DTNode) {
+
+	if node == nil{
+		return
+	}
+
 	nxt:=dtb.Backup
 	prev:=nxt
 	for{
@@ -360,9 +420,43 @@ func (dt *DhtTable)Remove(node *DTNode) {
 	(&bucket).Remove(node)
 }
 
+func (dt *DhtTable)DoPing(node *DTNode)  {
+	if node.P2pNode.Ping(){
+		dt.Insert(node)
+	}else{
+		dt.Update(node)
+	}
+}
+
+func (dt *DhtTable)RunPing(wg *sync.WaitGroup)  {
+
+	defer func() {
+		wg.Done()
+	}()
+
+	for{
+		select {
+		case node:=<-dt.PingNodeChan:
+			node.Dht.DoPing(node.Wait2Ping)
+		case <-dt.Quit:
+			return
+		}
+	}
 
 
-func (dt *DhtTable)Running() {
+}
+
+func (dt *DhtTable)Run() {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go dt.RunPing(wg)
+
+
+	wg.Wait()
+}
+
+func (dt *DhtTable)Stop()  {
+	dt.Quit <- 1
 
 }
 
