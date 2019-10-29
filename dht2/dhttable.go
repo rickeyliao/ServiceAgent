@@ -3,12 +3,14 @@ package dht2
 import (
 	"sync"
 	"fmt"
+	"github.com/kprc/nbsnetwork/tools"
 )
 
 //max node in bukcet
 var MaxKBucket int = 16
 //max node in backup bucket
 var MaxKBucketBackup int = 16
+
 
 type DTNode struct {
 	P2pNode P2pAddr
@@ -19,6 +21,7 @@ type DTNode struct {
 
 type PingNode struct {
 	Wait2Ping *DTNode
+	Wait2Insert *DTNode
 	Dht *DhtTable
 }
 
@@ -36,7 +39,11 @@ type DhtTable struct {
 	HashTable [257]DTBucket
 	DTLock sync.Mutex
 	PingNodeChan chan PingNode
-	Quit chan int
+	TimeOutChan  chan PingNode
+	Wg *sync.WaitGroup
+	PingQuit chan int
+	TimeQuitCreate chan int
+	TimeQuit chan int
 }
 
 func NewDhtTable() *DhtTable  {
@@ -46,13 +53,17 @@ func NewDhtTable() *DhtTable  {
 	defer dt.DTLock.Unlock()
 
 	dt.PingNodeChan = make(chan PingNode,2560)
+	dt.TimeOutChan = make(chan PingNode,2560)
 
 	for i:=0;i<len(dt.HashTable);i++{
 		dt.HashTable[i].Dht = dt
 	}
 
-	dt.Quit = make(chan int,0)
+	dt.PingQuit = make(chan int,0)
+	dt.TimeQuit = make(chan int,0)
+	dt.TimeQuitCreate = make(chan int,0)
 
+	dt.Wg = &sync.WaitGroup{}
 
 	return dt
 }
@@ -228,39 +239,42 @@ func (dtb *DTBucket)Add(node *DTNode)  {
 	nxt:=dtb.Root
 	dtb.Root = node
 	node.Next = nxt
+	dtb.RootCnt ++
 }
 
 func (dtb *DTBucket)AddBackup(node *DTNode)  {
 	nxt:=dtb.Backup
 	dtb.Backup = node
 	node.Next = nxt
+	dtb.BackupCnt ++
 }
 
-func (dtb *DTBucket)Insert(node *DTNode) bool {
+func (dtb *DTBucket)Insert(node *DTNode) {
 	//node.lastPingTime = tools.GetNowMsTime()
 
 	n1:=dtb.Find(node)
 	if n1==nil{
 		if dtb.RootCnt < MaxKBucket{
 			dtb.Add(node)
-			dtb.RootCnt ++
-			return false
+			return
 		}
 
 	}else{
 		dtb.Remove(n1)
 		dtb.Add(node)
-		return false
+		return
 	}
 
 	//rootcnt >= maxkbucket
 	pingnode:=PingNode{}
 	pingnode.Wait2Ping = dtb.GetLast().Clone()
+	pingnode.Wait2Insert = node
+
 	pingnode.Dht = dtb.Dht
 
 	dtb.Dht.PingNodeChan <- pingnode
 
-	return true
+
 }
 
 func (dtb *DTBucket)FindBackup(node *DTNode) *DTNode  {
@@ -293,7 +307,6 @@ func (dtb *DTBucket)InsertBackup(node *DTNode)  {
 	if n1 == nil{
 		if dtb.BackupCnt < MaxKBucketBackup{
 			dtb.AddBackup(node)
-			dtb.BackupCnt ++
 			return
 		}
 	}else{
@@ -307,7 +320,7 @@ func (dtb *DTBucket)InsertBackup(node *DTNode)  {
 	dtb.AddBackup(node)
 }
 
-func (dt *DhtTable)Insert(node *DTNode) error  {
+func (dt *DhtTable)Insert(node *DTNode)   {
 
 	laddr:=GetLocalNAddr()
 	dtaddr:=node.P2pNode.NbsAddr
@@ -317,42 +330,45 @@ func (dt *DhtTable)Insert(node *DTNode) error  {
 	bucket := dt.HashTable[bucketidx]
 
 	bucket.RootLock.Lock()
-	flag:=bucket.Insert(node)
-	bucket.RootLock.Unlock()
+	defer bucket.RootLock.Unlock()
+	bucket.Insert(node)
 
-	if flag{
-		bucket.BackupLock.Lock()
-		bucket.InsertBackup(node)
-		bucket.BackupLock.Unlock()
-	}
-
-	return nil
 }
 
-func (dt *DhtTable)Update(node *DTNode)  {
+func (dt *DhtTable)Update(pingNode PingNode)  {
 	laddr:=GetLocalNAddr()
-	dtaddr:=node.P2pNode.NbsAddr
+	dtaddr:=pingNode.Wait2Ping.P2pNode.NbsAddr
 
 	bucketidx,_:=NbsXorLen(laddr.Bytes(),dtaddr.Bytes())
 
 	bucket := dt.HashTable[bucketidx]
 
-	bucket.BackupLock.Lock()
+	bucket.RootLock.Lock()
+	defer bucket.RootLock.Unlock()
 
-	n1:=bucket.GetFirstBackup()
+	bucket.Remove(pingNode.Wait2Ping)
+	if bucket.RootCnt < MaxKBucket{
+		bucket.Add(pingNode.Wait2Insert)
+	}
 
-	bucket.RemoveBackup(n1)
-	bucket.BackupCnt --
+}
 
-	bucket.BackupLock.Unlock()
+func (dt *DhtTable)UpdateBackup(pingNode PingNode)  {
+	laddr:=GetLocalNAddr()
+	dtaddr:=pingNode.Wait2Ping.P2pNode.NbsAddr
+
+	bucketidx,_:=NbsXorLen(laddr.Bytes(),dtaddr.Bytes())
+
+	bucket := dt.HashTable[bucketidx]
 
 	bucket.RootLock.Lock()
-
-	bucket.Remove(node)
-	if n1!=nil{
-		bucket.Add(n1)
-	}
+	bucket.Remove(pingNode.Wait2Ping)
 	bucket.RootLock.Unlock()
+
+
+	bucket.BackupLock.Lock()
+	bucket.InsertBackup(pingNode.Wait2Insert)
+	bucket.BackupLock.Unlock()
 
 }
 
@@ -371,6 +387,8 @@ func (dtb *DTBucket)Remove(node *DTNode) {
 			}else{
 				prev.Next = nxt.Next
 			}
+			nxt.Next = nil  //for quick recycle
+			dtb.RootCnt --
 			return
 		}
 		prev = nxt
@@ -398,6 +416,8 @@ func (dtb *DTBucket)RemoveBackup(node *DTNode) {
 			}else{
 				prev.Next = nxt.Next
 			}
+			dtb.BackupCnt --
+			nxt.Next = nil  //for quick recycle
 			return
 		}
 		prev = nxt
@@ -420,43 +440,181 @@ func (dt *DhtTable)Remove(node *DTNode) {
 	(&bucket).Remove(node)
 }
 
-func (dt *DhtTable)DoPing(node *DTNode)  {
-	if node.P2pNode.Ping(){
-		dt.Insert(node)
+
+func (dt *DhtTable)RemoveBackup(node *DTNode) {
+	laddr:=GetLocalNAddr()
+	dtaddr:=node.P2pNode.NbsAddr
+
+	bucketidx,_:=NbsXorLen(laddr.Bytes(),dtaddr.Bytes())
+
+	bucket := dt.HashTable[bucketidx]
+
+	bucket.BackupLock.Lock()
+	defer bucket.BackupLock.Unlock()
+
+	(&bucket).RemoveBackup(node)
+}
+
+
+
+func (dt *DhtTable)DoPing(pingNode PingNode)  {
+	if pingNode.Wait2Ping.P2pNode.Ping(){
+		dt.Insert(pingNode.Wait2Ping)
 	}else{
-		dt.Update(node)
+		dt.Update(pingNode)
 	}
 }
 
-func (dt *DhtTable)RunPing(wg *sync.WaitGroup)  {
+func (dt *DhtTable)DoTimeOut(node PingNode)  {
+	if node.Wait2Ping.P2pNode.Ping(){
+		dt.Insert(node.Wait2Ping)
+	}else{
+		dt.TimeOutUpdate(node.Wait2Ping)
+	}
+}
+
+func (dt *DhtTable)TimeOutUpdate(node *DTNode)  {
+	laddr:=GetLocalNAddr()
+	dtaddr:=node.P2pNode.NbsAddr
+
+	bucketidx,_:=NbsXorLen(laddr.Bytes(),dtaddr.Bytes())
+
+	bucket := dt.HashTable[bucketidx]
+
+	bucket.RootLock.Lock()
+	bucket.Remove(node)
+	bucket.RootLock.Unlock()
+
+	bucket.BackupLock.Lock()
+	n:=bucket.GetFirstBackup()
+	if n!=nil{
+		bucket.RemoveBackup(n)
+		dt.TimeOutChan <- PingNode{Wait2Ping:n,Dht:dt}
+	}
+	bucket.BackupLock.Unlock()
+}
+
+
+func (dt *DhtTable)RunTimeOut()  {
+	defer func() {
+		dt.Wg.Done()
+	}()
+
+	for{
+		select {
+		case pn:=<-dt.TimeOutChan:
+			pn.Dht.DoTimeOut(pn)
+		case <-dt.TimeQuit:
+			return
+		}
+	}
+
+}
+
+
+func (dtb *DTBucket)TimeOut(tv int)  {
+	now:=tools.GetNowMsTime()
+
+	nxt:=dtb.Root
+	for{
+		if nxt == nil{
+			return
+		}
+
+		if now - nxt.lastPingTime > int64(tv){
+			pn:=PingNode{}
+			pn.Wait2Ping = nxt
+			pn.Dht = dtb.Dht
+
+			dtb.Dht.TimeOutChan <- pn
+		}
+		nxt = nxt.Next
+	}
+}
+
+func (dt *DhtTable)TimeOut(tv int)  {
+	if tv == 0 {
+		tv = 3600000 //ms,1hour
+	}
+
+	for idx:=1;idx<len(dt.HashTable);idx++{
+
+		bucket := dt.HashTable[idx]
+		bucket.RootLock.Lock()
+		bucket.TimeOut(tv)
+		bucket.RootLock.Unlock()
+
+	}
+
+}
+
+func (dt *DhtTable)WrapperTimeOut(tv int)  {
+
+	ticker:=tools.GetNbsTickerInstance()
+	c:=make(chan int64,1)
+	ticker.RegWithTimeOut(&c,int64(tv)/2)
+
 
 	defer func() {
-		wg.Done()
+		dt.Wg.Done()
+		ticker.UnReg(&c)
+	}()
+
+	for{
+		select {
+			case <-c:
+				 go dt.TimeOut(tv)
+			case <-dt.TimeQuitCreate:
+				return
+		}
+	}
+
+}
+
+
+func (dt *DhtTable)RunPing()  {
+
+	defer func() {
+		dt.Wg.Done()
 	}()
 
 	for{
 		select {
 		case node:=<-dt.PingNodeChan:
-			node.Dht.DoPing(node.Wait2Ping)
-		case <-dt.Quit:
+			node.Dht.DoPing(node)
+		case <-dt.PingQuit:
 			return
 		}
 	}
-
-
 }
 
-func (dt *DhtTable)Run() {
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go dt.RunPing(wg)
 
 
-	wg.Wait()
+func (dt *DhtTable)Run(wait bool) {
+	go tools.GetNbsTickerInstance().Run()
+
+	dt.Wg.Add(1)
+	go dt.RunPing()
+
+	dt.Wg.Add(1)
+
+	go dt.WrapperTimeOut(0)
+
+	dt.Wg.Add(1)
+	if wait{
+		dt.RunTimeOut()
+	}else{
+		go dt.RunTimeOut()
+	}
 }
 
 func (dt *DhtTable)Stop()  {
-	dt.Quit <- 1
+	dt.PingQuit <- 1
+	dt.TimeQuitCreate <- 1
+	dt.TimeQuit <-1
 
+	tools.GetNbsTickerInstance().Stop()
+
+	dt.Wg.Wait()
 }
 
