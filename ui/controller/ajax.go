@@ -227,7 +227,7 @@ func CoinGenerator() {
 
 	sac := common.GetSAConfig()
 
-	if sac.CoinBase && sac.CoinCount == 0{
+	if sac.CoinBase && sac.CoinCount == 0 {
 		SetBase()
 	}
 

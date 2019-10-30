@@ -5,16 +5,16 @@ import "sync"
 var (
 	dhtCanServiceInstance *DhtTable
 	dhtCanServiceInstLock sync.Mutex
-	dhtAllNodeInstance *DhtTable
-	dhtAllNodeInstLock sync.Mutex
+	dhtAllNodeInstance    *DhtTable
+	dhtAllNodeInstLock    sync.Mutex
 )
 
 func GetCanServiceDht() *DhtTable {
-	if dhtCanServiceInstance == nil{
+	if dhtCanServiceInstance == nil {
 		dhtCanServiceInstLock.Lock()
 		defer dhtCanServiceInstLock.Unlock()
 
-		if dhtCanServiceInstance == nil{
+		if dhtCanServiceInstance == nil {
 			dhtCanServiceInstance = NewDhtTable()
 		}
 	}
@@ -23,11 +23,11 @@ func GetCanServiceDht() *DhtTable {
 }
 
 func GetAllNodeDht() *DhtTable {
-	if dhtAllNodeInstance == nil{
+	if dhtAllNodeInstance == nil {
 		dhtAllNodeInstLock.Lock()
 		defer dhtAllNodeInstLock.Unlock()
 
-		if dhtAllNodeInstance == nil{
+		if dhtAllNodeInstance == nil {
 			dhtAllNodeInstance = NewDhtTable()
 		}
 	}
@@ -35,14 +35,12 @@ func GetAllNodeDht() *DhtTable {
 	return dhtAllNodeInstance
 }
 
-func DhtRuning()  {
+func DhtRuning() {
 	GetCanServiceDht().Run(false)
 	GetAllNodeDht().Run(false)
 }
 
-func DhtStop()  {
+func DhtStop() {
 	GetCanServiceDht().Stop()
 	GetAllNodeDht().Stop()
 }
-
-
