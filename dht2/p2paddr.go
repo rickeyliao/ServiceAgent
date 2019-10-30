@@ -55,7 +55,12 @@ func NewP2pAddr() *P2pAddr {
 }
 
 func (pa *P2pAddr)Ping() bool  {
-
+	//local -> pa
+	if pa.CanService {
+		//ping direct
+	}else{
+		//
+	}
 
 
 	return false

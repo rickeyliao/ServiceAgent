@@ -36,8 +36,8 @@ func GetAllNodeDht() *DhtTable {
 }
 
 func DhtRuning()  {
-	go GetCanServiceDht().Run()
-	go GetAllNodeDht().Run()
+	GetCanServiceDht().Run(false)
+	GetAllNodeDht().Run(false)
 }
 
 func DhtStop()  {
