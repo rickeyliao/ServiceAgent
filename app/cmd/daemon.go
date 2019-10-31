@@ -17,6 +17,7 @@ package cmd
 import (
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/dht2"
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 	"github.com/sevlyar/go-daemon"
@@ -69,7 +70,7 @@ var daemonCmd = &cobra.Command{
 		if cfg.ShadowSockServerSwitch {
 			go shadowsock.StartSS2Server()
 		}
-
+		dht2.DhtRuning()
 		cmdservice.StartCmdService()
 	},
 }

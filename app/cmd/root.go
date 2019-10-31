@@ -23,6 +23,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/spf13/cobra"
 
+	"github.com/rickeyliao/ServiceAgent/dht2"
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 )
 
@@ -45,7 +46,7 @@ var rootCmd = &cobra.Command{
 		if cfg.ShadowSockServerSwitch {
 			go shadowsock.StartSS2Server()
 		}
-
+		dht2.DhtRuning()
 		cmdservice.StartCmdService()
 	},
 }

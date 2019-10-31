@@ -15,6 +15,7 @@ import (
 	"github.com/rickeyliao/ServiceAgent/agent/listallip"
 	"github.com/rickeyliao/ServiceAgent/agent/software"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/dht2"
 	"github.com/rickeyliao/ServiceAgent/service/checkip"
 	"github.com/rickeyliao/ServiceAgent/service/file"
 	"github.com/rickeyliao/ServiceAgent/service/license"
@@ -105,6 +106,8 @@ func Stop() {
 	shadowsock.GetSSInst().Quit()
 
 	ui.StopWebDaemon()
+
+	dht2.DhtStop()
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	httpserver.Shutdown(ctx)
