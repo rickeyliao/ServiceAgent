@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -76,6 +77,8 @@ func (lp *LocalP2pAddr) ListenOnCanServicePort() {
 		log.Fatal("error P2p Can Service Port must large than 1024")
 		return
 	}
+
+	log.Println("Can service start at:", strconv.Itoa(lp.addr.Port))
 
 	laddr := &net.UDPAddr{IP: net.IPv4zero, Port: lp.addr.Port}
 
