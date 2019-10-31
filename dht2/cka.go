@@ -4,6 +4,7 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	"net"
 	"sync"
+	"time"
 )
 
 type KANode struct {
@@ -23,10 +24,28 @@ type KABucket struct {
 type KAStore struct {
 	HashTable [256]KABucket
 	lock      sync.Mutex
+	quit      chan int
+	wg        *sync.WaitGroup
 }
 
+var (
+	kastore     *KAStore
+	kastoreLock sync.Mutex
+)
+
 func NewKAStore() *KAStore {
-	return &KAStore{}
+	return &KAStore{quit: make(chan int, 1), wg: &sync.WaitGroup{}}
+}
+
+func GetKAStore() *KAStore {
+	if kastore == nil {
+		kastoreLock.Lock()
+		defer kastoreLock.Unlock()
+		if kastore == nil {
+			kastore = NewKAStore()
+		}
+	}
+	return kastore
 }
 
 func (na NAddr) KAHash() int {
@@ -218,4 +237,71 @@ func (ks *KAStore) DeleteAll(nbsaddr NAddr) {
 	defer b.lock.Unlock()
 
 	b.deleteall(nbsaddr)
+}
+
+func (kb *KABucket) timeout() {
+	now := tools.GetNowMsTime()
+
+	r := kb.root
+	prev := r
+	for {
+		if r == nil {
+			return
+		}
+
+		if now-r.lastAccessTime > 3600000 {
+			if r == kb.root {
+				kb.root = r.next
+			} else {
+				prev.next = r.next
+			}
+
+			r = r.next
+		} else {
+			prev = r
+			r = r.next
+		}
+	}
+}
+
+func (ks *KAStore) Timeout() {
+	for i := 0; i < len(ks.HashTable); i++ {
+		b := ks.HashTable[i]
+		b.lock.Lock()
+		b.timeout()
+		b.lock.Unlock()
+	}
+}
+
+func (ks *KAStore) WrapperTimeout() {
+
+	ks.wg.Add(1)
+
+	defer func() {
+		ks.wg.Done()
+	}()
+
+	starttime := tools.GetNowMsTime()
+	for {
+
+		select {
+		case <-ks.quit:
+			return
+		default:
+
+		}
+
+		if tools.GetNowMsTime()-starttime < 1800000 {
+			time.Sleep(time.Second * 1)
+			continue
+		}
+		ks.Timeout()
+
+		starttime = tools.GetNowMsTime()
+	}
+}
+
+func (ks *KAStore) TimeoutStop() {
+	ks.quit <- 1
+	ks.wg.Wait()
 }
