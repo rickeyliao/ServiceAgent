@@ -21,12 +21,14 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 var (
 	Version   string
 	Build     string
 	BuildTime string
+	WifiRes string
 )
 
 func main() {
@@ -34,6 +36,8 @@ func main() {
 	cmd.Build = Build
 	cmd.BuildTime = BuildTime
 	cmd.RunPath, _ = getCurrentPath()
+
+	common.WifiRes = WifiRes
 
 	cmd.Execute()
 }

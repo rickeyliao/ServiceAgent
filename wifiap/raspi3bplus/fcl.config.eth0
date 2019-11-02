@@ -1,6 +1,6 @@
 {
 	"dbfilename": "fclconfig",
-	"uplink": "enxb827eb303893",
+	"uplink": "enxb827eb30e893",
 	"localnetintf": "wlan0",
 	"flag4g": false,
 	"defaultiptrule": [
@@ -17,7 +17,7 @@
 			"-A",
 			"POSTROUTING",
 			"-o",
-			"enxb827eb303893",
+			"enxb827eb30e893",
 			"-j",
 			"MASQUERADE"
 		],
@@ -39,7 +39,7 @@
 			"-A",
 			"FORWARD",
 			"-i",
-			"enxb827eb303893",
+			"enxb827eb30e893",
 			"-o",
 			"wlan0",
 			"-j",
@@ -53,7 +53,7 @@
 			"-i",
 			"wlan0",
 			"-o",
-			"enxb827eb303893",
+			"enxb827eb30e893",
 			"-j",
 			"accept_mac_address"
 		]

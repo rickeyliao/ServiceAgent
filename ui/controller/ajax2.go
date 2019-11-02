@@ -22,7 +22,13 @@ func (ac *AjaxController) ChangeUplinkDo(w http.ResponseWriter, r *http.Request)
 
 	wifidir:=common.GetSAConfig().GetWifiDir()
 
-	wifidir = path.Join(wifidir,"wifiap/staticfile")
+	res:="wifiap/staticfile"
+
+	if common.WifiRes != ""{
+		res = common.WifiRes
+	}
+
+	wifidir = path.Join(wifidir,res)
 
 	shcmd := ""
 

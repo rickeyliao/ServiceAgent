@@ -18,6 +18,9 @@ import (
 	"sync"
 )
 
+
+var WifiRes string
+
 type SAConfig struct {
 	DownloadPath             string     `json:"downloadpath"`
 	Uploadpath               string     `json:"uploadpath"`

@@ -9,12 +9,13 @@ TARGET := nbssaarmlnx3bp
 #VERSION := 1.0.1
 #BUILD := `git rev-parse HEAD`
 #BUILDTIME := `date "+%Y-%m-%d/%H:%M:%S/%Z"`
+WIFIRES := wifiap/raspi3bplus
 
 include .Makefile
 
 # Use linker flags to provide version/build settings to the target
 #LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -X=main.BuildTime=$(BUILDTIME) -linkmode=external -v"
-LDFLAGS=-x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -X=main.BuildTime=$(BUILDTIME) -w"
+LDFLAGS=-x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -X=main.BuildTime=$(BUILDTIME) -X=main.WifiRes=$(WIFIRES) -w"
 #LDFLAGS=-race -x -ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -X=main.BuildTime=$(BUILDTIME)"
 
 # go source files, ignore vendor directory
@@ -51,7 +52,7 @@ build: $(TARGET)
 
 clean:
 	@rm -f $(TARGET)
-	@rm -f $(rpcservice)/*.pb.go $(assetdir)/res.go
+	@rm -f $(rpcservice)/*.pb.go $(assetdir)/res.go $(wifiapdir)/res.go
 #install: preinst
 #	#@go install $(LDFLAGS)
 #	@mv $$(which ${BASENAME})  $(subst ${BASENAME},$(TARGET),$$(which ${BASENAME}))
