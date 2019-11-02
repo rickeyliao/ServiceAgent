@@ -64,6 +64,7 @@ type SAConfig struct {
 	HostName                 string     `json:"hostname"`
 	IsCoordinator            bool       `json:"iscoordinator"`
 	Nationality              int32      `json:"nationality"`
+	WifiAPConfigFile         string     `json:wifiapconfigfile`
 	Version                  string     `json:"-"`
 
 	CoinBase   bool    `json:"coinbase"`
@@ -268,6 +269,7 @@ func DefaultInitConfig() *SAConfig {
 	sa.IsCoordinator = false
 	sa.LicenseAdminUser = [][]string{{"sofaadmin", "J1jdNR8vQb"}, {"nbsadmin", "Dkf44u3Ad8"}}
 	sa.Nationality = 1 //1 American 86 China
+	sa.WifiAPConfigFile = "wificonfig"
 
 	return sa
 }
@@ -459,6 +461,11 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 		os.MkdirAll(statdir, 0755)
 	}
 
+	wifiapdir:=path.Join(sar.HomeDir,sar.SacInst.WifiAPConfigFile)
+	if !tools.FileExists(wifiapdir) {
+		os.MkdirAll(statdir, 0755)
+	}
+
 	sar.SacInst.Root = sar
 
 	if nds {
@@ -480,6 +487,10 @@ func (sar *SARootConfig) InitRSAKey(force bool) *SARootConfig {
 	}
 
 	return sar
+}
+
+func (sac *SAConfig)GetWifiDir() string  {
+	return path.Join(sac.Root.HomeDir,sac.WifiAPConfigFile)
 }
 
 func (sac *SAConfig) GetPidDir() string {

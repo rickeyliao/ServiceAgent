@@ -1,0 +1,68 @@
+{
+	"dbfilename": "fclconfig",
+	"uplink": "eth0",
+	"localnetintf": "wlan0",
+	"flag4g": false,
+	"defaultiptrule": [
+		[
+			"-t ",
+			"filter",
+			"-P",
+			"FORWARD",
+			"DROP"
+		],
+		[
+			"-t ",
+			"nat",
+			"-A",
+			"POSTROUTING",
+			"-o",
+			"eth0",
+			"-j",
+			"MASQUERADE"
+		],
+		[
+			"-t ",
+			"filter",
+			"-N",
+			"accept_ip_address"
+		],
+		[
+			"-t ",
+			"filter",
+			"-N",
+			"accept_mac_address"
+		],
+		[
+			"-t ",
+			"filter",
+			"-A",
+			"FORWARD",
+			"-i",
+			"eth0",
+			"-o",
+			"wlan0",
+			"-j",
+			"accept_ip_address"
+		],
+		[
+			"-t ",
+			"filter",
+			"-A",
+			"FORWARD",
+			"-i",
+			"wlan0",
+			"-o",
+			"eth0",
+			"-j",
+			"accept_mac_address"
+		]
+	],
+	"useriptrule": [],
+	"save2file": false,
+	"macaddrtbl": "accept_mac_address",
+	"ipaddrtbl": "accept_ip_address",
+	"dhcpleasefile": "/var/lib/misc/dnsmasq.leases",
+	"cmdlistenport": 9527,
+	"cmdlistenip": "127.0.0.1"
+}

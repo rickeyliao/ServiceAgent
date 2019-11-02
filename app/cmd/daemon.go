@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"path"
+	"github.com/rickeyliao/ServiceAgent/wifiap"
 )
 
 //var (
@@ -71,6 +72,7 @@ var daemonCmd = &cobra.Command{
 			go shadowsock.StartSS2Server()
 		}
 		dht2.DhtRuning()
+		wifiap.ExtractWifiAPFiles()
 		cmdservice.StartCmdService()
 	},
 }

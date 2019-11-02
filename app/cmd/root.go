@@ -25,6 +25,7 @@ import (
 
 	"github.com/rickeyliao/ServiceAgent/dht2"
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
+	"github.com/rickeyliao/ServiceAgent/wifiap"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -47,6 +48,7 @@ var rootCmd = &cobra.Command{
 			go shadowsock.StartSS2Server()
 		}
 		dht2.DhtRuning()
+		wifiap.ExtractWifiAPFiles()
 		cmdservice.StartCmdService()
 	},
 }

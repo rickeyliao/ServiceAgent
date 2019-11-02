@@ -113,7 +113,7 @@ func (lp *LocalP2pAddr) Write(block *Block) error {
 	select {
 	case lp.wrtQ <- block:
 	default:
-		return errors.New("Write channel full")
+		return errors.New("no enough space to write")
 	}
 
 	return nil
@@ -145,9 +145,11 @@ func (lp *LocalP2pAddr) DoWrt() {
 			if err != nil {
 				if strings.Contains(err.Error(), "no buffer space available") {
 					lp.reWrtQ <- wblk
+				}else{
+					errListenChan <- err
+					return
 				}
-				errListenChan <- err
-				return
+
 			}
 			continue
 

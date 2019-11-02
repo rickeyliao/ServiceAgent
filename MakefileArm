@@ -33,6 +33,7 @@ Test:
 rpcservice := app/pb
 dhtrpc := dht/pb
 assetdir := ui/asset
+wifiapdir := wifiap/control
 
 proto:
 	protoc -I=$(rpcservice)  --go_out=plugins=grpc:${rpcservice}   ${rpcservice}/*.proto
@@ -40,6 +41,7 @@ proto:
 
 staticfile2bin:
 	go-bindata -o $(assetdir)/res.go -pkg=asset ui/xadmin/...
+	go-bindata -o $(wifiapdir)/res.go -pkg=control wifiap/staticfile/...
 
 $(TARGET): staticfile2bin proto $(SRC)
 	@GOOS=linux GOARM=7 GOARCH=arm go build $(LDFLAGS) -o $(TARGET)

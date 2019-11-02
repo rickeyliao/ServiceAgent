@@ -12,6 +12,34 @@
         <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
         <script src="./lib/layui/layui.js" charset="utf-8"></script>
         <script type="text/javascript" src="./js/xadmin.js"></script>
+        <script type="text/javascript">
+
+
+            function getuplink() {
+                $.post("/ajax/current/uplink",function (data){
+                    var p=JSON.parse(data)
+
+                    document.getElementById("curuplink").innerHTML = p.curuplink
+
+                } )
+
+            }
+            getuplink()
+
+            function change2eth() {
+                $.get("./ajax/change/uplink?uplink=eth")
+
+            }
+            function change2ppp() {
+                $.get("./ajax/change/uplink?uplink=ppp")
+
+            }
+            function reboot() {
+                $.get("./ajax/reboot")
+            }
+
+            window.setInterval("getuplink()",1000);
+        </script>
         <!--[if lt IE 9]>
           <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
           <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
@@ -19,6 +47,15 @@
     </head>
     
     <body>
+
+    <br>
+    <span >Current uplink: </span> <span class="x-red" id="curuplink">eth</span>
+    <br>
+
+    <button class="layui-btn layui-btn layui-btn-xs"  onclick="change2eth()" ><i class="layui-icon">&#xe642;</i>Change To Eth</button>
+    <button class="layui-btn layui-btn-warm layui-btn-xs"  onclick="change2ppp()" ><i class="layui-icon">&#xe642;</i>Change To PPP</button>
+    <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="reboot()" href="javascript:;" ><i class="layui-icon">&#xe640;</i>Reboot</button>
+
     <!--
         <div class="x-nav">
             <span class="layui-breadcrumb">
