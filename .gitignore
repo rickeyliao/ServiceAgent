@@ -2,6 +2,7 @@ nbssa*
 main
 test/
 ui/asset/*.go
+wifiap/control/res.go
 app/pb/*.go
 dht/pb/*.go
 .DS_Store
