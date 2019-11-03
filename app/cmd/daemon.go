@@ -24,6 +24,7 @@ import (
 	"log"
 	"path"
 	"github.com/rickeyliao/ServiceAgent/wifiap"
+	"github.com/rickeyliao/ServiceAgent/dht2"
 )
 
 //var (
@@ -70,7 +71,7 @@ var daemonCmd = &cobra.Command{
 		if cfg.ShadowSockServerSwitch {
 			go shadowsock.StartSS2Server()
 		}
-		//dht2.DhtRuning()
+		dht2.DhtRuning()
 		wifiap.ExtractWifiAPFiles()
 		cmdservice.StartCmdService()
 	},

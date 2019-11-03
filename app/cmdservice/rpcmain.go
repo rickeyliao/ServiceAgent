@@ -13,7 +13,12 @@ import (
 	"net"
 )
 
-var grpcServer *grpc.Server
+var (
+	grpcServer *grpc.Server
+	stopflag bool
+)
+
+
 
 func StartCmdService() {
 
@@ -42,6 +47,12 @@ func StartCmdService() {
 }
 
 func StopCmdService() {
+
+	if stopflag {
+		return
+	}
+
+	stopflag = true
 
 	service.Stop()
 
