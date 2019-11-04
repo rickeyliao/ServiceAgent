@@ -8,6 +8,7 @@ import (
 	"log"
 	"github.com/kprc/flowsharectrl/config"
 	"encoding/json"
+	"runtime"
 )
 
 func (ac *AjaxController) ChangeUplinkDo(w http.ResponseWriter, r *http.Request) {
@@ -15,6 +16,12 @@ func (ac *AjaxController) ChangeUplinkDo(w http.ResponseWriter, r *http.Request)
 	if !ok || len(ups)==0{
 		w.WriteHeader(500)
 		w.Write([]byte("{}"))
+		return
+	}
+
+	if runtime.GOARCH != "arm"{
+		w.Write([]byte("only arm platform can do this callback"))
+		w.WriteHeader(200)
 		return
 	}
 

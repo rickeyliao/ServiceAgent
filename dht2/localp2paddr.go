@@ -224,6 +224,7 @@ func (lp *LocalP2pAddr) StopP2pService() {
 
 	if lp.sock != nil {
 		lp.sock.Close()
+		lp.sock = nil
 	}
 
 	lp.rcvQuit <- struct{}{}

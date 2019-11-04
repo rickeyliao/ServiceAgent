@@ -37,6 +37,7 @@ var versionCmd = &cobra.Command{
 		fmt.Println("Build commit :", Build)
 		fmt.Println("Build Time   :", BuildTime)
 		//fmt.Println("Run Path     :",RunPath)
+		//fmt.Println("Arch",runtime.GOARCH)
 	},
 }
 
