@@ -5,11 +5,12 @@ import (
 	"net"
 	"sync"
 	"time"
+	"bytes"
 )
 
 type KANode struct {
 	nbsaddr        NAddr
-	sn             int64
+	sn             []byte
 	ip             net.IP
 	port           int
 	lastAccessTime int64
@@ -156,7 +157,7 @@ func (kb *KABucket) insert(n *KANode) {
 }
 
 //if node have been existed, refresh access time, if not, insert it
-func (ks *KAStore) Insert(ip net.IP, port int, nbsaddr NAddr, sn int64) {
+func (ks *KAStore) Insert(ip net.IP, port int, nbsaddr NAddr, sn []byte) {
 	h := nbsaddr.KAHash()
 
 	b := ks.HashTable[h]
@@ -194,14 +195,14 @@ func (ks *KAStore) Find(nbsaddr NAddr) []*KANode {
 
 }
 
-func (kb *KABucket) findBySn(nbsaddr NAddr, sn int64) *KANode {
+func (kb *KABucket) findBySn(nbsaddr NAddr, sn []byte) *KANode {
 	r := kb.root
 	for {
 		if r == nil {
 			return nil
 		}
 
-		if nbsaddr.Cmp(r.nbsaddr) && sn == r.sn {
+		if nbsaddr.Cmp(r.nbsaddr) && bytes.Compare(sn,r.sn)==0 {
 			return r
 		}
 
@@ -210,7 +211,7 @@ func (kb *KABucket) findBySn(nbsaddr NAddr, sn int64) *KANode {
 	}
 }
 
-func (ks *KAStore) FindBySn(nbsaddr NAddr, sn int64) *KANode {
+func (ks *KAStore) FindBySn(nbsaddr NAddr, sn []byte) *KANode {
 	h := nbsaddr.KAHash()
 	b := ks.HashTable[h]
 

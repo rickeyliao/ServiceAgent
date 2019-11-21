@@ -85,6 +85,13 @@ type CurUplink struct {
 }
 
 func (ac *AjaxController)CurrentUplinkDo(w http.ResponseWriter, r *http.Request) {
+
+	if runtime.GOARCH != "arm"{
+		w.Write([]byte("only arm platform can do this callback"))
+		w.WriteHeader(200)
+		return
+	}
+
 	cfg:=config.Reload()
 
 	cu:=CurUplink{}

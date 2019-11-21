@@ -38,13 +38,14 @@ func GetAllNodeDht() *DhtTable {
 func DhtRuning() {
 	GetCanServiceDht().Run(false)
 	GetAllNodeDht().Run(false)
-	go NbsP2PListen()
 	go GetKAStore().WrapperTimeout()
+	go NbsP2PListen()
+
 }
 
 func DhtStop() {
+	StopNbsP2pListen()
 	GetCanServiceDht().Stop()
 	GetAllNodeDht().Stop()
-	StopNbsP2pListen()
 	GetKAStore().TimeoutStop()
 }

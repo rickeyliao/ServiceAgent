@@ -90,7 +90,7 @@ func (lp *LocalP2pAddr) ListenOnCanServicePort() {
 
 	lp.sock = usock
 
-	defer usock.Close()
+	//defer usock.Close()
 
 	for {
 		buf := make([]byte, 2048)
@@ -170,7 +170,7 @@ func (lp *LocalP2pAddr) DoWrt() {
 				return
 			} else {
 				if cnt > 0 {
-					cnt--
+					cnt = 0
 				}
 			}
 		case <-lp.wrtQuit:
@@ -185,10 +185,12 @@ func NbsP2PListen() {
 
 	for {
 
-		select {
-		case <-errListenChan:
-		default:
-
+		for{
+			select {
+			case <-errListenChan:
+			default:
+				break
+			}
 		}
 
 		lp := GetLocalP2pAddr()
@@ -224,11 +226,12 @@ func (lp *LocalP2pAddr) StopP2pService() {
 
 	if lp.sock != nil {
 		lp.sock.Close()
-		lp.sock = nil
+		//lp.sock = nil
 	}
 
 	lp.rcvQuit <- struct{}{}
 	lp.wrtQuit <- struct{}{}
 
 	lp.wg.Wait()
+	lp.sock = nil
 }
