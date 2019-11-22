@@ -115,3 +115,7 @@ func (na NAddr) Cmp(na2 NAddr) bool {
 		return false
 	}
 }
+
+func (na NAddr) Len() int {
+	return len(na)
+}
