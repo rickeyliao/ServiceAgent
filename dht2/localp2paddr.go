@@ -145,7 +145,7 @@ func (lp *LocalP2pAddr) DoWrt() {
 			if err != nil {
 				if strings.Contains(err.Error(), "no buffer space available") {
 					lp.reWrtQ <- wblk
-				}else{
+				} else {
 					errListenChan <- err
 					return
 				}
@@ -185,7 +185,7 @@ func NbsP2PListen() {
 
 	for {
 
-		for{
+		for {
 			select {
 			case <-errListenChan:
 			default:

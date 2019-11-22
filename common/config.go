@@ -18,7 +18,6 @@ import (
 	"sync"
 )
 
-
 var WifiRes string
 
 type SAConfig struct {
@@ -225,7 +224,7 @@ func DefaultInitRootConfig(hdir string, force bool) *SARootConfig {
 func DefaultInitConfig() *SAConfig {
 	sa := &SAConfig{}
 
-	sa.BootstrapIPAddress = []string{"103.45.98.72:50811", "24.86.164.242:50811"}
+	sa.BootstrapIPAddress = []string{"91D8Fpp6ULgyzVKnuaUUoXyQ1zsQXBxWvXYC1d8Dh7kdtW@103.45.98.72", "912xtErURF4ZdeX3Q98CnQ8JEbezCwc2B7WXtrfRLDqtTU@24.86.164.242"}
 	sa.ReportServerIPAddress = []string{"103.45.98.72:50810", "24.86.164.242:50810"}
 	sa.ConsumePath = "/public/keys/consume"
 	sa.DownloadPath = "/download"
@@ -464,7 +463,7 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 		os.MkdirAll(statdir, 0755)
 	}
 
-	wifiapdir:=path.Join(sar.HomeDir,sar.SacInst.WifiAPConfigFile)
+	wifiapdir := path.Join(sar.HomeDir, sar.SacInst.WifiAPConfigFile)
 	if !tools.FileExists(wifiapdir) {
 		os.MkdirAll(statdir, 0755)
 	}
@@ -492,8 +491,8 @@ func (sar *SARootConfig) InitRSAKey(force bool) *SARootConfig {
 	return sar
 }
 
-func (sac *SAConfig)GetWifiDir() string  {
-	return path.Join(sac.Root.HomeDir,sac.WifiAPConfigFile)
+func (sac *SAConfig) GetWifiDir() string {
+	return path.Join(sac.Root.HomeDir, sac.WifiAPConfigFile)
 }
 
 func (sac *SAConfig) GetPidDir() string {

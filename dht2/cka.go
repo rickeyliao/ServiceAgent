@@ -1,11 +1,11 @@
 package dht2
 
 import (
+	"bytes"
 	"github.com/kprc/nbsnetwork/tools"
 	"net"
 	"sync"
 	"time"
-	"bytes"
 )
 
 type KANode struct {
@@ -202,7 +202,7 @@ func (kb *KABucket) findBySn(nbsaddr NAddr, sn []byte) *KANode {
 			return nil
 		}
 
-		if nbsaddr.Cmp(r.nbsaddr) && bytes.Compare(sn,r.sn)==0 {
+		if nbsaddr.Cmp(r.nbsaddr) && bytes.Compare(sn, r.sn) == 0 {
 			return r
 		}
 

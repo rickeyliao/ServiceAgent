@@ -6,8 +6,8 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	pb "github.com/rickeyliao/ServiceAgent/app/pb"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"net"
 	"path"
-	"strconv"
 	"strings"
 )
 
@@ -15,29 +15,29 @@ type CmdBootstrapServer struct {
 }
 
 type bootstrapaddr struct {
-	addr string
-	port uint16
+	nbsaddr string
+	ipaddr  string
 }
 
 func (bsa *bootstrapaddr) String() string {
-	return bsa.addr + ":" + strconv.Itoa(int(bsa.port))
+	return bsa.nbsaddr + "@" + bsa.ipaddr
 }
 
 func (cbs *CmdBootstrapServer) ChangeBootstrap(ctx context.Context, req *pb.BootstrapCHGReq) (*pb.DefaultResp, error) {
 
-	arrparam := strings.Split(req.Address, ":")
+	arrparam := strings.Split(req.Address, "@")
 	if len(arrparam) != 2 {
-		return encResp("address error"), nil
+		return encResp("address format error"), nil
 	}
-	paramip := arrparam[0]
-
-	var p int
-	var e error
-
-	if p, e = strconv.Atoi(arrparam[1]); e != nil {
-		return encResp("address error"), nil
+	nbsaddr := arrparam[0]
+	if !common.CheckNbsNodeHash(nbsaddr) {
+		return encResp("node address error"), nil
 	}
-	paramport := uint16(p)
+
+	ipaddr := arrparam[1]
+	if net.ParseIP(ipaddr) == nil {
+		return encResp("ip address error"), nil
+	}
 
 	sac := common.GetSAConfig()
 
@@ -48,28 +48,24 @@ func (cbs *CmdBootstrapServer) ChangeBootstrap(ctx context.Context, req *pb.Boot
 	addflag := false
 
 	for _, v := range addrarr {
-		ipport := strings.Split(v, ":")
+		addrarr := strings.Split(v, "@")
 
-		if len(ipport) != 2 {
+		if len(addrarr) != 2 {
 			continue
 		}
 
 		bsa := &bootstrapaddr{}
-		bsa.addr = ipport[0]
-		if port, err := strconv.Atoi(ipport[1]); err != nil {
-			continue
-		} else {
-			bsa.port = uint16(port)
-		}
+		bsa.nbsaddr = addrarr[0]
+		bsa.ipaddr = addrarr[1]
 
 		if req.Op {
-			if bsa.addr == paramip {
-				bsa.port = paramport
+			if bsa.nbsaddr == nbsaddr {
+				bsa.ipaddr = ipaddr
 				addflag = true
 			}
 		} else {
 			//remove
-			if bsa.port == paramport && bsa.addr == paramip {
+			if bsa.nbsaddr == nbsaddr && bsa.ipaddr == ipaddr {
 				continue
 			}
 		}
@@ -77,8 +73,8 @@ func (cbs *CmdBootstrapServer) ChangeBootstrap(ctx context.Context, req *pb.Boot
 	}
 	if req.Op && !addflag {
 		bsa := &bootstrapaddr{}
-		bsa.port = paramport
-		bsa.addr = paramip
+		bsa.nbsaddr = nbsaddr
+		bsa.ipaddr = ipaddr
 		addrs = append(addrs, bsa)
 	}
 

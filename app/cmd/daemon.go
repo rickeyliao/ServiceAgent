@@ -17,14 +17,14 @@ package cmd
 import (
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"github.com/rickeyliao/ServiceAgent/dht2"
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
+	"github.com/rickeyliao/ServiceAgent/wifiap"
 	"github.com/sevlyar/go-daemon"
 	"github.com/spf13/cobra"
 	"log"
 	"path"
-	"github.com/rickeyliao/ServiceAgent/wifiap"
-	"github.com/rickeyliao/ServiceAgent/dht2"
 )
 
 //var (

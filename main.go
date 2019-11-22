@@ -17,18 +17,18 @@ package main
 import (
 	"errors"
 	"github.com/rickeyliao/ServiceAgent/app/cmd"
+	"github.com/rickeyliao/ServiceAgent/common"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 var (
 	Version   string
 	Build     string
 	BuildTime string
-	WifiRes string
+	WifiRes   string
 )
 
 func main() {

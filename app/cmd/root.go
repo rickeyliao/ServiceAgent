@@ -23,9 +23,9 @@ import (
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/spf13/cobra"
 
+	"github.com/rickeyliao/ServiceAgent/dht2"
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 	"github.com/rickeyliao/ServiceAgent/wifiap"
-	"github.com/rickeyliao/ServiceAgent/dht2"
 )
 
 // rootCmd represents the base command when called without any subcommands

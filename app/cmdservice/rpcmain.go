@@ -15,10 +15,8 @@ import (
 
 var (
 	grpcServer *grpc.Server
-	stopflag bool
+	stopflag   bool
 )
-
-
 
 func StartCmdService() {
 
