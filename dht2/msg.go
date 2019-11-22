@@ -1,6 +1,7 @@
 package dht2
 
 import (
+	"crypto/rand"
 	"net"
 )
 
@@ -8,13 +9,30 @@ const (
 	MsgTypeLen             int = 1
 	InternalAddrCountLen   int = 2
 	NatAddrCountLen        int = 2
-	SerialNumberBytesCount     = 32
+	SerialNumberBytesCount int = 32
+	OnlineBufLen           int = 2048
 )
 
 type OnlineCtrlMsg struct {
 	typ       byte
 	sn        [SerialNumberBytesCount]byte
 	localAddr *P2pAddr
+}
+
+func BuildMsg(typ byte) *OnlineCtrlMsg {
+	ocm := &OnlineCtrlMsg{}
+	ocm.typ = typ
+	rand.Read(ocm.sn[:])
+	ocm.localAddr = GetLocalP2pAddr().GetP2pAddr()
+
+	return ocm
+}
+
+func (ocm *OnlineCtrlMsg) Pack() []byte {
+	buf := make([]byte, OnlineBufLen)
+	PackCtrlMsg(ocm, buf)
+
+	return buf
 }
 
 func PackCtrlMsg(ocm *OnlineCtrlMsg, buf []byte) int {

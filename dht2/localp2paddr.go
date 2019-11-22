@@ -56,6 +56,7 @@ func NewLocalP2pAddr() *LocalP2pAddr {
 	localP2pAddr = &LocalP2pAddr{}
 	localP2pAddr.addr = NewP2pAddr()
 	localP2pAddr.addr.LoadLocalAddr()
+	localP2pAddr.addr.NbsAddr = GetLocalNAddr()
 	localP2pAddr.rcvQ = make(chan *Block, 256)
 	localP2pAddr.rcvQuit = make(chan struct{}, 1)
 	localP2pAddr.wrtQ = make(chan *Block, 256)
@@ -66,7 +67,16 @@ func NewLocalP2pAddr() *LocalP2pAddr {
 	return localP2pAddr
 }
 
-func (lp *LocalP2pAddr) Online() {
+func (lp *LocalP2pAddr) GetP2pAddr() *P2pAddr {
+	return lp.addr
+}
+
+func SendAndRcv(ip string, port int, b2s []byte) (resp []byte, err error) {
+
+}
+
+func (lp *LocalP2pAddr) Online(bsip string, bsport int) {
+	b2s := BuildMsg(Msg_Online_Req).Pack()
 
 }
 
