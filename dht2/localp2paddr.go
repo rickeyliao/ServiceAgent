@@ -2,6 +2,7 @@ package dht2
 
 import (
 	"fmt"
+	"github.com/kprc/nbsnetwork/tools"
 	"github.com/pkg/errors"
 	"log"
 	"net"
@@ -72,11 +73,33 @@ func (lp *LocalP2pAddr) GetP2pAddr() *P2pAddr {
 }
 
 func SendAndRcv(ip string, port int, b2s []byte) (resp []byte, err error) {
+	raddr := &net.UDPAddr{IP: net.ParseIP(ip), Port: port}
+	conn, err := net.DialUDP("udp4", nil, raddr)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	deadline := time.Now().Add(time.Second * 2)
+	conn.SetDeadline(deadline)
+	conn.Write(b2s)
+	buf := make([]byte, OnlineBufLen)
+	nRead, err := conn.Read(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf[:nRead], nil
 
 }
 
 func (lp *LocalP2pAddr) Online(bsip string, bsport int) {
-	b2s := BuildMsg(Msg_Online_Req).Pack()
+	b2s := BuildOnlineReq().Pack()
+
+	res, err := SendAndRcv(bsip, bsport, b2s)
+	if err != nil {
+		return
+	}
 
 }
 
@@ -116,6 +139,28 @@ func (lp *LocalP2pAddr) ListenOnCanServicePort() {
 }
 
 func (lp *LocalP2pAddr) doRcv(block *Block) {
+	cm, offset := UnPackCtrlMsg(block.buf)
+	if cm.typ == Msg_Online_Req {
+		if !lp.addr.CanService {
+			dn := &DTNode{}
+			dn.P2pNode = *(cm.localAddr.Clone())
+			dn.lastPingTime = tools.GetNowMsTime()
+
+			ds, cnt := GetCanServiceDht().FindNearest(dn, NatServerCount)
+			//if cnt == 0{
+			//
+			//}
+			//send back Can Server Node addr as bootstrap server
+
+			return
+		}
+		//Test raddr is or not is a can server
+		//Send online success
+		//if not a can server,send back 3 nat server,
+	} else {
+
+		fmt.Println("offset", offset)
+	}
 
 }
 

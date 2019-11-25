@@ -13,47 +13,57 @@ const (
 	OnlineBufLen           int = 2048
 )
 
-type OnlineCtrlMsg struct {
+type CtrlMsg struct {
 	typ       byte
 	sn        [SerialNumberBytesCount]byte
 	localAddr *P2pAddr
 }
 
-func BuildMsg(typ byte) *OnlineCtrlMsg {
-	ocm := &OnlineCtrlMsg{}
-	ocm.typ = typ
-	rand.Read(ocm.sn[:])
-	ocm.localAddr = GetLocalP2pAddr().GetP2pAddr()
-
-	return ocm
+type OnlineReq struct {
+	CtrlMsg
 }
 
-func (ocm *OnlineCtrlMsg) Pack() []byte {
+func BuildMsg(typ byte) *CtrlMsg {
+	cm := &CtrlMsg{}
+	cm.typ = typ
+	rand.Read(cm.sn[:])
+	cm.localAddr = GetLocalP2pAddr().GetP2pAddr()
+
+	return cm
+}
+
+func BuildOnlineReq() *OnlineReq {
+	cm := BuildMsg(Msg_Online_Req)
+
+	return &OnlineReq{*cm}
+}
+
+func (cm *CtrlMsg) Pack() []byte {
 	buf := make([]byte, OnlineBufLen)
-	PackCtrlMsg(ocm, buf)
+	PackCtrlMsg(cm, buf)
 
 	return buf
 }
 
-func PackCtrlMsg(ocm *OnlineCtrlMsg, buf []byte) int {
+func PackCtrlMsg(cm *CtrlMsg, buf []byte) int {
 	offset := 0
-	buf[0] = ocm.typ
+	buf[0] = cm.typ
 	offset += MsgTypeLen
-	copy(buf[offset:], ocm.sn[:])
-	offset += len(ocm.sn)
+	copy(buf[offset:], cm.sn[:])
+	offset += len(cm.sn)
 
-	p2paddr := &P2pAddr{}
+	p2paddr := cm.localAddr
 
 	offset += PackP2pAddr(p2paddr, buf[offset:])
-
-	ocm.localAddr = p2paddr
 
 	return offset
 }
 
-func putUint16(buf []byte, v uint16) {
+func putUint16(buf []byte, v uint16) int {
 	buf[0] = byte(v >> 8)
 	buf[1] = byte(v)
+
+	return 2
 }
 
 func toUint16(buf []byte) uint16 {
@@ -101,20 +111,20 @@ func PackP2pAddr(addr *P2pAddr, buf []byte) int {
 
 }
 
-func UnPackCtrlMsg(buf []byte) (*OnlineCtrlMsg, int) {
+func UnPackCtrlMsg(buf []byte) (*CtrlMsg, int) {
 	offset := 0
-	ocm := &OnlineCtrlMsg{}
-	ocm.typ = buf[offset]
+	cm := &CtrlMsg{}
+	cm.typ = buf[offset]
 	offset += 1
-	copy(ocm.sn[:], buf[offset:])
+	copy(cm.sn[:], buf[offset:])
 	offset += SerialNumberBytesCount
 
 	var nxtof int
-	ocm.localAddr, nxtof = UnPackP2pAddr(buf[offset:])
+	cm.localAddr, nxtof = UnPackP2pAddr(buf[offset:])
 
 	offset += nxtof
 
-	return ocm, offset
+	return cm, offset
 
 }
 
