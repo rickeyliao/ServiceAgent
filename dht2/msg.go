@@ -10,7 +10,7 @@ const (
 	InternalAddrCountLen   int = 2
 	NatAddrCountLen        int = 2
 	SerialNumberBytesCount int = 32
-	OnlineBufLen           int = 2048
+	CtrlMsgBufLen          int = 2048
 )
 
 type CtrlMsg struct {
@@ -20,6 +20,10 @@ type CtrlMsg struct {
 }
 
 type OnlineReq struct {
+	CtrlMsg
+}
+
+type CanServiceReq struct {
 	CtrlMsg
 }
 
@@ -38,8 +42,14 @@ func BuildOnlineReq() *OnlineReq {
 	return &OnlineReq{*cm}
 }
 
+func BuildCanServiceReq() *CanServiceReq {
+	cm := BuildMsg(Msg_CanSrv_Req)
+
+	return &CanServiceReq{*cm}
+}
+
 func (cm *CtrlMsg) Pack() []byte {
-	buf := make([]byte, OnlineBufLen)
+	buf := make([]byte, CtrlMsgBufLen)
 	PackCtrlMsg(cm, buf)
 
 	return buf

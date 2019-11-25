@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kprc/nbsnetwork/tools"
 	"github.com/pkg/errors"
+	"github.com/rickeyliao/ServiceAgent/common"
 	"log"
 	"net"
 	"strconv"
@@ -56,6 +57,7 @@ func ResetLocalP2p() {
 func NewLocalP2pAddr() *LocalP2pAddr {
 	localP2pAddr = &LocalP2pAddr{}
 	localP2pAddr.addr = NewP2pAddr()
+	localP2pAddr.addr.Port = int(common.GetSAConfig().DhtListenPort)
 	localP2pAddr.addr.LoadLocalAddr()
 	localP2pAddr.addr.NbsAddr = GetLocalNAddr()
 	localP2pAddr.rcvQ = make(chan *Block, 256)
@@ -80,10 +82,10 @@ func SendAndRcv(ip string, port int, b2s []byte) (resp []byte, err error) {
 	}
 	defer conn.Close()
 
-	deadline := time.Now().Add(time.Second * 2)
+	deadline := time.Now().Add(time.Second * 5)
 	conn.SetDeadline(deadline)
 	conn.Write(b2s)
-	buf := make([]byte, OnlineBufLen)
+	buf := make([]byte, CtrlMsgBufLen)
 	nRead, err := conn.Read(buf)
 	if err != nil {
 		return nil, err
@@ -143,17 +145,22 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 	if cm.typ == Msg_Online_Req {
 		if !lp.addr.CanService {
 			dn := &DTNode{}
-			dn.P2pNode = *(cm.localAddr.Clone())
+			dn.P2pNode = *(cm.localAddr)
 			dn.lastPingTime = tools.GetNowMsTime()
 
 			ds, cnt := GetCanServiceDht().FindNearest(dn, NatServerCount)
-			//if cnt == 0{
-			//
-			//}
-			//send back Can Server Node addr as bootstrap server
-
+			var bs []P2pAddr
+			for i := 0; i < cnt; i++ {
+				bs = append(bs, ds[i].P2pNode)
+			}
+			rbs := BuildRespBSMsg(bs)
+			//reuse buffer
+			offset = rbs.Pack(block.buf)
+			blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+			lp.Write(blocksnd)
 			return
 		}
+
 		//Test raddr is or not is a can server
 		//Send online success
 		//if not a can server,send back 3 nat server,

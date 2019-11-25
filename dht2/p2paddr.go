@@ -2,7 +2,6 @@ package dht2
 
 import (
 	"fmt"
-	"github.com/rickeyliao/ServiceAgent/common"
 	"net"
 )
 
@@ -49,7 +48,7 @@ func (pa *P2pAddr) LoadLocalAddr() {
 
 func NewP2pAddr() *P2pAddr {
 
-	pa := &P2pAddr{Port: int(common.GetSAConfig().DhtListenPort)}
+	pa := &P2pAddr{}
 	return pa
 }
 
