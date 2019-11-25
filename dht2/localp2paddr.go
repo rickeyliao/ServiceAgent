@@ -5,6 +5,7 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/common"
+	"google.golang.org/genproto/googleapis/bigtable/v2"
 	"log"
 	"net"
 	"strconv"
@@ -140,6 +141,50 @@ func (lp *LocalP2pAddr) ListenOnCanServicePort() {
 
 }
 
+func (lp *LocalP2pAddr) TestCanService(remoteIP net.IP) (bool, error) {
+
+	raddr := &net.UDPAddr{IP: remoteIP, Port: int(common.GetSAConfig().DhtListenPort)}
+	conn, err := net.DialUDP("udp4", nil, raddr)
+	if err != nil {
+		return false, err
+	}
+	defer conn.Close()
+
+	csm := BuildCanServiceReq()
+	b2s := csm.Pack()
+
+	deadline := time.Now().Add(time.Second * 1)
+	conn.SetDeadline(deadline)
+	conn.Write(b2s)
+	buf := make([]byte, CtrlMsgBufLen)
+	_, err = conn.Read(buf)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (lp *LocalP2pAddr) TestCanServiceTimes(remoteIP net.IP, times int) (bool, error) {
+	if times <= 0 {
+		times = 1
+	}
+	count := 0
+
+	for {
+		count++
+		if count > times {
+			return false, errors.New("peer is not a can service node")
+		}
+		b, _ := lp.TestCanService(remoteIP)
+		if b {
+			return true, nil
+		}
+
+	}
+
+}
+
 func (lp *LocalP2pAddr) doRcv(block *Block) {
 	cm, offset := UnPackCtrlMsg(block.buf)
 	if cm.typ == Msg_Online_Req {
@@ -160,13 +205,30 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 			lp.Write(blocksnd)
 			return
 		}
-
 		//Test raddr is or not is a can server
-		//Send online success
-		//if not a can server,send back 3 nat server,
-	} else {
+		b, _ := lp.TestCanServiceTimes(block.raddr.IP, 3)
+		var nats []P2pAddr
+		if !b {
+			//if not a can server,send back 3 nat server,
+			dn := &DTNode{}
+			dn.P2pNode = *(cm.localAddr)
+			dn.lastPingTime = tools.GetNowMsTime()
+			ds, cnt := GetCanServiceDht().FindNearest(dn, NatServerCount)
+			for i := 0; i < cnt; i++ {
+				nats = append(nats, ds[i].P2pNode)
+			}
+		}
 
-		fmt.Println("offset", offset)
+		ret := BuildRespNatMsg(b, block.raddr.IP, nats)
+		offset = ret.Pack(block.buf)
+		blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+		//Send online success
+		lp.Write(blocksnd)
+	} else if cm.typ == Msg_CanSrv_Req {
+		csresp := BuildCanServiceResp()
+		offset := PackCtrlMsg(&csresp.CtrlMsg, block.buf)
+		blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+		lp.Write(blocksnd)
 	}
 
 }

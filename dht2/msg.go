@@ -27,6 +27,10 @@ type CanServiceReq struct {
 	CtrlMsg
 }
 
+type CanServiceResp struct {
+	CtrlMsg
+}
+
 func BuildMsg(typ byte) *CtrlMsg {
 	cm := &CtrlMsg{}
 	cm.typ = typ
@@ -46,6 +50,12 @@ func BuildCanServiceReq() *CanServiceReq {
 	cm := BuildMsg(Msg_CanSrv_Req)
 
 	return &CanServiceReq{*cm}
+}
+
+func BuildCanServiceResp() *CanServiceResp {
+	cm := BuildMsg(Msg_CanService_Resp)
+
+	return &CanServiceResp{*cm}
 }
 
 func (cm *CtrlMsg) Pack() []byte {
