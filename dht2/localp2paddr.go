@@ -126,18 +126,33 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 		lp.addr.InternetAddr = rnm.ObservrIP
 		lp.addr.NatAddr = rnm.NatServer
 
+		//prepare to saving normal dht and can service dht
+		dn := &DTNode{P2pNode: *(rnm.localAddr.Clone()), lastPingTime: tools.GetNowMsTime()}
 		//begin to loop searching
 		if rnm.CanService {
+			//save to can service dht
+			GetCanServiceDht().Insert(dn)
 			//can service loop searching
+			lp.CanServiceLoop(rnm.localAddr)
 		} else {
-			//begin to connect nat server
+			GetAllNodeDht().Insert(dn)
+			//begin to connect to nat server
+
 		}
 
 		//normal dht loop searching
-
+		lp.NormalLoop(rnm.localAddr)
 		return nil
 	}
 
+	return nil
+}
+
+func (lp *LocalP2pAddr) CanServiceLoop(cs *P2pAddr) error {
+	return nil
+}
+
+func (lp *LocalP2pAddr) NormalLoop(peer *P2pAddr) error {
 	return nil
 }
 

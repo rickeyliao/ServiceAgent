@@ -8,5 +8,8 @@ const (
 	Msg_Nat_Resp        byte = 12
 	Msg_CanService_Resp byte = 13
 
+	Msg_CanService_Loop byte = 21
+	Msg_Dht_Loop        byte = 22
+
 	NatServerCount int = 3
 )
