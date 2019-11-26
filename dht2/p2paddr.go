@@ -2,7 +2,9 @@ package dht2
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"net"
+	"time"
 )
 
 var (
@@ -44,6 +46,47 @@ func (pa *P2pAddr) Clone() *P2pAddr {
 
 func (pa *P2pAddr) LoadLocalAddr() {
 	pa.InternalAddr = GetAllLocalIps()
+}
+
+func (pa *P2pAddr) sendAndRcv(b2s []byte, mstimeout int) (b2r []byte, err error) {
+	raddr := &net.UDPAddr{IP: pa.InternetAddr, Port: pa.Port}
+	conn, err := net.DialUDP("udp4", nil, raddr)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	if mstimeout <= 0 {
+		mstimeout = 1000 //1 second
+	}
+
+	deadline := time.Now().Add(time.Duration(int64(time.Millisecond) * int64(mstimeout)))
+	conn.SetDeadline(deadline)
+	conn.Write(b2s)
+	buf := make([]byte, CtrlMsgBufLen)
+	var n int
+	n, err = conn.Read(buf)
+	if err != nil {
+		return nil, err
+	}
+	return buf[:n], nil
+}
+
+func (pa *P2pAddr) SendAndRcv(b2s []byte, times int, mstimeout int) (b2r []byte, err error) {
+
+	if times <= 0 {
+		times = 1
+	}
+
+	for i := 0; i < times; i++ {
+		b2r, err = pa.sendAndRcv(b2s, mstimeout)
+		if err != nil {
+			continue
+		} else {
+			return b2r, nil
+		}
+	}
+	return nil, errors.New("Can't connect")
 }
 
 func NewP2pAddr() *P2pAddr {

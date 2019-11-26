@@ -26,6 +26,7 @@ type LocalP2pAddr struct {
 	wrtQ    chan *Block
 	reWrtQ  chan *Block
 	wrtQuit chan struct{}
+	kaQuit  chan struct{}
 	wg      *sync.WaitGroup
 	sock    *net.UDPConn
 }
@@ -66,6 +67,7 @@ func NewLocalP2pAddr() *LocalP2pAddr {
 	localP2pAddr.wrtQ = make(chan *Block, 256)
 	localP2pAddr.reWrtQ = make(chan *Block, 256)
 	localP2pAddr.wrtQuit = make(chan struct{}, 1)
+	localP2pAddr.kaQuit = make(chan struct{}, 1)
 	localP2pAddr.wg = &sync.WaitGroup{}
 
 	return localP2pAddr
@@ -353,6 +355,32 @@ func (lp *LocalP2pAddr) DoWrt() {
 	}
 }
 
+func (lp *LocalP2pAddr) KeepAlive() {
+
+	var cnt int64 = 0
+
+	defer lp.wg.Done()
+	for {
+		select {
+		case <-lp.kaQuit:
+			return
+		default:
+			time.Sleep(time.Second)
+			cnt++
+		}
+
+		nats := lp.addr.NatAddr
+		if len(nats) == 0 {
+			continue
+		}
+
+		if cnt%5 != 0 {
+			continue
+		}
+
+	}
+}
+
 func NbsP2PListen() {
 	errListenChan = make(chan error, 1)
 	quitListen = make(chan struct{}, 1)
@@ -394,6 +422,9 @@ func (lp *LocalP2pAddr) StartP2PService() {
 	lp.wg.Add(1)
 	go lp.DoWrt()
 
+	lp.wg.Add(1)
+	go lp.KeepAlive()
+
 }
 
 func (lp *LocalP2pAddr) StopP2pService() {
@@ -403,6 +434,7 @@ func (lp *LocalP2pAddr) StopP2pService() {
 		//lp.sock = nil
 	}
 
+	lp.kaQuit <- struct{}{}
 	lp.rcvQuit <- struct{}{}
 	lp.wrtQuit <- struct{}{}
 
