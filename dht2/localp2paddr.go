@@ -3,6 +3,7 @@ package dht2
 import (
 	"fmt"
 	"github.com/kprc/nbsnetwork/tools"
+	"github.com/kprc/nbsnetwork/tools/privateip"
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/common"
 	"log"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"github.com/kprc/nbsnetwork/tools/privateip"
 )
 
 type Block struct {
@@ -75,8 +75,8 @@ func (lp *LocalP2pAddr) GetP2pAddr() *P2pAddr {
 	return lp.addr
 }
 
-func SendAndRcv(ip string, port int, b2s []byte) (resp []byte, err error) {
-	raddr := &net.UDPAddr{IP: net.ParseIP(ip), Port: port}
+func SendAndRcv(ip net.IP, port int, b2s []byte) (resp []byte, err error) {
+	raddr := &net.UDPAddr{IP: ip, Port: port}
 	conn, err := net.DialUDP("udp4", nil, raddr)
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func SendAndRcv(ip string, port int, b2s []byte) (resp []byte, err error) {
 
 }
 
-func (lp *LocalP2pAddr) Online(bsip string, bsport int) error {
+func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 	b2s := BuildOnlineReq().Pack()
 
 	res, err := SendAndRcv(bsip, bsport, b2s)
@@ -105,21 +105,40 @@ func (lp *LocalP2pAddr) Online(bsip string, bsport int) error {
 	}
 
 	cm, offset := UnPackCtrlMsg(res)
-	if cm.typ == Msg_BS_Resp{
-		rbs:=&RespBSMsg{}
+	if cm.typ == Msg_BS_Resp {
+		rbs := &RespBSMsg{}
 		rbs.CtrlMsg = *cm
 		rbs.UnpackBS(res[offset:])
+		BootsTrapFailed(naddr)
+		if len(rbs.BSServer) == 0 {
+			return errors.New("No Bootstrap server")
+		}
+		BootsTrapServerAdd(rbs.BSServer)
 
-		//save to bootstrap
-		return  nil
-	}else if cm.typ == Msg_Nat_Resp{
-		rnm:=&RespNatMsg{}
+		return errors.New("Current bootstrap server can't support online service")
+	} else if cm.typ == Msg_Nat_Resp {
+		rnm := &RespNatMsg{}
 		rnm.CtrlMsg = *cm
 		rnm.UnpackNatS(res[offset:])
 
-		//begin to online
+		//fill local address
+		lp.addr.CanService = rnm.CanService
+		lp.addr.InternetAddr = rnm.ObservrIP
+		lp.addr.NatAddr = rnm.NatServer
+
+		//begin to loop searching
+		if rnm.CanService {
+			//can service loop searching
+		} else {
+			//begin to connect nat server
+		}
+
+		//normal dht loop searching
+
 		return nil
 	}
+
+	return nil
 }
 
 func (lp *LocalP2pAddr) ListenOnCanServicePort() {
@@ -204,7 +223,7 @@ func (lp *LocalP2pAddr) TestCanServiceTimes(remoteIP net.IP, times int) (bool, e
 func (lp *LocalP2pAddr) doRcv(block *Block) {
 	cm, offset := UnPackCtrlMsg(block.buf)
 	if cm.typ == Msg_Online_Req {
-		if !lp.addr.CanService || privateip.IsPrivateIP(block.raddr.IP){
+		if !lp.addr.CanService || privateip.IsPrivateIP(block.raddr.IP) {
 			dn := &DTNode{}
 			dn.P2pNode = *(cm.localAddr)
 			dn.lastPingTime = tools.GetNowMsTime()
