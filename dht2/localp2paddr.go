@@ -5,13 +5,13 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	"github.com/pkg/errors"
 	"github.com/rickeyliao/ServiceAgent/common"
-	"google.golang.org/genproto/googleapis/bigtable/v2"
 	"log"
 	"net"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"github.com/kprc/nbsnetwork/tools/privateip"
 )
 
 type Block struct {
@@ -96,14 +96,30 @@ func SendAndRcv(ip string, port int, b2s []byte) (resp []byte, err error) {
 
 }
 
-func (lp *LocalP2pAddr) Online(bsip string, bsport int) {
+func (lp *LocalP2pAddr) Online(bsip string, bsport int) error {
 	b2s := BuildOnlineReq().Pack()
 
 	res, err := SendAndRcv(bsip, bsport, b2s)
 	if err != nil {
-		return
+		return err
 	}
 
+	cm, offset := UnPackCtrlMsg(res)
+	if cm.typ == Msg_BS_Resp{
+		rbs:=&RespBSMsg{}
+		rbs.CtrlMsg = *cm
+		rbs.UnpackBS(res[offset:])
+
+		//save to bootstrap
+		return  nil
+	}else if cm.typ == Msg_Nat_Resp{
+		rnm:=&RespNatMsg{}
+		rnm.CtrlMsg = *cm
+		rnm.UnpackNatS(res[offset:])
+
+		//begin to online
+		return nil
+	}
 }
 
 func (lp *LocalP2pAddr) ListenOnCanServicePort() {
@@ -188,7 +204,7 @@ func (lp *LocalP2pAddr) TestCanServiceTimes(remoteIP net.IP, times int) (bool, e
 func (lp *LocalP2pAddr) doRcv(block *Block) {
 	cm, offset := UnPackCtrlMsg(block.buf)
 	if cm.typ == Msg_Online_Req {
-		if !lp.addr.CanService {
+		if !lp.addr.CanService || privateip.IsPrivateIP(block.raddr.IP){
 			dn := &DTNode{}
 			dn.P2pNode = *(cm.localAddr)
 			dn.lastPingTime = tools.GetNowMsTime()
