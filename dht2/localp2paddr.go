@@ -281,6 +281,13 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 		offset := PackCtrlMsg(&csresp.CtrlMsg, block.buf)
 		blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
 		lp.Write(blocksnd)
+	} else if cm.typ == Msg_Ka_Req {
+		kar := BuildRespNCKAMsg(block.raddr.Port)
+
+		offset = kar.Pack(block.buf)
+
+		blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+		lp.Write(blocksnd)
 	}
 
 }
@@ -382,7 +389,7 @@ func (lp *LocalP2pAddr) KeepAlive() {
 }
 
 func NbsP2PListen() {
-	errListenChan = make(chan error, 1)
+	errListenChan = make(chan error, 3)
 	quitListen = make(chan struct{}, 1)
 
 	for {

@@ -48,7 +48,7 @@ func (pa *P2pAddr) LoadLocalAddr() {
 	pa.InternalAddr = GetAllLocalIps()
 }
 
-func (pa *P2pAddr) sendAndRcv(b2s []byte, mstimeout int) (b2r []byte, err error) {
+func (pa *P2pAddr) sendAndRcv(b2s []byte, mstimeout int) (bfr []byte, err error) {
 	raddr := &net.UDPAddr{IP: pa.InternetAddr, Port: pa.Port}
 	conn, err := net.DialUDP("udp4", nil, raddr)
 	if err != nil {

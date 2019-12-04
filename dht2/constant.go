@@ -12,4 +12,8 @@ const (
 	Msg_Dht_Loop        byte = 22
 
 	NatServerCount int = 3
+
+	Msg_Ka_Req byte = 31
+
+	Msg_Ka_Resp byte = 41
 )
