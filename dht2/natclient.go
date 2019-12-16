@@ -14,11 +14,13 @@ const (
 	MsgRCVBufferLen int = 256
 	MsgWrtBufferLen int = 256
 
+	NC_UnInitialed int = 0
 	NC_IsRunning   int = 1
 	NC_IsStoped    int = 2
-	NC_IsQuiting   int = 3
-	NC_InternalErr int = 4
-	NC_UnInitialed int = 0
+	NC_IsStopping  int = 3
+	NC_IsQuiting   int = 4
+	NC_InternalErr int = 5
+
 )
 
 type NatClient struct {
@@ -89,12 +91,12 @@ func (nc *NatClient) start() (err error) {
 }
 
 func (nc *NatClient) Run() (err error, satus int) {
-	if nc.running == NC_IsRunning {
+	if nc.running == NC_IsRunning || nc.running == NC_IsStopping || nc.running == NC_IsQuiting{
 		return errors.New("nc: " + nc.addr.NbsAddr.String() + " is running"), NC_IsRunning
 	}
 
 	nc.runLock.Lock()
-	if nc.running == NC_IsRunning {
+	if nc.running == NC_IsRunning || nc.running == NC_IsStopping || nc.running == NC_IsQuiting {
 		return errors.New("nc: " + nc.addr.NbsAddr.String() + " is running"), NC_IsRunning
 	}
 	nc.running = NC_IsRunning
@@ -119,7 +121,22 @@ func (nc *NatClient) Run() (err error, satus int) {
 
 }
 
+func (nc *NatClient)IsRunning() bool  {
+	nc.runLock.Lock()
+	defer nc.runLock.Unlock()
+	if nc.running == NC_IsRunning{
+		return true
+	}
+	return false
+}
+
+
 func (nc *NatClient) Stop() {
+
+	nc.runLock.Lock()
+	nc.running = NC_IsStopping
+	nc.runLock.Unlock()
+
 	nc.rcvQuit <- struct{}{}
 	nc.wrtQuit <- struct{}{}
 	nc.quit <- struct{}{}
@@ -201,3 +218,26 @@ func (nc *NatClient) doWrt() {
 		}
 	}
 }
+
+func IteratorNCKA(ncs []*NatClient) {
+
+	if len(ncs) == 0{
+		return
+	}
+
+	now:=tools.GetNowMsTime()
+
+	for i:=0;i<len(ncs);i++{
+		nc:=ncs[i]
+
+		if !nc.IsRunning(){
+			continue
+		}
+
+		if now - nc.lastRcvTime > 3000{
+			nc.WrtKa()
+		}
+
+	}
+}
+

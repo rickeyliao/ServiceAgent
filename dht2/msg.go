@@ -35,6 +35,11 @@ type NCKAReq struct {
 	CtrlMsg
 }
 
+type NatReq struct {
+	CtrlMsg
+}
+
+
 func BuildMsg(typ byte) *CtrlMsg {
 	cm := &CtrlMsg{}
 	cm.typ = typ
@@ -67,6 +72,13 @@ func BuildNCKAReq() *NCKAReq {
 
 	return &NCKAReq{*cm}
 }
+
+func BuildNatRefreshReq() *NatReq {
+	cm := BuildMsg(Msg_Nat_Refresh_Req)
+
+	return &NatReq{*cm}
+}
+
 
 func (cm *CtrlMsg) Pack() []byte {
 	buf := make([]byte, CtrlMsgBufLen)

@@ -146,7 +146,7 @@ func (dtb *DTBucket) CloneAllNotes() []*DTNode {
 	return dtnodes
 }
 
-func (dt *DhtTable) FindNearest(node *DTNode, cnt int) ([]*DTNode, int) {
+func (dt *DhtTable) FindNearest(node *DTNode, cnt int) []*DTNode {
 	laddr := GetLocalNAddr()
 	dtaddr := node.P2pNode.NbsAddr
 
@@ -168,7 +168,7 @@ func (dt *DhtTable) FindNearest(node *DTNode, cnt int) ([]*DTNode, int) {
 
 			if curcnt >= cnt {
 				bucket.RootLock.Unlock()
-				return dtnodes, curcnt
+				return dtnodes
 			}
 		}
 
@@ -186,7 +186,7 @@ func (dt *DhtTable) FindNearest(node *DTNode, cnt int) ([]*DTNode, int) {
 
 				if curcnt >= cnt {
 					bucket.RootLock.Unlock()
-					return dtnodes, curcnt
+					return dtnodes
 				}
 			}
 
@@ -194,7 +194,7 @@ func (dt *DhtTable) FindNearest(node *DTNode, cnt int) ([]*DTNode, int) {
 		}
 	}
 
-	return dtnodes, curcnt
+	return dtnodes
 }
 
 func (dtb *DTBucket) GetLast() *DTNode {

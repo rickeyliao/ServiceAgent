@@ -29,6 +29,9 @@ type LocalP2pAddr struct {
 	kaQuit  chan struct{}
 	wg      *sync.WaitGroup
 	sock    *net.UDPConn
+	ncsLock sync.Mutex
+	ncs      []*NatClient
+	ncQuit  chan struct{}
 }
 
 var (
@@ -68,6 +71,7 @@ func NewLocalP2pAddr() *LocalP2pAddr {
 	localP2pAddr.reWrtQ = make(chan *Block, 256)
 	localP2pAddr.wrtQuit = make(chan struct{}, 1)
 	localP2pAddr.kaQuit = make(chan struct{}, 1)
+	localP2pAddr.ncQuit = make(chan struct{},1)
 	localP2pAddr.wg = &sync.WaitGroup{}
 
 	return localP2pAddr
@@ -126,7 +130,8 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 		//fill local address
 		lp.addr.CanService = rnm.CanService
 		lp.addr.InternetAddr = rnm.ObservrIP
-		lp.addr.NatAddr = rnm.NatServer
+		//lp.addr.NatAddr = rnm.NatServer
+		lp.updateNatServer(rnm.NatServer)
 
 		//prepare to saving normal dht and can service dht
 		dn := &DTNode{P2pNode: *(rnm.localAddr.Clone()), lastPingTime: tools.GetNowMsTime()}
@@ -245,9 +250,9 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 			dn.P2pNode = *(cm.localAddr)
 			dn.lastPingTime = tools.GetNowMsTime()
 
-			ds, cnt := GetCanServiceDht().FindNearest(dn, NatServerCount)
+			ds := GetCanServiceDht().FindNearest(dn, NatServerCount)
 			var bs []P2pAddr
-			for i := 0; i < cnt; i++ {
+			for i := 0; i < len(ds); i++ {
 				bs = append(bs, ds[i].P2pNode)
 			}
 			rbs := BuildRespBSMsg(bs)
@@ -265,8 +270,8 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 			dn := &DTNode{}
 			dn.P2pNode = *(cm.localAddr)
 			dn.lastPingTime = tools.GetNowMsTime()
-			ds, cnt := GetCanServiceDht().FindNearest(dn, NatServerCount)
-			for i := 0; i < cnt; i++ {
+			ds := GetCanServiceDht().FindNearest(dn, NatServerCount)
+			for i := 0; i < len(ds); i++ {
 				nats = append(nats, ds[i].P2pNode)
 			}
 		}
@@ -362,29 +367,86 @@ func (lp *LocalP2pAddr) DoWrt() {
 	}
 }
 
-func (lp *LocalP2pAddr) KeepAlive() {
+func (lp *LocalP2pAddr)stopAllKa()  {
+	if len(lp.ncs) <=0{
+		return
+	}
 
-	var cnt int64 = 0
+	lp.addr.NatAddr = nil
 
-	defer lp.wg.Done()
-	for {
-		select {
-		case <-lp.kaQuit:
-			return
-		default:
-			time.Sleep(time.Second)
-			cnt++
+	for i:=0;i<len(lp.ncs);i++{
+		nc:=lp.ncs[i]
+		nc.Stop()
+	}
+	lp.ncs = nil
+}
+
+
+func (lp *LocalP2pAddr)updateNatServer(ns []P2pAddr) {
+	lp.ncsLock.Lock()
+	defer lp.ncsLock.Unlock()
+	if len(ns) == 0 && !lp.addr.CanService{
+		panic("No adapter nat server for you !")
+		return
+	}
+	if lp.addr.CanService{
+		lp.stopAllKa()
+		return
+	}
+
+	var nc2del []*NatClient
+	var ncNews [] *NatClient
+	var addr2add []P2pAddr
+
+
+	for i:=0;i<len(ns);i++{
+		addr:=ns[i]
+
+		var j int = 0
+
+		for j=0;j<len(lp.ncs);j++{
+			nc:=lp.ncs[j]
+			if nc.addr.NbsAddr.Cmp(addr.NbsAddr){
+				break
+			}
 		}
 
-		nats := lp.addr.NatAddr
-		if len(nats) == 0 {
-			continue
+		if j == len(lp.ncs){
+			addr2add = append(addr2add,addr)
+		}
+	}
+
+	for i:=0;i<len(lp.ncs);i++{
+		nc:=lp.ncs[i]
+
+		var j int = 0
+		for j=0; j<len(ns);j++  {
+			addr:=ns[j]
+			if nc.addr.NbsAddr.Cmp(addr.NbsAddr){
+				break
+			}
 		}
 
-		if cnt%5 != 0 {
-			continue
+		if j == len(ns){
+			nc2del = append(nc2del,nc)
+		}else{
+			ncNews = append(ncNews,nc)
 		}
 
+	}
+
+	lp.ncs = ncNews
+
+	for i:=0;i<len(nc2del);i++{
+		nc:=nc2del[i]
+		nc.Stop()
+
+	}
+
+	for i:=0;i<len(addr2add);i++{
+		nc:=NewNatClient(&addr2add[i])
+		go nc.Run()
+		lp.ncs = append(lp.ncs,nc)
 	}
 }
 
@@ -430,7 +492,7 @@ func (lp *LocalP2pAddr) StartP2PService() {
 	go lp.DoWrt()
 
 	lp.wg.Add(1)
-	go lp.KeepAlive()
+	go lp.timeDoNCKA()
 
 }
 
@@ -440,6 +502,7 @@ func (lp *LocalP2pAddr) StopP2pService() {
 		lp.sock.Close()
 		//lp.sock = nil
 	}
+	lp.ncQuit <- struct{}{}
 
 	lp.kaQuit <- struct{}{}
 	lp.rcvQuit <- struct{}{}
@@ -448,3 +511,90 @@ func (lp *LocalP2pAddr) StopP2pService() {
 	lp.wg.Wait()
 	lp.sock = nil
 }
+
+
+func (lp *LocalP2pAddr)timeDoNCKA(){
+	defer lp.wg.Done()
+
+	for{
+		select {
+		case <-lp.ncQuit:
+			lp.stopAllKa()
+			return
+		default:
+
+		}
+
+		IteratorNCKA(lp.ncs)
+
+		time.Sleep(time.Second)
+
+	}
+}
+
+func (lp *LocalP2pAddr)NatClientCnt() int  {
+	cnt:=0
+	for _,nc:=range lp.ncs{
+		if nc.IsRunning(){
+			cnt ++
+		}
+	}
+
+	return cnt
+}
+
+func (lp *LocalP2pAddr)CheckNCCount(ncs []*NatClient)  {
+	if len(ncs) < NatServerCount{
+		dn := &DTNode{P2pNode:*lp.addr,lastPingTime:tools.GetNowMsTime()}
+		dns := GetCanServiceDht().FindNearest(dn,NatServerCount)
+		if len(dns) == 0{
+			return
+		}
+
+		for _,d:=range dns{
+			natreq:=BuildNatRefreshReq()
+			d2s:=natreq.Pack()
+
+			res,err:=SendAndRcv(d.P2pNode.InternetAddr,d.P2pNode.Port,d2s)
+			cm, offset := UnPackCtrlMsg(res)
+			if cm.typ == Msg_Nat_Refresh_Resp {
+
+			}
+
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
