@@ -134,3 +134,58 @@ func (rnm *RespNatMsg) UnpackNatS(buf []byte) int {
 
 	return offset
 }
+
+
+type RespNatRefreshMsg struct {
+	CtrlMsg
+	NatServer []P2pAddr
+}
+
+func NewRespNatRefreshMsg(msg *CtrlMsg, nats []P2pAddr) *RespNatRefreshMsg  {
+	rnrm:=&RespNatRefreshMsg{}
+	rnrm.CtrlMsg = *msg
+	rnrm.NatServer = nats
+
+	return rnrm
+}
+
+func BuildRespNatRefreshMsg(nats []P2pAddr) *RespNatRefreshMsg  {
+	cm:=BuildMsg(Msg_Nat_Refresh_Resp)
+
+	return NewRespNatRefreshMsg(cm,nats)
+
+}
+
+
+func (rnm *RespNatRefreshMsg) Pack(buf []byte) int {
+	cm := &rnm.CtrlMsg
+
+	offset := PackCtrlMsg(cm, buf)
+
+	cnt := len(rnm.NatServer)
+	offset += putUint16(buf[offset:], uint16(cnt))
+
+	for i := 0; i < cnt; i++ {
+		offset += PackP2pAddr(&rnm.NatServer[i], buf[offset:])
+	}
+
+	return offset
+}
+
+
+func (rnm *RespNatRefreshMsg) UnpackNatRefreshS(buf []byte) int {
+	offset := 0
+
+	cnt := toUint16(buf)
+	offset += 2
+
+	if cnt > 0 {
+		for i := 0; i < int(cnt); i++ {
+			addr, of1 := UnPackP2pAddr(buf[offset:])
+			offset += of1
+			rnm.NatServer = append(rnm.NatServer, *addr)
+		}
+	}
+
+	return offset
+}

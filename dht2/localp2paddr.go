@@ -293,6 +293,22 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 
 		blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
 		lp.Write(blocksnd)
+	}else if cm.typ == Msg_Nat_Refresh_Req{
+		dn:=&DTNode{}
+		dn.P2pNode = *(cm.localAddr)
+		dn.lastPingTime = tools.GetNowMsTime()
+
+		ds :=GetCanServiceDht().FindNearest(dn,NatServerCount)
+		var bs []P2pAddr
+		for i := 0; i < len(ds); i++ {
+			bs = append(bs, ds[i].P2pNode)
+		}
+
+		rnrm:=BuildRespNatRefreshMsg(bs)
+		offset = rnrm.Pack(block.buf)
+		block2snd := &Block{buf:block.buf[:offset],raddr:block.raddr}
+
+		lp.Write(block2snd)
 	}
 
 }
@@ -556,9 +572,15 @@ func (lp *LocalP2pAddr)CheckNCCount(ncs []*NatClient)  {
 			d2s:=natreq.Pack()
 
 			res,err:=SendAndRcv(d.P2pNode.InternetAddr,d.P2pNode.Port,d2s)
+			if err!=nil{
+				continue
+			}
 			cm, offset := UnPackCtrlMsg(res)
 			if cm.typ == Msg_Nat_Refresh_Resp {
-
+				nrm:=&RespNatRefreshMsg{}
+				nrm.CtrlMsg = *cm
+				nrm.UnpackNatRefreshS(res[offset:])
+				lp.updateNatServer(nrm.NatServer)
 			}
 
 		}
