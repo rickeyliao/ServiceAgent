@@ -241,3 +241,28 @@ func IteratorNCKA(ncs []*NatClient) {
 	}
 }
 
+func TimeoutNCKA(ncs []*NatClient) (newncs []*NatClient) {
+	if len(ncs) == 0{
+		return
+	}
+
+	now:=tools.GetNowMsTime()
+
+	for i:=0;i<len(ncs);i++{
+		nc:=ncs[i]
+		if !nc.IsRunning(){
+			continue
+		}
+
+		if now - nc.lastRcvTime > 30000{
+			nc.Stop()
+			continue
+		}
+
+		newncs = append(newncs,nc)
+
+	}
+
+	return
+}
+

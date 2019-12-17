@@ -545,6 +545,10 @@ func (lp *LocalP2pAddr)timeDoNCKA(){
 
 		time.Sleep(time.Second)
 
+		lp.ncs = TimeoutNCKA(lp.ncs)
+
+		lp.CheckNCCount()
+
 	}
 }
 
@@ -559,8 +563,8 @@ func (lp *LocalP2pAddr)NatClientCnt() int  {
 	return cnt
 }
 
-func (lp *LocalP2pAddr)CheckNCCount(ncs []*NatClient)  {
-	if len(ncs) < NatServerCount{
+func (lp *LocalP2pAddr)CheckNCCount()  {
+	if len(lp.ncs) < NatServerCount{
 		dn := &DTNode{P2pNode:*lp.addr,lastPingTime:tools.GetNowMsTime()}
 		dns := GetCanServiceDht().FindNearest(dn,NatServerCount)
 		if len(dns) == 0{
@@ -581,6 +585,10 @@ func (lp *LocalP2pAddr)CheckNCCount(ncs []*NatClient)  {
 				nrm.CtrlMsg = *cm
 				nrm.UnpackNatRefreshS(res[offset:])
 				lp.updateNatServer(nrm.NatServer)
+			}
+
+			if len(lp.ncs) >= NatServerCount{
+				return
 			}
 
 		}
