@@ -39,7 +39,6 @@ type NatReq struct {
 	CtrlMsg
 }
 
-
 func BuildMsg(typ byte) *CtrlMsg {
 	cm := &CtrlMsg{}
 	cm.typ = typ
@@ -78,7 +77,6 @@ func BuildNatRefreshReq() *NatReq {
 
 	return &NatReq{*cm}
 }
-
 
 func (cm *CtrlMsg) Pack() []byte {
 	buf := make([]byte, CtrlMsgBufLen)

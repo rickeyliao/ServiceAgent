@@ -20,7 +20,6 @@ const (
 	NC_IsStopping  int = 3
 	NC_IsQuiting   int = 4
 	NC_InternalErr int = 5
-
 )
 
 type NatClient struct {
@@ -91,7 +90,7 @@ func (nc *NatClient) start() (err error) {
 }
 
 func (nc *NatClient) Run() (err error, satus int) {
-	if nc.running == NC_IsRunning || nc.running == NC_IsStopping || nc.running == NC_IsQuiting{
+	if nc.running == NC_IsRunning || nc.running == NC_IsStopping || nc.running == NC_IsQuiting {
 		return errors.New("nc: " + nc.addr.NbsAddr.String() + " is running"), NC_IsRunning
 	}
 
@@ -121,15 +120,14 @@ func (nc *NatClient) Run() (err error, satus int) {
 
 }
 
-func (nc *NatClient)IsRunning() bool  {
+func (nc *NatClient) IsRunning() bool {
 	nc.runLock.Lock()
 	defer nc.runLock.Unlock()
-	if nc.running == NC_IsRunning{
+	if nc.running == NC_IsRunning {
 		return true
 	}
 	return false
 }
-
 
 func (nc *NatClient) Stop() {
 
@@ -221,20 +219,20 @@ func (nc *NatClient) doWrt() {
 
 func IteratorNCKA(ncs []*NatClient) {
 
-	if len(ncs) == 0{
+	if len(ncs) == 0 {
 		return
 	}
 
-	now:=tools.GetNowMsTime()
+	now := tools.GetNowMsTime()
 
-	for i:=0;i<len(ncs);i++{
-		nc:=ncs[i]
+	for i := 0; i < len(ncs); i++ {
+		nc := ncs[i]
 
-		if !nc.IsRunning(){
+		if !nc.IsRunning() {
 			continue
 		}
 
-		if now - nc.lastRcvTime > 3000{
+		if now-nc.lastRcvTime > 3000 {
 			nc.WrtKa()
 		}
 
@@ -242,27 +240,26 @@ func IteratorNCKA(ncs []*NatClient) {
 }
 
 func TimeoutNCKA(ncs []*NatClient) (newncs []*NatClient) {
-	if len(ncs) == 0{
+	if len(ncs) == 0 {
 		return
 	}
 
-	now:=tools.GetNowMsTime()
+	now := tools.GetNowMsTime()
 
-	for i:=0;i<len(ncs);i++{
-		nc:=ncs[i]
-		if !nc.IsRunning(){
+	for i := 0; i < len(ncs); i++ {
+		nc := ncs[i]
+		if !nc.IsRunning() {
 			continue
 		}
 
-		if now - nc.lastRcvTime > 30000{
+		if now-nc.lastRcvTime > 30000 {
 			nc.Stop()
 			continue
 		}
 
-		newncs = append(newncs,nc)
+		newncs = append(newncs, nc)
 
 	}
 
 	return
 }
-

@@ -135,27 +135,25 @@ func (rnm *RespNatMsg) UnpackNatS(buf []byte) int {
 	return offset
 }
 
-
 type RespNatRefreshMsg struct {
 	CtrlMsg
 	NatServer []P2pAddr
 }
 
-func NewRespNatRefreshMsg(msg *CtrlMsg, nats []P2pAddr) *RespNatRefreshMsg  {
-	rnrm:=&RespNatRefreshMsg{}
+func NewRespNatRefreshMsg(msg *CtrlMsg, nats []P2pAddr) *RespNatRefreshMsg {
+	rnrm := &RespNatRefreshMsg{}
 	rnrm.CtrlMsg = *msg
 	rnrm.NatServer = nats
 
 	return rnrm
 }
 
-func BuildRespNatRefreshMsg(nats []P2pAddr) *RespNatRefreshMsg  {
-	cm:=BuildMsg(Msg_Nat_Refresh_Resp)
+func BuildRespNatRefreshMsg(nats []P2pAddr) *RespNatRefreshMsg {
+	cm := BuildMsg(Msg_Nat_Refresh_Resp)
 
-	return NewRespNatRefreshMsg(cm,nats)
+	return NewRespNatRefreshMsg(cm, nats)
 
 }
-
 
 func (rnm *RespNatRefreshMsg) Pack(buf []byte) int {
 	cm := &rnm.CtrlMsg
@@ -171,7 +169,6 @@ func (rnm *RespNatRefreshMsg) Pack(buf []byte) int {
 
 	return offset
 }
-
 
 func (rnm *RespNatRefreshMsg) UnpackNatRefreshS(buf []byte) int {
 	offset := 0

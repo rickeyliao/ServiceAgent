@@ -30,7 +30,7 @@ type LocalP2pAddr struct {
 	wg      *sync.WaitGroup
 	sock    *net.UDPConn
 	ncsLock sync.Mutex
-	ncs      []*NatClient
+	ncs     []*NatClient
 	ncQuit  chan struct{}
 }
 
@@ -71,7 +71,7 @@ func NewLocalP2pAddr() *LocalP2pAddr {
 	localP2pAddr.reWrtQ = make(chan *Block, 256)
 	localP2pAddr.wrtQuit = make(chan struct{}, 1)
 	localP2pAddr.kaQuit = make(chan struct{}, 1)
-	localP2pAddr.ncQuit = make(chan struct{},1)
+	localP2pAddr.ncQuit = make(chan struct{}, 1)
 	localP2pAddr.wg = &sync.WaitGroup{}
 
 	return localP2pAddr
@@ -293,20 +293,20 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 
 		blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
 		lp.Write(blocksnd)
-	}else if cm.typ == Msg_Nat_Refresh_Req{
-		dn:=&DTNode{}
+	} else if cm.typ == Msg_Nat_Refresh_Req {
+		dn := &DTNode{}
 		dn.P2pNode = *(cm.localAddr)
 		dn.lastPingTime = tools.GetNowMsTime()
 
-		ds :=GetCanServiceDht().FindNearest(dn,NatServerCount)
+		ds := GetCanServiceDht().FindNearest(dn, NatServerCount)
 		var bs []P2pAddr
 		for i := 0; i < len(ds); i++ {
 			bs = append(bs, ds[i].P2pNode)
 		}
 
-		rnrm:=BuildRespNatRefreshMsg(bs)
+		rnrm := BuildRespNatRefreshMsg(bs)
 		offset = rnrm.Pack(block.buf)
-		block2snd := &Block{buf:block.buf[:offset],raddr:block.raddr}
+		block2snd := &Block{buf: block.buf[:offset], raddr: block.raddr}
 
 		lp.Write(block2snd)
 	}
@@ -383,86 +383,84 @@ func (lp *LocalP2pAddr) DoWrt() {
 	}
 }
 
-func (lp *LocalP2pAddr)stopAllKa()  {
-	if len(lp.ncs) <=0{
+func (lp *LocalP2pAddr) stopAllKa() {
+	if len(lp.ncs) <= 0 {
 		return
 	}
 
 	lp.addr.NatAddr = nil
 
-	for i:=0;i<len(lp.ncs);i++{
-		nc:=lp.ncs[i]
+	for i := 0; i < len(lp.ncs); i++ {
+		nc := lp.ncs[i]
 		nc.Stop()
 	}
 	lp.ncs = nil
 }
 
-
-func (lp *LocalP2pAddr)updateNatServer(ns []P2pAddr) {
+func (lp *LocalP2pAddr) updateNatServer(ns []P2pAddr) {
 	lp.ncsLock.Lock()
 	defer lp.ncsLock.Unlock()
-	if len(ns) == 0 && !lp.addr.CanService{
+	if len(ns) == 0 && !lp.addr.CanService {
 		panic("No adapter nat server for you !")
 		return
 	}
-	if lp.addr.CanService{
+	if lp.addr.CanService {
 		lp.stopAllKa()
 		return
 	}
 
 	var nc2del []*NatClient
-	var ncNews [] *NatClient
+	var ncNews []*NatClient
 	var addr2add []P2pAddr
 
-
-	for i:=0;i<len(ns);i++{
-		addr:=ns[i]
+	for i := 0; i < len(ns); i++ {
+		addr := ns[i]
 
 		var j int = 0
 
-		for j=0;j<len(lp.ncs);j++{
-			nc:=lp.ncs[j]
-			if nc.addr.NbsAddr.Cmp(addr.NbsAddr){
+		for j = 0; j < len(lp.ncs); j++ {
+			nc := lp.ncs[j]
+			if nc.addr.NbsAddr.Cmp(addr.NbsAddr) {
 				break
 			}
 		}
 
-		if j == len(lp.ncs){
-			addr2add = append(addr2add,addr)
+		if j == len(lp.ncs) {
+			addr2add = append(addr2add, addr)
 		}
 	}
 
-	for i:=0;i<len(lp.ncs);i++{
-		nc:=lp.ncs[i]
+	for i := 0; i < len(lp.ncs); i++ {
+		nc := lp.ncs[i]
 
 		var j int = 0
-		for j=0; j<len(ns);j++  {
-			addr:=ns[j]
-			if nc.addr.NbsAddr.Cmp(addr.NbsAddr){
+		for j = 0; j < len(ns); j++ {
+			addr := ns[j]
+			if nc.addr.NbsAddr.Cmp(addr.NbsAddr) {
 				break
 			}
 		}
 
-		if j == len(ns){
-			nc2del = append(nc2del,nc)
-		}else{
-			ncNews = append(ncNews,nc)
+		if j == len(ns) {
+			nc2del = append(nc2del, nc)
+		} else {
+			ncNews = append(ncNews, nc)
 		}
 
 	}
 
 	lp.ncs = ncNews
 
-	for i:=0;i<len(nc2del);i++{
-		nc:=nc2del[i]
+	for i := 0; i < len(nc2del); i++ {
+		nc := nc2del[i]
 		nc.Stop()
 
 	}
 
-	for i:=0;i<len(addr2add);i++{
-		nc:=NewNatClient(&addr2add[i])
+	for i := 0; i < len(addr2add); i++ {
+		nc := NewNatClient(&addr2add[i])
 		go nc.Run()
-		lp.ncs = append(lp.ncs,nc)
+		lp.ncs = append(lp.ncs, nc)
 	}
 }
 
@@ -528,11 +526,10 @@ func (lp *LocalP2pAddr) StopP2pService() {
 	lp.sock = nil
 }
 
-
-func (lp *LocalP2pAddr)timeDoNCKA(){
+func (lp *LocalP2pAddr) timeDoNCKA() {
 	defer lp.wg.Done()
 
-	for{
+	for {
 		select {
 		case <-lp.ncQuit:
 			lp.stopAllKa()
@@ -552,79 +549,45 @@ func (lp *LocalP2pAddr)timeDoNCKA(){
 	}
 }
 
-func (lp *LocalP2pAddr)NatClientCnt() int  {
-	cnt:=0
-	for _,nc:=range lp.ncs{
-		if nc.IsRunning(){
-			cnt ++
+func (lp *LocalP2pAddr) NatClientCnt() int {
+	cnt := 0
+	for _, nc := range lp.ncs {
+		if nc.IsRunning() {
+			cnt++
 		}
 	}
 
 	return cnt
 }
 
-func (lp *LocalP2pAddr)CheckNCCount()  {
-	if len(lp.ncs) < NatServerCount{
-		dn := &DTNode{P2pNode:*lp.addr,lastPingTime:tools.GetNowMsTime()}
-		dns := GetCanServiceDht().FindNearest(dn,NatServerCount)
-		if len(dns) == 0{
+func (lp *LocalP2pAddr) CheckNCCount() {
+	if len(lp.ncs) < NatServerCount {
+		dn := &DTNode{P2pNode: *lp.addr, lastPingTime: tools.GetNowMsTime()}
+		dns := GetCanServiceDht().FindNearest(dn, NatServerCount)
+		if len(dns) == 0 {
 			return
 		}
 
-		for _,d:=range dns{
-			natreq:=BuildNatRefreshReq()
-			d2s:=natreq.Pack()
+		for _, d := range dns {
+			natreq := BuildNatRefreshReq()
+			d2s := natreq.Pack()
 
-			res,err:=SendAndRcv(d.P2pNode.InternetAddr,d.P2pNode.Port,d2s)
-			if err!=nil{
+			res, err := SendAndRcv(d.P2pNode.InternetAddr, d.P2pNode.Port, d2s)
+			if err != nil {
 				continue
 			}
 			cm, offset := UnPackCtrlMsg(res)
 			if cm.typ == Msg_Nat_Refresh_Resp {
-				nrm:=&RespNatRefreshMsg{}
+				nrm := &RespNatRefreshMsg{}
 				nrm.CtrlMsg = *cm
 				nrm.UnpackNatRefreshS(res[offset:])
 				lp.updateNatServer(nrm.NatServer)
 			}
 
-			if len(lp.ncs) >= NatServerCount{
+			if len(lp.ncs) >= NatServerCount {
 				return
 			}
 
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
