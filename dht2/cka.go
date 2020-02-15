@@ -1,7 +1,6 @@
 package dht2
 
 import (
-	"bytes"
 	"github.com/kprc/nbsnetwork/tools"
 	"net"
 	"sync"
@@ -10,7 +9,6 @@ import (
 
 type KANode struct {
 	nbsaddr        NAddr
-	sn             []byte
 	ip             net.IP
 	port           int
 	lastAccessTime int64
@@ -50,7 +48,12 @@ func GetKAStore() *KAStore {
 }
 
 func (na NAddr) KAHash() int {
-	return int(na[31])
+	h := int(na[31]) + int(na[30]) + int(na[29]) +int(na[28])
+	if h < 0 {
+		h = 0 - h
+	}
+
+	return h & 0xFF
 }
 
 func (kn *KANode) clone() *KANode {
@@ -65,7 +68,7 @@ func (kn *KANode) clone() *KANode {
 
 }
 
-func (kb *KABucket) find(nbsaddr NAddr, port int, ip net.IP) *KANode {
+func (kb *KABucket) find(nbsaddr NAddr) *KANode {
 	r := kb.root
 
 	for {
@@ -73,7 +76,7 @@ func (kb *KABucket) find(nbsaddr NAddr, port int, ip net.IP) *KANode {
 			return nil
 		}
 
-		if r.nbsaddr.Cmp(nbsaddr) && r.port == port && r.ip.Equal(ip) {
+		if r.nbsaddr.Cmp(nbsaddr) {
 			return r
 		}
 
@@ -81,30 +84,7 @@ func (kb *KABucket) find(nbsaddr NAddr, port int, ip net.IP) *KANode {
 	}
 }
 
-func (kb *KABucket) delete(nbsaddr NAddr, port int, ip net.IP) {
-	r := kb.root
-	prev := r
-	for {
-		if r == nil {
-			return
-		}
-
-		if r.nbsaddr.Cmp(nbsaddr) && r.port == port && r.ip.Equal(ip) {
-
-			if r == kb.root {
-				kb.root = r.next
-			} else {
-				prev.next = r.next
-			}
-
-			return
-		}
-		prev = r
-		r = r.next
-	}
-}
-
-func (kb *KABucket) deleteall(nbsaddr NAddr) {
+func (kb *KABucket) delete(nbsaddr NAddr) {
 	r := kb.root
 	prev := r
 	for {
@@ -120,35 +100,13 @@ func (kb *KABucket) deleteall(nbsaddr NAddr) {
 				prev.next = r.next
 			}
 
-			r = r.next
-		} else {
-			prev = r
-			r = r.next
+			return
 		}
-
-	}
-}
-
-func (kb *KABucket) findall(nbsaddr NAddr) []*KANode {
-	r := kb.root
-
-	arr := make([]*KANode, 0)
-
-	for {
-		if r == nil {
-			break
-		}
-
-		if nbsaddr.Cmp(r.nbsaddr) {
-			arr = append(arr, r)
-		}
-
+		prev = r
 		r = r.next
-
 	}
-
-	return arr
 }
+
 
 func (kb *KABucket) insert(n *KANode) {
 	nxt := kb.root
@@ -157,7 +115,7 @@ func (kb *KABucket) insert(n *KANode) {
 }
 
 //if node have been existed, refresh access time, if not, insert it
-func (ks *KAStore) Insert(ip net.IP, port int, nbsaddr NAddr, sn []byte) {
+func (ks *KAStore) Insert(ip net.IP, port int, nbsaddr NAddr) {
 	h := nbsaddr.KAHash()
 
 	b := ks.HashTable[h]
@@ -165,80 +123,42 @@ func (ks *KAStore) Insert(ip net.IP, port int, nbsaddr NAddr, sn []byte) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	n := b.find(nbsaddr, port, ip)
+	n := b.find(nbsaddr)
 	if n != nil {
 		n.lastAccessTime = tools.GetNowMsTime()
+		n.ip = ip
+		n.port = port
 		return
 	}
 
-	n = &KANode{nbsaddr: nbsaddr, ip: ip, port: port, lastAccessTime: tools.GetNowMsTime(), sn: sn}
+	n = &KANode{nbsaddr: nbsaddr, ip: ip, port: port, lastAccessTime: tools.GetNowMsTime()}
 
 	b.insert(n)
 }
 
-func (ks *KAStore) Find(nbsaddr NAddr) []*KANode {
+func (ks *KAStore) Find(nbsaddr NAddr) *KANode {
 	h := nbsaddr.KAHash()
 	b := ks.HashTable[h]
 
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	ns := b.findall(nbsaddr)
+	ns := b.find(nbsaddr)
 
-	arr := make([]*KANode, 0)
-
-	for _, n := range ns {
-		arr = append(arr, n.clone())
-	}
-
-	return arr
+	return ns
 
 }
 
-func (kb *KABucket) findBySn(nbsaddr NAddr, sn []byte) *KANode {
-	r := kb.root
-	for {
-		if r == nil {
-			return nil
-		}
-
-		if nbsaddr.Cmp(r.nbsaddr) && bytes.Compare(sn, r.sn) == 0 {
-			return r
-		}
-
-		r = r.next
-
-	}
-}
-
-func (ks *KAStore) FindBySn(nbsaddr NAddr, sn []byte) *KANode {
+func (ks *KAStore) Delete(nbsaddr NAddr) {
 	h := nbsaddr.KAHash()
 	b := ks.HashTable[h]
 
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
-	return b.findBySn(nbsaddr, sn)
+	b.delete(nbsaddr)
 }
 
-func (ks *KAStore) Delete(nbsaddr NAddr, port int, ip net.IP) {
-	h := nbsaddr.KAHash()
-	b := ks.HashTable[h]
 
-	b.lock.Lock()
-	defer b.lock.Unlock()
-	b.delete(nbsaddr, port, ip)
-}
-
-func (ks *KAStore) DeleteAll(nbsaddr NAddr) {
-	h := nbsaddr.KAHash()
-	b := ks.HashTable[h]
-
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	b.deleteall(nbsaddr)
-}
 
 func (kb *KABucket) timeout() {
 	now := tools.GetNowMsTime()
@@ -250,7 +170,7 @@ func (kb *KABucket) timeout() {
 			return
 		}
 
-		if now-r.lastAccessTime > 3600000 {
+		if now-r.lastAccessTime > 60000 {
 			if r == kb.root {
 				kb.root = r.next
 			} else {
@@ -292,7 +212,7 @@ func (ks *KAStore) WrapperTimeout() {
 
 		}
 
-		if tools.GetNowMsTime()-starttime < 1800000 {
+		if tools.GetNowMsTime()-starttime < 300000 {
 			time.Sleep(time.Second * 1)
 			continue
 		}

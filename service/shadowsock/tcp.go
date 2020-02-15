@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"time"
+	"fmt"
 )
 
 // Create a SOCKS server listening on addr and proxy to server.
@@ -118,6 +119,7 @@ func tcpRemote(addr string, shadow func(net.Conn) net.Conn) {
 				logf("failed to get target address: %v", err)
 				return
 			}
+			fmt.Println(tgt.String())
 
 			rc, err := net.Dial("tcp", tgt.String())
 			if err != nil {

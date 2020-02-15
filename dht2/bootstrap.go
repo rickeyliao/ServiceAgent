@@ -51,6 +51,9 @@ func bootsTrapAdd(bs string) error {
 
 func init() {
 	cfg := common.GetSAConfig()
+	if cfg == nil{
+		return
+	}
 
 	for _, bs := range cfg.BootstrapIPAddress {
 		err := bootsTrapAdd(bs)
@@ -103,8 +106,8 @@ func BootsTrapGetNxtBS() (naddr NAddr, ip net.IP, port int, err error) {
 			if len(bts.BSServer.InternalAddr) == 0 {
 				bts.IsFailed = true
 				continue
-				rip = bts.BSServer.InternalAddr[0]
 			}
+			rip = bts.BSServer.InternalAddr[0]
 		} else {
 			rip = bts.BSServer.InternetAddr
 		}

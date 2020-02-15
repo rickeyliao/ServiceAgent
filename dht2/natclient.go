@@ -193,7 +193,31 @@ func (nc *NatClient) rcv(blk *Block) {
 		offset = kar.UnPackNCKA(blk.buf[offset:])
 		nc.internetPort = kar.RPort
 		return
+	case Msg_Nat_Conn_Inform:
+		inform:=&NCConnInForm{}
+		inform.CtrlMsg = *cm
+		offset += inform.UnPack(blk.buf[offset:])
+		reply:=BuildNCConnReply()
+		buf:=make([]byte,1024)
+		offset = reply.Pack(buf)
+		nc.Wrt(buf[:offset])
 
+		sess:=BuildNCSessCreateReq()
+		buf = make([]byte,1024)
+		offset = sess.Pack(buf)
+		go SendAndRcv(inform.Wait4ConnIP,inform.Wait4ConnPort,buf[:offset])
+		return
+	case Msg_Nat_Sess_Create_Resp:
+		//nothing to do ...
+		return
+	case Msg_Nat_Sess_Create_Req:
+		sess:=&NCSessionCreateReq{}
+		sess.CtrlMsg = *cm
+		sessResp:=BuildNCSessCreateResp()
+		buf := make([]byte,1024)
+		offset = sessResp.Pack(buf)
+		go SendAndRcv(blk.raddr.IP,blk.raddr.Port,buf[:offset])
+		return
 	}
 }
 

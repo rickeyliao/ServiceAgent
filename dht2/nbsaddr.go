@@ -119,3 +119,7 @@ func (na NAddr) Cmp(na2 NAddr) bool {
 func (na NAddr) Len() int {
 	return len(na)
 }
+
+func (na *NAddr)Set(buf []byte)  {
+	copy((*na)[:],buf)
+}

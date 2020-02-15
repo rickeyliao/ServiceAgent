@@ -65,6 +65,8 @@ var xorlen = [...]int{
 	8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, //255
 }
 
+
+
 func NbsXorLen(x []byte, y []byte) (int, error) {
 
 	if len(x) != len(y) {

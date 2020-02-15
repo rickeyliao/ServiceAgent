@@ -17,7 +17,6 @@ package cmd
 import (
 	"github.com/rickeyliao/ServiceAgent/app/cmdservice"
 	"github.com/rickeyliao/ServiceAgent/common"
-	"github.com/rickeyliao/ServiceAgent/dht2"
 	"github.com/rickeyliao/ServiceAgent/service"
 	"github.com/rickeyliao/ServiceAgent/service/shadowsock"
 	"github.com/rickeyliao/ServiceAgent/wifiap"
@@ -71,7 +70,7 @@ var daemonCmd = &cobra.Command{
 		if cfg.ShadowSockServerSwitch {
 			go shadowsock.StartSS2Server()
 		}
-		dht2.DhtRuning()
+		//dht2.DhtRuning()
 		wifiap.ExtractWifiAPFiles()
 		cmdservice.StartCmdService()
 	},
