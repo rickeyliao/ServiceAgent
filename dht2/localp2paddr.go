@@ -291,10 +291,40 @@ func CreateSess(ip net.IP,port int,addr NAddr) (sess *ConnSession,err error) {
 	sess.PeerIP = raddr.IP
 	sess.PeerPort = raddr.Port
 	sess.Socket = conn
-	conn.SetDeadline(time.Time{})
+	//conn.SetDeadline(time.Time{})
 
 	return sess,nil
 }
+
+func CreateSessAndInform(ip net.IP,port int, nbsaddr NAddr,result chan *ConnSession) error {
+	if sess,err:=CreateSess(ip,port,nbsaddr);err!=nil{
+		return err
+	}else{
+		result <- sess
+		return nil
+	}
+}
+func (lp *LocalP2pAddr)CreateNatSession(ip net.IP,port int,nbsaddr NAddr) (*ConnSession,error) {
+	laddr:=&net.UDPAddr{}
+	raddr:=&net.UDPAddr{IP:ip,Port:port}
+
+	_,err:=net.DialUDP("udp4",laddr,raddr)
+	if err!=nil{
+		return nil,err
+	}
+	//req:=BuildNCConnReq()
+	return nil,nil
+}
+
+func (lp *LocalP2pAddr)CreateNatSessionAndInform(ip net.IP,port int,nbsaddr NAddr, result chan *ConnSession) error {
+	if sess,err:=lp.CreateNatSession(ip,port,nbsaddr);err!=nil{
+		return err
+	}else{
+		result <- sess
+		return nil
+	}
+}
+
 
 func (lp *LocalP2pAddr)CreateConnSession(peer *P2pAddr) *ConnSession  {
 	if peer.CanService {
@@ -304,8 +334,29 @@ func (lp *LocalP2pAddr)CreateConnSession(peer *P2pAddr) *ConnSession  {
 		}
 		return sess
 	}
+	result := make(chan *ConnSession,128)
+	if !peer.CanService && !lp.addr.CanService{
+		if peer.InternetAddr.Equal(lp.addr.InternetAddr){
+			for i:=0;i<len(peer.InternalAddr);i++ {
+				addr := peer.InternalAddr[i]
+				go CreateSessAndInform(addr,peer.Port,peer.NbsAddr,result)
+			}
+		}
+	}
+	for i:=0;i<len(peer.NatAddr)&&i<3;i++{
+		nat:=peer.NatAddr[i]
+		go lp.CreateNatSessionAndInform(nat.InternetAddr,nat.Port,nat.NbsAddr,result)
 
-	return nil
+	}
+
+	timer1:=time.NewTimer(5*time.Second)
+	select{
+	case sess:=<-result:
+		sess.Socket.SetDeadline(time.Time{})
+		return sess
+	case timer1.C:
+		return nil
+	}
 
 }
 
