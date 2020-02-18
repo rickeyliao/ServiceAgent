@@ -157,12 +157,12 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 }
 
 func (lp *LocalP2pAddr) CanServiceLoop(peer *P2pAddr) error {
-
-	//nodes,err:=lp.FindCanSrvNode(lp)
+	lp.FindCanSrvNode(lp.addr.NbsAddr,peer)
 	return nil
 }
 
 func (lp *LocalP2pAddr) NormalLoop(peer *P2pAddr) error {
+	lp.FindNode(lp.addr.NbsAddr,peer)
 	return nil
 }
 
@@ -198,54 +198,33 @@ func (lp *LocalP2pAddr)FindNode(node NAddr,peer *P2pAddr) (nearstNode []P2pAddr,
 }
 
 func (lp *LocalP2pAddr)FindCanSrvNode(node NAddr,peer *P2pAddr) (nearstNode []P2pAddr,err error)  {
-	return
+	req:=BuildReqFindCanServiceMsg(node)
+	buf:=make([]byte,1024)
+	n:=req.Pack(buf)
+
+	respbuf,err:=lp.NatSendAndRcv(peer,buf[:n])
+	if err!=nil{
+		return nil,err
+	}
+
+	cm,offset:=UnPackCtrlMsg(respbuf)
+	resp:=&FindRespMsg{}
+	resp.CtrlMsg = *cm
+	resp.UnPackFRespMsg(respbuf[offset:])
+
+	nearstNode = resp.NearestNodes
+
+	return 
+
 }
 
 func (lp *LocalP2pAddr)NatSendAndRcv(peer *P2pAddr,b2s []byte) (rcvbuf []byte,err error) {
-	if peer.CanService{
-		return SendAndRcv(peer.InternetAddr,peer.Port,b2s)
-	}
-	if !peer.CanService && !lp.addr.CanService{
-		if peer.InternetAddr.Equal(lp.addr.InternetAddr){
-			//attempt to connect to peer
-			result := make(chan *NCSessionCreateResp,16)
-			req:=BuildNCSessCreateReq()
-			buf:=make([]byte,1024)
-			offset:=req.Pack(buf)
-			for i:=0;i<len(peer.InternalAddr);i++{
-				addr := peer.InternalAddr[i]
-				go func(nbsaddr NAddr,ip net.IP,port int,result chan *NCSessionCreateResp) {
-					if resp,errsnd:=SendAndRcv(ip,port,buf[:offset]);errsnd!=nil{
-						return
-					}else{
-						ret:=&NCSessionCreateResp{}
-						cm,_:=UnPackCtrlMsg(resp)
-						if cm.localAddr.NbsAddr.Cmp(nbsaddr){
-							ret.CtrlMsg = *cm
-							result <- ret
-						}
-					}
-
-				}(peer.NbsAddr,addr,peer.Port,result)
-			}
-			timer1:=time.NewTimer(5*time.Second)
-
-			select{
-			case blk:=<-result:
-				//todo...
-
-				fmt.Println(blk.typ)
-
-			case <-timer1.C:
-				//nothing todo...
-			}
-
-		}
+	sess:=lp.CreateConnSession(peer)
+	if sess != nil{
+		return sess.WriteAndRead(b2s)
 	}
 
-
-
-	return
+	return nil,errors.New("Can't Connect to peer")
 }
 
 type ConnSession struct {
@@ -256,7 +235,33 @@ type ConnSession struct {
 	Socket *net.UDPConn
 }
 
-func CreateSess(ip net.IP,port int,addr NAddr) (sess *ConnSession,err error) {
+func (cs *ConnSession)WriteAndRead(wrt []byte) (rcv []byte,err error) {
+	cs.Socket.Write(wrt)
+	deadline := time.Now().Add(time.Second * 5)
+	cs.Socket.SetDeadline(deadline)
+	for {
+		buf1 := make([]byte, CtrlMsgBufLen)
+		nRead, err := cs.Socket.Read(buf1)
+		if err != nil {
+			cs.Socket.Close()
+			return nil, err
+		}
+		cm, _ := UnPackCtrlMsg(buf1[:nRead])
+		switch cm.typ {
+		case Msg_Nat_Conn_Resp:
+			fallthrough
+		case Msg_Nat_Sess_Create_Req:
+			fallthrough
+		case Msg_Nat_Sess_Create_Resp:
+			continue
+		default:
+			return buf1,nil
+		}
+	}
+
+}
+
+func createSess(ip net.IP,port int,addr NAddr) (sess *ConnSession,err error) {
 
 	laddr:=&net.UDPAddr{}
 	raddr:=&net.UDPAddr{IP:ip,Port:port}
@@ -296,28 +301,72 @@ func CreateSess(ip net.IP,port int,addr NAddr) (sess *ConnSession,err error) {
 	return sess,nil
 }
 
-func CreateSessAndInform(ip net.IP,port int, nbsaddr NAddr,result chan *ConnSession) error {
-	if sess,err:=CreateSess(ip,port,nbsaddr);err!=nil{
+func createSessAndInform(ip net.IP,port int, nbsaddr NAddr,result chan *ConnSession) error {
+	if sess,err:=createSess(ip,port,nbsaddr);err!=nil{
 		return err
 	}else{
 		result <- sess
 		return nil
 	}
 }
-func (lp *LocalP2pAddr)CreateNatSession(ip net.IP,port int,nbsaddr NAddr) (*ConnSession,error) {
+func (lp *LocalP2pAddr)createNatSession(peer *P2pAddr) (*ConnSession,error) {
 	laddr:=&net.UDPAddr{}
-	raddr:=&net.UDPAddr{IP:ip,Port:port}
+	raddr:=&net.UDPAddr{IP:peer.InternetAddr,Port:peer.Port}
 
-	_,err:=net.DialUDP("udp4",laddr,raddr)
+	conn,err:=net.DialUDP("udp4",laddr,raddr)
 	if err!=nil{
 		return nil,err
 	}
-	//req:=BuildNCConnReq()
-	return nil,nil
+	req:=BuildNCConnReq(peer)
+	buf:=make([]byte,2048)
+	offset:=req.Pack(buf)
+
+	deadline := time.Now().Add(time.Second * 5)
+	conn.SetDeadline(deadline)
+	conn.Write(buf[:offset])
+
+	for {
+		buf1 := make([]byte, CtrlMsgBufLen)
+		nRead, err := conn.Read(buf1)
+		if err != nil {
+			conn.Close()
+			return nil, err
+		}
+		cm, _ := UnPackCtrlMsg(buf1[:nRead])
+		if !cm.localAddr.NbsAddr.Cmp(peer.NbsAddr){
+			continue
+		}
+		switch cm.typ {
+		case Msg_Nat_Conn_Resp:
+			sessreq:=BuildNCSessCreateReq()
+			bufreq:=make([]byte,1024)
+			of1:=sessreq.Pack(bufreq)
+			conn.Write(bufreq[:of1])
+		case Msg_Nat_Sess_Create_Req:
+			sessresp:=BuildNCSessCreateResp()
+			bufresp:=make([]byte,1024)
+			of2:=sessresp.Pack(bufresp)
+			conn.Write(bufresp[:of2])
+			fallthrough
+		case Msg_Nat_Sess_Create_Resp:
+			sess := &ConnSession{}
+			sess.LocalIP = laddr.IP
+			sess.LocalPort = laddr.Port
+			sess.PeerIP = raddr.IP
+			sess.PeerPort = raddr.Port
+			sess.Socket = conn
+
+			return sess,nil
+		default:
+			conn.Close()
+			return nil,errors.New("Get Error msg")
+		}
+	}
+	return nil,errors.New("Unknown error")
 }
 
-func (lp *LocalP2pAddr)CreateNatSessionAndInform(ip net.IP,port int,nbsaddr NAddr, result chan *ConnSession) error {
-	if sess,err:=lp.CreateNatSession(ip,port,nbsaddr);err!=nil{
+func (lp *LocalP2pAddr)createNatSessionAndInform(peer *P2pAddr, result chan *ConnSession) error {
+	if sess,err:=lp.createNatSession(peer);err!=nil{
 		return err
 	}else{
 		result <- sess
@@ -328,7 +377,7 @@ func (lp *LocalP2pAddr)CreateNatSessionAndInform(ip net.IP,port int,nbsaddr NAdd
 
 func (lp *LocalP2pAddr)CreateConnSession(peer *P2pAddr) *ConnSession  {
 	if peer.CanService {
-		sess,err:=CreateSess(peer.InternetAddr,peer.Port,peer.NbsAddr)
+		sess,err:=createSess(peer.InternetAddr,peer.Port,peer.NbsAddr)
 		if err!=nil{
 			return nil
 		}
@@ -339,13 +388,13 @@ func (lp *LocalP2pAddr)CreateConnSession(peer *P2pAddr) *ConnSession  {
 		if peer.InternetAddr.Equal(lp.addr.InternetAddr){
 			for i:=0;i<len(peer.InternalAddr);i++ {
 				addr := peer.InternalAddr[i]
-				go CreateSessAndInform(addr,peer.Port,peer.NbsAddr,result)
+				go createSessAndInform(addr,peer.Port,peer.NbsAddr,result)
 			}
 		}
 	}
 	for i:=0;i<len(peer.NatAddr)&&i<3;i++{
-		nat:=peer.NatAddr[i]
-		go lp.CreateNatSessionAndInform(nat.InternetAddr,nat.Port,nat.NbsAddr,result)
+		nat:=&peer.NatAddr[i]
+		go lp.createNatSessionAndInform(nat,result)
 
 	}
 
