@@ -5,6 +5,7 @@ import (
 	"github.com/kprc/nbsnetwork/tools"
 	"sync"
 	"sort"
+	"github.com/pkg/errors"
 )
 
 //max node in bukcet
@@ -56,9 +57,21 @@ type NodeAndLens struct {
 	Nls []*NodeAndLen
 }
 
-func (nal *NodeAndLens)Add(len int,node P2pAddr)  {
-	nl:=&NodeAndLen{Len:len,Node:node}
+func (nal *NodeAndLens)Add(l int,node P2pAddr)  {
+	nl:=&NodeAndLen{Len:l,Node:node}
 	nal.Nls = append(nal.Nls,nl)
+}
+
+func (nal *NodeAndLens)AddUniq(l int,node P2pAddr) error {
+	for i:=0;i<len(nal.Nls);i++{
+		if node.NbsAddr.Cmp(nal.Nls[i].Node.NbsAddr){
+			return errors.New("dup")
+		}
+	}
+
+	nal.Add(l,node)
+
+	return nil
 }
 
 func (nal *NodeAndLens)Count() int {
@@ -99,13 +112,13 @@ func minV(a,b int) int {
 
 func (nal *NodeAndLens)Equals(nal2 *NodeAndLens,cnt int) bool {
 	sort.Slice(nal.Nls, func(i, j int) bool {
-		if nal.Nls[i].Len <= nal.Nls[i].Len{
+		if nal.Nls[i].Len <= nal.Nls[j].Len{
 			return true
 		}
 		return false
 	})
 	sort.Slice(nal2.Nls, func(i, j int) bool {
-		if nal.Nls[i].Len <= nal.Nls[i].Len{
+		if nal.Nls[i].Len <= nal.Nls[j].Len{
 			return true
 		}
 		return false

@@ -172,7 +172,6 @@ func (lp *LocalP2pAddr) FindNodes(node NAddr) (nodes []P2pAddr,err error){
 	dtns:=GetAllNodeDht().FindNearest(dhtnode,DHTNearstCount)
 
 
-
 	for i:=0;i<len(dtns);i++{
 		dtn:=dtns[i]
 		if dtn.P2pNode.NbsAddr.Cmp(node){
