@@ -24,6 +24,8 @@ const (
 
 	NatServerCount int = 3
 
+	DHTNearstCount int = 8
+
 	Msg_Ka_Req byte = 31
 
 

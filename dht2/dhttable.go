@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kprc/nbsnetwork/tools"
 	"sync"
+	"sort"
 )
 
 //max node in bukcet
@@ -44,6 +45,81 @@ type DhtTable struct {
 	PingQuit       chan int
 	TimeQuitCreate chan int
 	TimeQuit       chan int
+}
+
+type NodeAndLen struct {
+	Len int
+	Node P2pAddr
+}
+
+type NodeAndLens struct {
+	Nls []*NodeAndLen
+}
+
+func (nal *NodeAndLens)Add(len int,node P2pAddr)  {
+	nl:=&NodeAndLen{Len:len,Node:node}
+	nal.Nls = append(nal.Nls,nl)
+}
+
+func (nal *NodeAndLens)Count() int {
+	return len(nal.Nls)
+}
+
+func (nal *NodeAndLens)MinLen(cnt int) []*NodeAndLen {
+	var nls []*NodeAndLen
+
+	sort.Slice(nal.Nls, func(i, j int) bool {
+		if nal.Nls[i].Len <= nal.Nls[j].Len{
+			return true
+		}else {
+			return false
+		}
+	})
+
+	n:=0
+	for i:=0;i<len(nal.Nls);i++{
+		if n >= cnt{
+			return nls
+		}
+		nls = append(nls,nal.Nls[i])
+		n++
+	}
+
+	return nls
+
+}
+
+func minV(a,b int) int {
+	if a > b{
+		return b
+	}else{
+		return a
+	}
+}
+
+func (nal *NodeAndLens)Equals(nal2 *NodeAndLens,cnt int) bool {
+	sort.Slice(nal.Nls, func(i, j int) bool {
+		if nal.Nls[i].Len <= nal.Nls[i].Len{
+			return true
+		}
+		return false
+	})
+	sort.Slice(nal2.Nls, func(i, j int) bool {
+		if nal.Nls[i].Len <= nal.Nls[i].Len{
+			return true
+		}
+		return false
+	})
+	min:=cnt
+	min = minV(min,len(nal.Nls))
+	min = minV(min,len(nal2.Nls))
+	for i:=0;i<min;i++{
+		if !nal.Nls[i].Node.NbsAddr.Cmp(nal2.Nls[i].Node.NbsAddr){
+			return false
+		}
+	}
+
+	return true
 }
 
 func NewDhtTable() *DhtTable {

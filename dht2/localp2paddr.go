@@ -167,6 +167,24 @@ func (lp *LocalP2pAddr) NormalLoop(peer *P2pAddr) error {
 }
 
 func (lp *LocalP2pAddr) FindNodes(node NAddr) (nodes []P2pAddr,err error){
+	dhtnode:=&DTNode{}
+	dhtnode.P2pNode=P2pAddr{NbsAddr:node}
+	dtns:=GetAllNodeDht().FindNearest(dhtnode,DHTNearstCount)
+
+
+
+	for i:=0;i<len(dtns);i++{
+		dtn:=dtns[i]
+		if dtn.P2pNode.NbsAddr.Cmp(node){
+			nodes = append(nodes,dtn.P2pNode)
+			break
+		}
+
+
+
+	}
+
+
 	return
 }
 
@@ -214,14 +232,18 @@ func (lp *LocalP2pAddr)FindCanSrvNode(node NAddr,peer *P2pAddr) (nearstNode []P2
 
 	nearstNode = resp.NearestNodes
 
-	return 
+	return
 
 }
 
 func (lp *LocalP2pAddr)NatSendAndRcv(peer *P2pAddr,b2s []byte) (rcvbuf []byte,err error) {
 	sess:=lp.CreateConnSession(peer)
 	if sess != nil{
-		return sess.WriteAndRead(b2s)
+		rcvbuf,err = sess.WriteAndRead(b2s)
+		if err == nil{
+			sess.Socket.Close()
+		}
+		return
 	}
 
 	return nil,errors.New("Can't Connect to peer")
@@ -249,9 +271,9 @@ func (cs *ConnSession)WriteAndRead(wrt []byte) (rcv []byte,err error) {
 		cm, _ := UnPackCtrlMsg(buf1[:nRead])
 		switch cm.typ {
 		case Msg_Nat_Conn_Resp:
-			fallthrough
+			continue
 		case Msg_Nat_Sess_Create_Req:
-			fallthrough
+			continue
 		case Msg_Nat_Sess_Create_Resp:
 			continue
 		default:
@@ -381,6 +403,7 @@ func (lp *LocalP2pAddr)CreateConnSession(peer *P2pAddr) *ConnSession  {
 		if err!=nil{
 			return nil
 		}
+		sess.Socket.SetDeadline(time.Time{})
 		return sess
 	}
 	result := make(chan *ConnSession,128)
