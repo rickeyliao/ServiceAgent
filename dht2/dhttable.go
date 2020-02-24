@@ -55,6 +55,7 @@ type NodeAndLen struct {
 
 type NodeAndLens struct {
 	Nls []*NodeAndLen
+	Indicator int
 }
 
 func (nal *NodeAndLens)Add(l int,node P2pAddr)  {
@@ -74,12 +75,18 @@ func (nal *NodeAndLens)AddUniq(l int,node P2pAddr) error {
 	return nil
 }
 
+func (nal *NodeAndLens)Concat(nal2 *NodeAndLens)  {
+
+	for i:=0;i<len(nal2.Nls);i++{
+		nal.AddUniq(nal2.Nls[i].Len,nal2.Nls[i].Node)
+	}
+}
+
 func (nal *NodeAndLens)Count() int {
 	return len(nal.Nls)
 }
 
-func (nal *NodeAndLens)MinLen(cnt int) []*NodeAndLen {
-	var nls []*NodeAndLen
+func (nal *NodeAndLens)SortLH() {
 
 	sort.Slice(nal.Nls, func(i, j int) bool {
 		if nal.Nls[i].Len <= nal.Nls[j].Len{
@@ -88,18 +95,41 @@ func (nal *NodeAndLens)MinLen(cnt int) []*NodeAndLen {
 			return false
 		}
 	})
+}
 
-	n:=0
-	for i:=0;i<len(nal.Nls);i++{
-		if n >= cnt{
-			return nls
+func (nal *NodeAndLens)SortHL()  {
+	sort.Slice(nal.Nls, func(i, j int) bool {
+		if nal.Nls[i].Len >= nal.Nls[j].Len{
+			return true
+		}else {
+			return false
 		}
-		nls = append(nls,nal.Nls[i])
-		n++
+	})
+}
+
+func (nal *NodeAndLens)Iterator()  {
+	nal.Indicator = 0
+}
+
+func (nal *NodeAndLens)Next() (nl *NodeAndLen) {
+	if nal.Indicator >= len(nal.Nls){
+		return nil
+	}
+	nl = nal.Nls[nal.Indicator]
+	nal.Indicator ++
+	return
+}
+
+func (nal *NodeAndLens)Left() int  {
+	return len(nal.Nls) - nal.Indicator
+}
+
+func DTNS2Addrs(dtns []*DTNode) (arr []P2pAddr){
+	for i:=0;i<len(dtns);i++{
+		arr = append(arr,dtns[i].P2pNode)
 	}
 
-	return nls
-
+	return
 }
 
 func minV(a,b int) int {

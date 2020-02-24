@@ -166,28 +166,68 @@ func (lp *LocalP2pAddr) NormalLoop(peer *P2pAddr) error {
 	return nil
 }
 
-func (lp *LocalP2pAddr) FindNodes(node NAddr) (nodes []P2pAddr,err error){
+func (lp *LocalP2pAddr) FindNodes(node NAddr) (fnode *P2pAddr,nodes []P2pAddr,err error){
 	dhtnode:=&DTNode{}
 	dhtnode.P2pNode=P2pAddr{NbsAddr:node}
 	dtns:=GetAllNodeDht().FindNearest(dhtnode,DHTNearstCount)
 
+	nls:=&NodeAndLens{}
 
 	for i:=0;i<len(dtns);i++{
 		dtn:=dtns[i]
 		if dtn.P2pNode.NbsAddr.Cmp(node){
-			nodes = append(nodes,dtn.P2pNode)
-			break
+			return &dtn.P2pNode,nil,nil
 		}
-
-
-
+		l,_:=NbsXorLen(node.Bytes(),dtn.P2pNode.NbsAddr.Bytes())
+		nls.AddUniq(l,dtn.P2pNode)
 	}
+
 
 
 	return
 }
 
-func (lp *LocalP2pAddr) FindCanSrvNodes(node NAddr) (nodes []P2pAddr,err error) {
+func (lp *LocalP2pAddr)FindNodeByA(nls *NodeAndLens,node NAddr) (nodes []P2pAddr,err error) {
+	if nls.Left() == 0{
+		return nil,errors.New("No Nearst DHT Node")
+	}
+
+	nls.SortLH()
+	nls.Iterator()
+
+	result := make(chan []P2pAddr,128)
+	more   := make(chan int,8)
+	cnt := 0
+
+	timer1:=time.NewTimer(5*time.Second)
+
+	for{
+		if cnt < DHTFindA && nls.Left()>0{
+			nl:=nls.Next()
+			cnt ++
+			go lp.FindNodeAndInform(node,&nl.Node,result,more)
+			continue
+		}
+
+		select {
+		case r:=<-result:
+			return r,nil
+		case <-more:
+			cnt --
+			if cnt == 0{
+				return nil,errors.New("Not Found at all")
+			}
+			continue
+		case <-timer1.C:
+			return nil,errors.New("Time out")
+
+		}
+
+	}
+}
+
+
+func (lp *LocalP2pAddr) FindCanSrvNodes(node NAddr) (fnode *P2pAddr,nodes []P2pAddr,err error) {
 	return
 }
 
@@ -213,6 +253,19 @@ func (lp *LocalP2pAddr)FindNode(node NAddr,peer *P2pAddr) (nearstNode []P2pAddr,
 
 	return
 }
+
+func (lp *LocalP2pAddr)FindNodeAndInform(node NAddr,peer *P2pAddr, result chan []P2pAddr, more chan int) {
+	arr,err:=lp.FindNode(node,peer)
+	if err!=nil{
+		more <- 1
+		return
+	}
+
+	result <- arr
+
+	return
+}
+
 
 func (lp *LocalP2pAddr)FindCanSrvNode(node NAddr,peer *P2pAddr) (nearstNode []P2pAddr,err error)  {
 	req:=BuildReqFindCanServiceMsg(node)
