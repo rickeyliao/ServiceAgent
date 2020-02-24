@@ -162,6 +162,10 @@ func (nal *NodeAndLens)Equals(nal2 *NodeAndLens,cnt int) bool {
 		}
 	}
 
+	if cnt > min{
+		return false
+	}
+
 	return true
 }
 

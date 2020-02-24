@@ -171,26 +171,54 @@ func (lp *LocalP2pAddr) FindNodes(node NAddr) (fnode *P2pAddr,nodes []P2pAddr,er
 	dhtnode.P2pNode=P2pAddr{NbsAddr:node}
 	dtns:=GetAllNodeDht().FindNearest(dhtnode,DHTNearstCount)
 
+	arr:=DTNS2Addrs(dtns)
+	var arr1 []P2pAddr
 	nls:=&NodeAndLens{}
 
-	for i:=0;i<len(dtns);i++{
-		dtn:=dtns[i]
-		if dtn.P2pNode.NbsAddr.Cmp(node){
-			return &dtn.P2pNode,nil,nil
+	for{
+		if nls.Left() == 0{
+			for i:=0;i<len(arr);i++{
+				if arr[i].NbsAddr.Cmp(node){
+					return &arr[i],nil,nil
+				}
+				l,_:=NbsXorLen(node.Bytes(),arr[i].NbsAddr.Bytes())
+				nls.AddUniq(l,arr[i])
+
+			}
 		}
-		l,_:=NbsXorLen(node.Bytes(),dtn.P2pNode.NbsAddr.Bytes())
-		nls.AddUniq(l,dtn.P2pNode)
+
+		if nls.Left() == 0{
+			return nil,nil,errors.New("No Nearst DHT Node")
+		}
+		arr1,err=lp.FindNodeByA(nls,node)
+		if err!=nil{
+			return nil,arr,nil
+		}
+
+		nls1:=&NodeAndLens{}
+		for i:=0;i<len(arr1);i++{
+			if arr1[i].NbsAddr.Cmp(node){
+				return &arr1[i],nil,nil
+			}
+			l,_:=NbsXorLen(node.Bytes(),arr1[i].NbsAddr.Bytes())
+			nls1.AddUniq(l,arr1[i])
+		}
+
+		if nls1.Equals(nls,DHTNearstCount) || nls1.Left() == 0{
+			return nil,arr,nil
+		}
+
+		arr = arr1
+		nls = nls1
+
 	}
-
-
 
 	return
 }
 
+
 func (lp *LocalP2pAddr)FindNodeByA(nls *NodeAndLens,node NAddr) (nodes []P2pAddr,err error) {
-	if nls.Left() == 0{
-		return nil,errors.New("No Nearst DHT Node")
-	}
+
 
 	nls.SortLH()
 	nls.Iterator()
