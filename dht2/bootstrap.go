@@ -49,7 +49,7 @@ func bootsTrapAdd(bs string) error {
 	return nil
 }
 
-func init() {
+func InitBS() {
 	cfg := common.GetSAConfig()
 	if cfg == nil{
 		return

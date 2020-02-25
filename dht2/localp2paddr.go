@@ -1027,6 +1027,24 @@ func StopNbsP2pListen() {
 	quitListen <- struct{}{}
 }
 
+func Online()  {
+	for {
+		naddr,ip,port,err:=BootsTrapGetNxtBS()
+		if err!=nil{
+			log.Println("Start DHT Failed")
+			return
+		}
+
+		lp:=GetLocalP2pAddr()
+		err = lp.Online(naddr,ip,port)
+		if err!=nil{
+			continue
+		}else {
+			return
+		}
+	}
+}
+
 func (lp *LocalP2pAddr) StartP2PService() {
 	lp.wg.Add(1)
 	go lp.ListenOnCanServicePort()
@@ -1038,6 +1056,9 @@ func (lp *LocalP2pAddr) StartP2PService() {
 	lp.wg.Add(1)
 	go lp.timeDoNCKA()
 
+	InitBS()
+
+	Online()
 }
 
 func (lp *LocalP2pAddr) StopP2pService() {
