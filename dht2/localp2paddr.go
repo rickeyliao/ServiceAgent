@@ -141,28 +141,35 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 			//save to can service dht
 			GetCanServiceDht().Insert(dn)
 			//can service loop searching
-			lp.CanServiceLoop()
+			lp.CanServiceLoop(rnm.localAddr)
 		} else {
 			GetAllNodeDht().Insert(dn)
-			//begin to connect to nat server
-
 		}
 
 		//normal dht loop searching
-		lp.NormalLoop()
+		lp.NormalLoop(rnm.localAddr)
 		return nil
 	}
 
 	return nil
 }
 
-func (lp *LocalP2pAddr) CanServiceLoop() error {
-	lp.FindCanSrvNodes(lp.addr.NbsAddr)
+func (lp *LocalP2pAddr) CanServiceLoop(peer *P2pAddr) error {
+	var arr []P2pAddr
+
+	arr = append(arr,*peer)
+
+	lp.FindCanSrvNodeFromAddrs(lp.addr.NbsAddr,arr)
 	return nil
 }
 
-func (lp *LocalP2pAddr) NormalLoop() error {
-	lp.FindNodes(lp.addr.NbsAddr)
+func (lp *LocalP2pAddr) NormalLoop(peer *P2pAddr) error {
+	var arr []P2pAddr
+
+	arr = append(arr,*peer)
+
+	lp.FindNodeFromAddrs(lp.addr.NbsAddr,arr)
+
 	return nil
 }
 
@@ -172,6 +179,11 @@ func (lp *LocalP2pAddr) FindNodes(node NAddr) (fnode *P2pAddr,nodes []P2pAddr,er
 	dtns:=GetAllNodeDht().FindNearest(dhtnode,DHTNearstCount)
 
 	arr:=DTNS2Addrs(dtns)
+
+	return lp.FindNodeFromAddrs(node,arr)
+}
+
+func (lp *LocalP2pAddr)FindNodeFromAddrs(node NAddr,arr []P2pAddr) (fnode *P2pAddr,nodes []P2pAddr,err error) {
 	var arr1 []P2pAddr
 	nls:=&NodeAndLens{}
 
@@ -212,13 +224,9 @@ func (lp *LocalP2pAddr) FindNodes(node NAddr) (fnode *P2pAddr,nodes []P2pAddr,er
 		nls = nls1
 
 	}
-
-	return
 }
 
-
 func (lp *LocalP2pAddr)FindNodeByA(nls *NodeAndLens,node NAddr) (nodes []P2pAddr,err error) {
-
 
 	nls.SortLH()
 	nls.Iterator()
@@ -309,6 +317,11 @@ func (lp *LocalP2pAddr) FindCanSrvNodes(node NAddr) (fnode *P2pAddr,nodes []P2pA
 	dtns:=GetCanServiceDht().FindNearest(dhtnode,DHTNearstCount)
 
 	arr:=DTNS2Addrs(dtns)
+
+	return lp.FindCanSrvNodeFromAddrs(node,arr)
+}
+
+func (lp *LocalP2pAddr) FindCanSrvNodeFromAddrs(node NAddr,arr []P2pAddr) (fnode *P2pAddr,nodes []P2pAddr,err error){
 	var arr1 []P2pAddr
 	nls:=&NodeAndLens{}
 
@@ -349,9 +362,6 @@ func (lp *LocalP2pAddr) FindCanSrvNodes(node NAddr) (fnode *P2pAddr,nodes []P2pA
 		nls = nls1
 
 	}
-
-	return
-	return
 }
 
 func (lp *LocalP2pAddr)FindNode(node NAddr,peer *P2pAddr) (nearstNode []P2pAddr,err error)  {
@@ -790,6 +800,44 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 		resp:=BuildNCConnResp(errCode,ip,port)
 		offset = resp.Pack(block.buf)
 		blocksnd := &Block{buf:block.buf[:offset],raddr:block.raddr}
+		lp.Write(blocksnd)
+	}else if cm.typ == Msg_Dht_Find{
+		req:=&FindReqMsg{}
+		req.CtrlMsg = *cm
+		offset+=req.UnPackFRM(block.buf[offset:])
+
+		dhtnode:=&DTNode{P2pNode:P2pAddr{NbsAddr:req.NodeToFind}}
+		dtns:=GetAllNodeDht().FindNearest(dhtnode,DHTNearstCount)
+
+		dn := &DTNode{P2pNode: *(cm.localAddr.Clone()), lastPingTime: tools.GetNowMsTime()}
+		GetAllNodeDht().Insert(dn)
+
+		resp:=BuildRespFindMsg(req.NodeToFind,DTNS2Addrs(dtns))
+		buf := make([]byte,1024)
+		offset = resp.Pack(buf)
+		blocksnd:=&Block{buf:buf[:offset],raddr:block.raddr}
+		lp.Write(blocksnd)
+
+
+
+
+		return
+	}else if cm.typ == Msg_CanService_Find{
+		req:=&FindReqMsg{}
+		req.CtrlMsg = *cm
+		offset+=req.UnPackFRM(block.buf[offset:])
+
+		dhtnode:=&DTNode{P2pNode:P2pAddr{NbsAddr:req.NodeToFind}}
+		dtns := GetCanServiceDht().FindNearest(dhtnode,DHTNearstCount)
+
+		dn := &DTNode{P2pNode: *(cm.localAddr.Clone()), lastPingTime: tools.GetNowMsTime()}
+		GetCanServiceDht().Insert(dn)
+
+		resp:=BuildRespFindCanServiceMsg(req.NodeToFind,DTNS2Addrs(dtns))
+		buf := make([]byte,1024)
+		offset = resp.Pack(buf)
+
+		blocksnd:=&Block{buf:buf[:offset],raddr:block.raddr}
 		lp.Write(blocksnd)
 	}
 

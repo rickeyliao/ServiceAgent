@@ -218,6 +218,20 @@ func (nc *NatClient) rcv(blk *Block) {
 		offset = sessResp.Pack(buf)
 		go SendAndRcv(blk.raddr.IP,blk.raddr.Port,buf[:offset])
 		return
+	case Msg_Dht_Find:
+		req:=&FindReqMsg{}
+		req.CtrlMsg = *cm
+		offset+=req.UnPackFRM(blk.buf[offset:])
+
+		dhtnode:=&DTNode{P2pNode:P2pAddr{NbsAddr:req.NodeToFind}}
+		dtns:=GetAllNodeDht().FindNearest(dhtnode,DHTNearstCount)
+		dn := &DTNode{P2pNode: *(cm.localAddr.Clone()), lastPingTime: tools.GetNowMsTime()}
+		GetAllNodeDht().Insert(dn)
+		resp:=BuildRespFindMsg(req.NodeToFind,DTNS2Addrs(dtns))
+		buf := make([]byte,1024)
+		offset = resp.Pack(buf)
+		go SendAndRcv(blk.raddr.IP,blk.raddr.Port,buf[:offset])
+		return
 	}
 }
 
