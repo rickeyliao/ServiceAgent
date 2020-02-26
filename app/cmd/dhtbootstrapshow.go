@@ -30,7 +30,7 @@ var bootstrapCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(bootstrapCmd)
+	dhtCmd.AddCommand(bootstrapCmd)
 
 	// Here you will define your flags and configuration settings.
 

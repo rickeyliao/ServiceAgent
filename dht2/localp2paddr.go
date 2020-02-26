@@ -611,7 +611,7 @@ func (lp *LocalP2pAddr)CreateConnSession(peer *P2pAddr) *ConnSession  {
 	case sess:=<-result:
 		sess.Socket.SetDeadline(time.Time{})
 		return sess
-	case timer1.C:
+	case <-timer1.C:
 		return nil
 	}
 
@@ -998,15 +998,20 @@ func NbsP2PListen() {
 	errListenChan = make(chan error, 3)
 	quitListen = make(chan struct{}, 1)
 
-	for {
+	timeout:=time.Duration(0)
 
-		for {
-			select {
-			case <-errListenChan:
-			default:
-				break
+	for {
+		if timeout > 0{
+			timer1:=time.NewTimer(timeout*time.Second)
+			for {
+				select {
+				case <-errListenChan:
+				case <-timer1.C:
+					break
+				}
 			}
 		}
+
 
 		lp := GetLocalP2pAddr()
 		lp.StartP2PService()
@@ -1019,6 +1024,7 @@ func NbsP2PListen() {
 			lp.StopP2pService()
 			return
 		}
+		timeout = time.Duration(3)
 		ResetLocalP2p()
 	}
 }
