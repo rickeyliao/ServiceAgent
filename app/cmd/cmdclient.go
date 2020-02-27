@@ -148,6 +148,21 @@ func BootstrapCmdSend(op bool, req string) {
 
 }
 
+func DhtCmdSend(op int32) {
+	request := &pb.DhtCmdPb{Op:op}
+	conn := DialToCmdService()
+	defer conn.Close()
+
+	client := pb.NewDhtCmdSrvClient(conn.c)
+
+	if response, err := client.DhtCmdDo(conn.ctx, request); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(response.Message)
+	}
+
+}
+
 func LicenseUserCmdSend(op bool, req string) {
 	request := &pb.LicenseUserChgReq{Op: op, User: req}
 	conn := DialToCmdService()

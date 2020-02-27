@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package rpccmdservice;
+
+import "default.proto";
+
+message DhtCmdPb {
+    int32 op = 1;
+}
+
+service DhtCmdSrv{
+    rpc DhtCmdDo(DhtCmdPb)returns (DefaultResp) {}
+}

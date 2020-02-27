@@ -19,6 +19,12 @@ type Block struct {
 	raddr *net.UDPAddr
 }
 
+const(
+	ONLINE int = 1
+	OFFLINE int = 2
+)
+
+
 type LocalP2pAddr struct {
 	addr    *P2pAddr
 	rcvQ    chan *Block
@@ -32,6 +38,7 @@ type LocalP2pAddr struct {
 	ncsLock sync.Mutex
 	ncs     []*NatClient
 	ncQuit  chan struct{}
+	status  int
 }
 
 var (
@@ -1034,18 +1041,25 @@ func StopNbsP2pListen() {
 }
 
 func Online()  {
+	lp:=GetLocalP2pAddr()
+	if lp.status == ONLINE {
+		log.Println("Node have online")
+		return
+	}
+
 	for {
+
 		naddr,ip,port,err:=BootsTrapGetNxtBS()
 		if err!=nil{
 			log.Println("Start DHT Failed")
 			return
 		}
 
-		lp:=GetLocalP2pAddr()
 		err = lp.Online(naddr,ip,port)
 		if err!=nil{
 			continue
 		}else {
+			lp.status = ONLINE
 			return
 		}
 	}
@@ -1081,6 +1095,7 @@ func (lp *LocalP2pAddr) StopP2pService() {
 
 	lp.wg.Wait()
 	lp.sock = nil
+	lp.status = OFFLINE
 }
 
 func (lp *LocalP2pAddr) timeDoNCKA() {

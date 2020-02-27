@@ -16,9 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"github.com/rickeyliao/ServiceAgent/app"
 )
 
 // onlineCmd represents the online command
@@ -27,7 +26,11 @@ var dhtonlineCmd = &cobra.Command{
 	Short: "Let local node become online status",
 	Long: `Let local node become online status`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("online called")
+		if !CheckProcessReady() {
+			return
+		}
+
+		DhtCmdSend(app.CMD_DHT_ONLINE)
 	},
 }
 
