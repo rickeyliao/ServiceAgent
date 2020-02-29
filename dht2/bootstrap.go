@@ -54,7 +54,7 @@ func InitBS() {
 	if cfg == nil{
 		return
 	}
-
+	bsservers = make([]BootsTrapServer,0)
 	for _, bs := range cfg.BootstrapIPAddress {
 		err := bootsTrapAdd(bs)
 		if err != nil {

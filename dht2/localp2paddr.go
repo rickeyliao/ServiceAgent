@@ -80,6 +80,7 @@ func NewLocalP2pAddr() *LocalP2pAddr {
 	localP2pAddr.kaQuit = make(chan struct{}, 1)
 	localP2pAddr.ncQuit = make(chan struct{}, 1)
 	localP2pAddr.wg = &sync.WaitGroup{}
+	localP2pAddr.addr.CanService = false
 
 	return localP2pAddr
 }
@@ -115,6 +116,7 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 
 	res, err := SendAndRcv(bsip, bsport, b2s)
 	if err != nil {
+		BootsTrapFailed(naddr)
 		return err
 	}
 
@@ -135,6 +137,7 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 		rnm.CtrlMsg = *cm
 		rnm.UnpackNatS(res[offset:])
 
+		fmt.Println(rnm.CanService,rnm.ObservrIP.String(),cm.localAddr.CanService,cm.localAddr.InternetAddr.String())
 		//fill local address
 		lp.addr.CanService = rnm.CanService
 		lp.addr.InternetAddr = rnm.ObservrIP
@@ -706,6 +709,11 @@ func (lp *LocalP2pAddr) TestCanServiceTimes(remoteIP net.IP, times int) (bool, e
 
 func (lp *LocalP2pAddr) doRcv(block *Block) {
 	cm, offset := UnPackCtrlMsg(block.buf)
+	fmt.Println(cm.typ,cm.localAddr.InternetAddr.String(),cm.localAddr.CanService,cm.localAddr.Port)
+	for i:=0;i<len(cm.localAddr.InternalAddr);i++{
+		addrtmp:=cm.localAddr.InternalAddr[i]
+		fmt.Println(addrtmp.String())
+	}
 	if cm.typ == Msg_Online_Req {
 		if !lp.addr.CanService || privateip.IsPrivateIP(block.raddr.IP) {
 			dn := &DTNode{}
@@ -1054,9 +1062,10 @@ func Online()  {
 			log.Println("Start DHT Failed")
 			return
 		}
-
+		log.Println(naddr.String(),ip.String(),port)
 		err = lp.Online(naddr,ip,port)
 		if err!=nil{
+			log.Println(err)
 			continue
 		}else {
 			lp.status = ONLINE

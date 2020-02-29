@@ -5,6 +5,8 @@ import (
 	"github.com/pkg/errors"
 	"net"
 	"time"
+	"github.com/kprc/nbsnetwork/tools/privateip"
+	"github.com/rickeyliao/ServiceAgent/common"
 )
 
 var (
@@ -45,7 +47,23 @@ func (pa *P2pAddr) Clone() *P2pAddr {
 }
 
 func (pa *P2pAddr) LoadLocalAddr() {
-	pa.InternalAddr = GetAllLocalIps()
+	addrs := GetAllLocalIps()
+	var privAddrs []net.IP
+	for i:=0;i<len(addrs);i++{
+		if privateip.IsPrivateIP(addrs[i]){
+			privAddrs = append(privAddrs,addrs[i])
+		}
+	}
+
+	pa.InternalAddr = privAddrs
+
+	cfg:=common.GetSAConfig()
+
+	if cfg.DhtInternetIp != ""{
+		dip := net.ParseIP(cfg.DhtInternetIp)
+		pa.InternetAddr = dip
+	}
+
 }
 
 func (pa *P2pAddr) sendAndRcv(b2s []byte, mstimeout int) (bfr []byte, err error) {

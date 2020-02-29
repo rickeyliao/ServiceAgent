@@ -26,6 +26,8 @@ var iscoord bool
 var machinename string
 var shadowsockParam string
 var nationality int32
+var iscanservice bool
+var internetipstr string
 
 //var sslocation string
 
@@ -52,6 +54,9 @@ var initCmd = &cobra.Command{
 		cip.Hostname = machinename
 		cip.Nationality = nationality
 		cip.SS = shadowsockParam
+		cip.Ip = internetipstr
+		cip.IsCanService = iscanservice
+
 		//cip.Location = sslocation
 
 		sar.InitConfig(cip)
@@ -81,4 +86,6 @@ func init() {
 	initCmd.Flags().StringVarP(&machinename, "machinename", "m", "", "set machine name")
 	//initCmd.Flags().StringVarP(&sslocation, "location", "l", "", "set shadowsock server vps location")
 	initCmd.Flags().Int32VarP(&nationality, "nationality", "n", 0, "set nationality")
+	initCmd.Flags().StringVarP(&internetipstr, "ipaddress", "i", "", "set internet ip address")
+	initCmd.Flags().BoolVarP(&iscanservice, "canservice", "r", false, "set can service value")
 }

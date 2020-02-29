@@ -56,6 +56,8 @@ type SAConfig struct {
 	Loginfile                string     `json:"loginfile"`
 	CheckIPPath              string     `json:"checkipdir"`
 	CheckIPFile              string     `json:"checkipfile"`
+	DhtInternetIp            string     `json:"dhtinternetip"`
+	DhtCanService            bool		`json:"dhtcanservice"`
 	LicenseAdminUser         [][]string `json:"licenseadminuser"`
 	ShadowSockServerSwitch   bool       `json:"shadowsockserverswitch"`
 	ShadowSockPort           uint16     `json:"shadowsockport"` //50812
@@ -340,6 +342,8 @@ type ConfigInitParam struct {
 	Hostname    string
 	SS          string
 	Nationality int32
+	Ip          string
+	IsCanService bool
 }
 
 func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
@@ -399,6 +403,14 @@ func (sar *SARootConfig) InitConfig(cip *ConfigInitParam) *SARootConfig {
 		nds = true
 	}
 
+	if cip.Ip != ""{
+		sar.SacInst.DhtInternetIp = cip.Ip
+		nds = true
+	}
+	if cip.IsCanService == true{
+		sar.SacInst.DhtCanService = true
+		nds = true
+	}
 	//if cip.Location != sar.SacInst.Location {
 	//	sar.SacInst.Location = cip.Location
 	//	nds = true
