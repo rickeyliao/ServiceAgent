@@ -1,6 +1,9 @@
 package dht2
 
-import "net"
+import (
+	"net"
+	"fmt"
+)
 
 type RespBSMsg struct {
 	CtrlMsg
@@ -80,7 +83,11 @@ func BuildRespNatMsg(can bool, obsip net.IP, nats []P2pAddr) *RespNatMsg {
 func (rnm *RespNatMsg) Pack(buf []byte) int {
 	cm := &rnm.CtrlMsg
 
+	fmt.Println(len(buf))
+	fmt.Println(cm.String())
 	offset := PackCtrlMsg(cm, buf)
+
+	fmt.Println(offset)
 
 	buf[offset] = func() byte {
 		if rnm.CanService {

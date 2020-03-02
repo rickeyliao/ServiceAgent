@@ -16,6 +16,7 @@ import (
 
 type Block struct {
 	buf   []byte
+	bufOri []byte
 	raddr *net.UDPAddr
 }
 
@@ -80,7 +81,7 @@ func NewLocalP2pAddr() *LocalP2pAddr {
 	localP2pAddr.kaQuit = make(chan struct{}, 1)
 	localP2pAddr.ncQuit = make(chan struct{}, 1)
 	localP2pAddr.wg = &sync.WaitGroup{}
-	localP2pAddr.addr.CanService = false
+	localP2pAddr.addr.CanService = common.GetSAConfig().DhtCanService
 
 	return localP2pAddr
 }
@@ -664,6 +665,7 @@ func (lp *LocalP2pAddr) ListenOnCanServicePort() {
 }
 
 func (lp *LocalP2pAddr) TestCanService(remoteIP net.IP) (bool, error) {
+	fmt.Println("TestCanService",remoteIP.String())
 
 	raddr := &net.UDPAddr{IP: remoteIP, Port: int(common.GetSAConfig().DhtListenPort)}
 	conn, err := net.DialUDP("udp4", nil, raddr)
@@ -673,6 +675,7 @@ func (lp *LocalP2pAddr) TestCanService(remoteIP net.IP) (bool, error) {
 	defer conn.Close()
 
 	csm := BuildCanServiceReq()
+	fmt.Println("TestCanService",csm.localAddr.String())
 	b2s := csm.Pack()
 
 	deadline := time.Now().Add(time.Second * 1)
@@ -714,6 +717,8 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 		addrtmp:=cm.localAddr.InternalAddr[i]
 		fmt.Println(addrtmp.String())
 	}
+	fmt.Println(block.raddr.IP.String(),block.raddr.Port)
+	fmt.Println(lp.addr.String())
 	if cm.typ == Msg_Online_Req {
 		if !lp.addr.CanService || privateip.IsPrivateIP(block.raddr.IP) {
 			dn := &DTNode{}
@@ -727,15 +732,17 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 			}
 			rbs := BuildRespBSMsg(bs)
 			//reuse buffer
-			offset = rbs.Pack(block.buf)
-			blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+			buf:=make([]byte,CtrlMsgBufLen)
+			offset = rbs.Pack(buf)
+			blocksnd := &Block{buf: buf[:offset], raddr: block.raddr}
 			lp.Write(blocksnd)
 			return
 		}
 
 		go func() {
 			//Test raddr is or not is a can server
-			b, _ := lp.TestCanServiceTimes(block.raddr.IP, 3)
+			b, err := lp.TestCanServiceTimes(block.raddr.IP, 3)
+			fmt.Println(b,err)
 			var nats []P2pAddr
 			if !b {
 				//if not a can server,send back 3 nat server,
@@ -749,16 +756,18 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 			}
 
 			ret := BuildRespNatMsg(b, block.raddr.IP, nats)
-			offset = ret.Pack(block.buf)
-			blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+			buf:=make([]byte,CtrlMsgBufLen)
+			offset = ret.Pack(buf)
+			blocksnd := &Block{buf: buf[:offset], raddr: block.raddr}
 			//Send online success
 			lp.Write(blocksnd)
 		}()
 
 	} else if cm.typ == Msg_CanSrv_Req {
 		csresp := BuildCanServiceResp()
-		offset := PackCtrlMsg(&csresp.CtrlMsg, block.buf)
-		blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+		buf:=make([]byte,1024)
+		offset := PackCtrlMsg(&csresp.CtrlMsg, buf)
+		blocksnd := &Block{buf: buf[:offset], raddr: block.raddr}
 		lp.Write(blocksnd)
 	} else if cm.typ == Msg_Ka_Req {
 		//insert ka node
@@ -766,9 +775,11 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 
 		kar := BuildRespNCKAMsg(block.raddr.Port)
 
-		offset = kar.Pack(block.buf)
+		buf:=make([]byte,1024)
 
-		blocksnd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+		offset = kar.Pack(buf)
+
+		blocksnd := &Block{buf: buf[:offset], raddr: block.raddr}
 
 		lp.Write(blocksnd)
 	} else if cm.typ == Msg_Nat_Refresh_Req {
@@ -783,8 +794,9 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 		}
 
 		rnrm := BuildRespNatRefreshMsg(bs)
-		offset = rnrm.Pack(block.buf)
-		block2snd := &Block{buf: block.buf[:offset], raddr: block.raddr}
+		buf:=make([]byte,CtrlMsgBufLen)
+		offset = rnrm.Pack(buf)
+		block2snd := &Block{buf: buf[:offset], raddr: block.raddr}
 
 		lp.Write(block2snd)
 	} else if cm.typ == Msg_Nat_Conn_Req {
@@ -813,8 +825,9 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 			go SendAndRcv(nc.ip,nc.port,buf[:ofs])
 		}
 		resp:=BuildNCConnResp(errCode,ip,port)
-		offset = resp.Pack(block.buf)
-		blocksnd := &Block{buf:block.buf[:offset],raddr:block.raddr}
+		buf:=make([]byte,1024)
+		offset = resp.Pack(buf)
+		blocksnd := &Block{buf:buf[:offset],raddr:block.raddr}
 		lp.Write(blocksnd)
 	}else if cm.typ == Msg_Dht_Find{
 		req:=&FindReqMsg{}
@@ -828,13 +841,10 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 		GetAllNodeDht().Insert(dn)
 
 		resp:=BuildRespFindMsg(req.NodeToFind,DTNS2Addrs(dtns))
-		buf := make([]byte,1024)
+		buf := make([]byte,CtrlMsgBufLen)
 		offset = resp.Pack(buf)
 		blocksnd:=&Block{buf:buf[:offset],raddr:block.raddr}
 		lp.Write(blocksnd)
-
-
-
 
 		return
 	}else if cm.typ == Msg_CanService_Find{
@@ -849,7 +859,7 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 		GetCanServiceDht().Insert(dn)
 
 		resp:=BuildRespFindCanServiceMsg(req.NodeToFind,DTNS2Addrs(dtns))
-		buf := make([]byte,1024)
+		buf := make([]byte,CtrlMsgBufLen)
 		offset = resp.Pack(buf)
 
 		blocksnd:=&Block{buf:buf[:offset],raddr:block.raddr}

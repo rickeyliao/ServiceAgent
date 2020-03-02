@@ -3,6 +3,9 @@ package dht2
 import (
 	"crypto/rand"
 	"net"
+	"strconv"
+	"encoding/hex"
+	"fmt"
 )
 
 const (
@@ -80,9 +83,16 @@ func BuildNatRefreshReq() *NatReq {
 
 func (cm *CtrlMsg) Pack() []byte {
 	buf := make([]byte, CtrlMsgBufLen)
-	PackCtrlMsg(cm, buf)
+	offset:=PackCtrlMsg(cm, buf)
 
-	return buf
+	return buf[:offset]
+}
+
+func (cm *CtrlMsg)String() string  {
+	s := fmt.Sprintf("Typ: %s ",strconv.Itoa(int(cm.typ)))
+	s += fmt.Sprintf("SN : 0x%s ",hex.EncodeToString(cm.sn[:]))
+	s += cm.localAddr.String()
+	return s
 }
 
 func PackCtrlMsg(cm *CtrlMsg, buf []byte) int {
