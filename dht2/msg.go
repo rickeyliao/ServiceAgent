@@ -182,7 +182,9 @@ func UnPackP2pAddr(buf []byte) (*P2pAddr, int) {
 	offset := 0
 	addr := &P2pAddr{}
 	copy(addr.NbsAddr[0:], buf[offset:])
+	//fmt.Println(cplen,len(buf))
 	offset += addr.NbsAddr.Len()
+	//fmt.Println(offset)
 	flg := buf[offset]
 	if flg == 1 {
 		addr.CanService = true
@@ -193,7 +195,7 @@ func UnPackP2pAddr(buf []byte) (*P2pAddr, int) {
 	addr.Port = int(toUint16(buf[offset:]))
 	offset += 2
 	internalCnt := toUint16(buf[offset:])
-	offset += 2
+	offset += InternalAddrCountLen
 	if internalCnt > 0 {
 		for i := 0; i < int(internalCnt); i++ {
 			ip := net.IPv4(buf[offset], buf[offset+1], buf[offset+2], buf[offset+3])
@@ -202,6 +204,7 @@ func UnPackP2pAddr(buf []byte) (*P2pAddr, int) {
 		}
 	}
 	natCnt := toUint16(buf[offset:])
+	offset += NatAddrCountLen
 	if natCnt > 0 {
 		for i := 0; i < int(natCnt); i++ {
 			p2paddr, nxtoffset := UnPackP2pAddr(buf[offset:])

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"encoding/hex"
 )
 
 type Block struct {
@@ -121,6 +122,8 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 		return err
 	}
 
+	fmt.Println("hex:",hex.EncodeToString(res))
+
 	cm, offset := UnPackCtrlMsg(res)
 	if cm.typ == Msg_BS_Resp {
 		rbs := &RespBSMsg{}
@@ -136,9 +139,15 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 	} else if cm.typ == Msg_Nat_Resp {
 		rnm := &RespNatMsg{}
 		rnm.CtrlMsg = *cm
+
+		fmt.Println("reslen",len(res),"offset",offset)
+
 		rnm.UnpackNatS(res[offset:])
 
-		fmt.Println(rnm.CanService,rnm.ObservrIP.String(),cm.localAddr.CanService,cm.localAddr.InternetAddr.String())
+
+
+		fmt.Println(rnm.String())
+		//fmt.Println(rnm.CanService,rnm.ObservrIP.String(),cm.localAddr.CanService,cm.localAddr.InternetAddr.String())
 		//fill local address
 		lp.addr.CanService = rnm.CanService
 		lp.addr.InternetAddr = rnm.ObservrIP
@@ -712,11 +721,7 @@ func (lp *LocalP2pAddr) TestCanServiceTimes(remoteIP net.IP, times int) (bool, e
 
 func (lp *LocalP2pAddr) doRcv(block *Block) {
 	cm, offset := UnPackCtrlMsg(block.buf)
-	fmt.Println(cm.typ,cm.localAddr.InternetAddr.String(),cm.localAddr.CanService,cm.localAddr.Port)
-	for i:=0;i<len(cm.localAddr.InternalAddr);i++{
-		addrtmp:=cm.localAddr.InternalAddr[i]
-		fmt.Println(addrtmp.String())
-	}
+	fmt.Println(cm.String())
 	fmt.Println(block.raddr.IP.String(),block.raddr.Port)
 	fmt.Println(lp.addr.String())
 	if cm.typ == Msg_Online_Req {
@@ -756,8 +761,13 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 			}
 
 			ret := BuildRespNatMsg(b, block.raddr.IP, nats)
+
+			fmt.Println(ret.String())
 			buf:=make([]byte,CtrlMsgBufLen)
 			offset = ret.Pack(buf)
+
+			fmt.Println("hex:",hex.EncodeToString(buf[:offset]))
+
 			blocksnd := &Block{buf: buf[:offset], raddr: block.raddr}
 			//Send online success
 			lp.Write(blocksnd)
@@ -768,6 +778,7 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 		buf:=make([]byte,1024)
 		offset := PackCtrlMsg(&csresp.CtrlMsg, buf)
 		blocksnd := &Block{buf: buf[:offset], raddr: block.raddr}
+		fmt.Println("Response to TestCanService",csresp.String())
 		lp.Write(blocksnd)
 	} else if cm.typ == Msg_Ka_Req {
 		//insert ka node

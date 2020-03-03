@@ -63,6 +63,20 @@ type RespNatMsg struct {
 	NatServer  []P2pAddr
 }
 
+func (rnm *RespNatMsg)String() string {
+	s := rnm.CtrlMsg.String()
+	s += fmt.Sprintf("Canservice: %t ", rnm.CanService)
+	s += fmt.Sprintf("ObserverIP: %s ", rnm.ObservrIP.String())
+	if len(rnm.NatServer) > 0 {
+		s += "NatServer: "
+	}
+	for i:=0;i<len(rnm.NatServer);i++{
+		s+=rnm.NatServer[i].String()
+	}
+
+	return s
+}
+
 func NewRespNatMsg(msg *CtrlMsg, can bool, obsip net.IP, nats []P2pAddr) *RespNatMsg {
 	rnm := &RespNatMsg{}
 	rnm.CtrlMsg = *msg
@@ -83,11 +97,11 @@ func BuildRespNatMsg(can bool, obsip net.IP, nats []P2pAddr) *RespNatMsg {
 func (rnm *RespNatMsg) Pack(buf []byte) int {
 	cm := &rnm.CtrlMsg
 
-	fmt.Println(len(buf))
-	fmt.Println(cm.String())
+	//fmt.Println(len(buf))
+	//fmt.Println(cm.String())
 	offset := PackCtrlMsg(cm, buf)
 
-	fmt.Println(offset)
+	//fmt.Println(offset)
 
 	buf[offset] = func() byte {
 		if rnm.CanService {
@@ -128,7 +142,7 @@ func (rnm *RespNatMsg) UnpackNatS(buf []byte) int {
 	rnm.ObservrIP = net.IPv4(buf[offset], buf[offset+1], buf[offset+2], buf[offset+3])
 	offset += 4
 
-	cnt := toUint16(buf)
+	cnt := toUint16(buf[offset:])
 	offset += 2
 
 	if cnt > 0 {
@@ -180,7 +194,7 @@ func (rnm *RespNatRefreshMsg) Pack(buf []byte) int {
 func (rnm *RespNatRefreshMsg) UnpackNatRefreshS(buf []byte) int {
 	offset := 0
 
-	cnt := toUint16(buf)
+	cnt := toUint16(buf[offset:])
 	offset += 2
 
 	if cnt > 0 {
