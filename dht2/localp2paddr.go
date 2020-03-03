@@ -157,15 +157,15 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 		//prepare to saving normal dht and can service dht
 		dn := &DTNode{P2pNode: *(rnm.localAddr.Clone()), lastPingTime: tools.GetNowMsTime()}
 		//begin to loop searching
+
+		GetAllNodeDht().Insert(dn)
+
 		if rnm.CanService {
 			//save to can service dht
-			GetCanServiceDht().Insert(dn)
+			GetCanServiceDht().Insert(dn.Clone())
 			//can service loop searching
 			lp.CanServiceLoop(rnm.localAddr)
-		} else {
-			GetAllNodeDht().Insert(dn)
 		}
-
 		//normal dht loop searching
 		lp.NormalLoop(rnm.localAddr)
 		return nil
@@ -345,17 +345,16 @@ func (lp *LocalP2pAddr) FindCanSrvNodeFromAddrs(node NAddr,arr []P2pAddr) (fnode
 	var arr1 []P2pAddr
 	nls:=&NodeAndLens{}
 
-	for{
-		if nls.Left() == 0{
-			for i:=0;i<len(arr);i++{
-				if arr[i].NbsAddr.Cmp(node){
-					return &arr[i],nil,nil
-				}
-				l,_:=NbsXorLen(node.Bytes(),arr[i].NbsAddr.Bytes())
-				nls.AddUniq(l,arr[i])
-
-			}
+	for i:=0;i<len(arr);i++{
+		if arr[i].NbsAddr.Cmp(node){
+			return &arr[i],nil,nil
 		}
+		l,_:=NbsXorLen(node.Bytes(),arr[i].NbsAddr.Bytes())
+		nls.AddUniq(l,arr[i])
+
+	}
+
+	for{
 
 		if nls.Left() == 0{
 			return nil,nil,errors.New("No Nearst DHT Node")
@@ -430,6 +429,7 @@ func (lp *LocalP2pAddr)FindCanSrvNode(node NAddr,peer *P2pAddr) (nearstNode []P2
 		return nil,err
 	}
 
+	fmt.Println("find can srv node:",hex.EncodeToString(respbuf))
 	cm,offset:=UnPackCtrlMsg(respbuf)
 	resp:=&FindRespMsg{}
 	resp.CtrlMsg = *cm
@@ -482,7 +482,7 @@ func (cs *ConnSession)WriteAndRead(wrt []byte) (rcv []byte,err error) {
 		case Msg_Nat_Sess_Create_Resp:
 			continue
 		default:
-			return buf1,nil
+			return buf1[:nRead],nil
 		}
 	}
 
@@ -879,10 +879,22 @@ func (lp *LocalP2pAddr) doRcv(block *Block) {
 		GetCanServiceDht().Insert(dn)
 
 		resp:=BuildRespFindCanServiceMsg(req.NodeToFind,DTNS2Addrs(dtns))
+
+		fmt.Println("can service find:",resp.String())
 		buf := make([]byte,CtrlMsgBufLen)
 		offset = resp.Pack(buf)
 
+		fmt.Println(hex.EncodeToString(buf[:offset]))
+
 		blocksnd:=&Block{buf:buf[:offset],raddr:block.raddr}
+		lp.Write(blocksnd)
+	}else if cm.typ == Msg_Nat_Sess_Create_Req{
+		sess:=&NCSessionCreateReq{}
+		sess.CtrlMsg = *cm
+		sessResp:=BuildNCSessCreateResp()
+		buf := make([]byte,1024)
+		offset = sessResp.Pack(buf)
+		blocksnd := &Block{buf:buf[:offset],raddr:block.raddr}
 		lp.Write(blocksnd)
 	}
 

@@ -30,7 +30,7 @@ func (pa *P2pAddr) Clone() *P2pAddr {
 
 	pa1.CanService = pa.CanService
 
-	pa1.InternalAddr = pa.InternalAddr
+	pa1.InternetAddr = pa.InternetAddr
 
 	pa1.Port = pa.Port
 	pa1.InternalAddr = make([]net.IP, 0)

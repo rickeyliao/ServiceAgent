@@ -53,6 +53,20 @@ type FindRespMsg struct {
 	NearestNodes []P2pAddr
 }
 
+func (frm *FindRespMsg)String() string  {
+	s := frm.CtrlMsg.String()
+
+	s += string(frm.NodeToFind.ID())
+
+	for i:=0;i<len(frm.NearestNodes);i++{
+		addr:=&frm.NearestNodes[i]
+
+		s += addr.String()
+	}
+
+	return s
+}
+
 func NewFindRespMsg(cm *CtrlMsg,addr NAddr,nodes []P2pAddr) *FindRespMsg {
 	frm:=&FindRespMsg{}
 	frm.CtrlMsg = *cm
