@@ -113,7 +113,7 @@ func (frm *FindRespMsg)UnPackFRespMsg(buf []byte) int {
 
 	offset:=frm.NodeToFind.Len()
 
-	cnt := toUint16(buf)
+	cnt := toUint16(buf[offset:])
 	offset += 2
 
 	if cnt > 0 {
