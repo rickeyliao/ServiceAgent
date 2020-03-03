@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/context"
 	"strconv"
 	"time"
+	"github.com/rickeyliao/ServiceAgent/dht2"
 )
 
 type CmdDefaultServer struct {
@@ -45,6 +46,14 @@ func (ss *CmdDefaultServer) DefaultNbssa(ctx context.Context, in *pb.DefaultRequ
 		return ss.shadowsockshow()
 	}
 
+	if in.Reqid == app.CMD_DHT_NORMAL_SHOW{
+		return ss.dhtNormalShow()
+	}
+
+	if in.Reqid == app.CMD_DHT_CANSERVICE_SHOW{
+		return ss.dhtCanServiceShow()
+	}
+
 	resp := &pb.DefaultResp{}
 	resp.Message = "no cmd found"
 
@@ -73,6 +82,36 @@ func (ss *CmdDefaultServer) configshow() (*pb.DefaultResp, error) {
 		resp.Message = "Marshal json failed"
 	} else {
 		resp.Message = string(j)
+	}
+
+	return resp, nil
+
+}
+
+func (ss *CmdDefaultServer) dhtNormalShow() (*pb.DefaultResp, error) {
+
+
+	resp := &pb.DefaultResp{}
+
+	s:=dht2.GetAllNodeDht().String()
+	if len(s)>0{
+		resp.Message = s
+	}else{
+		resp.Message = "Not found node"
+	}
+
+	return resp, nil
+
+}
+
+func (ss *CmdDefaultServer) dhtCanServiceShow() (*pb.DefaultResp, error) {
+	resp := &pb.DefaultResp{}
+
+	s:=dht2.GetCanServiceDht().String()
+	if len(s)>0{
+		resp.Message = s
+	}else{
+		resp.Message = "Not found node"
 	}
 
 	return resp, nil

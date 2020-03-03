@@ -25,7 +25,9 @@ var configshowCmd = &cobra.Command{
 	Short: "show config",
 	Long:  `show config`,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		if !CheckProcessReady() {
+			return
+		}
 		DefaultCmdSend(app.CMD_CONFIG_SHOW_REQ)
 	},
 }

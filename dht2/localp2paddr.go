@@ -488,6 +488,15 @@ func (cs *ConnSession)WriteAndRead(wrt []byte) (rcv []byte,err error) {
 
 }
 
+func (cs *ConnSession)Close()  {
+	if cs.Socket != nil{
+		cs.Socket.Close()
+	}
+
+	cs.Socket = nil
+}
+
+
 func createSess(ip net.IP,port int,addr NAddr) (sess *ConnSession,err error) {
 
 	laddr:=&net.UDPAddr{}
@@ -1145,6 +1154,10 @@ func (lp *LocalP2pAddr) timeDoNCKA() {
 		time.Sleep(time.Second)
 
 		lp.ncs = TimeoutNCKA(lp.ncs)
+
+		if lp.addr.CanService{
+			return
+		}
 
 		lp.CheckNCCount()
 

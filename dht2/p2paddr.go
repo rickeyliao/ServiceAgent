@@ -114,11 +114,11 @@ func NewP2pAddr() *P2pAddr {
 }
 
 func (pa *P2pAddr) Ping() bool {
-	//local -> pa
-	if pa.CanService {
-		//ping direct
-	} else {
-		//
+
+	cs:=GetLocalP2pAddr().CreateConnSession(pa)
+	if cs != nil{
+		cs.Close()
+		return true
 	}
 
 	return false

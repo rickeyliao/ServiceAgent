@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sort"
 	"github.com/pkg/errors"
+	"time"
 )
 
 //max node in bukcet
@@ -212,18 +213,50 @@ func (dtn *DTNode) Clone() *DTNode {
 	return dtn1
 }
 
+func (dt *DhtTable)String() string  {
+	s:=""
+	for i:=0;i<len(dt.HashTable);i++{
+		dtb:=&dt.HashTable[i]
+		dtb.RootLock.Lock()
+		root:=dtb.Root
+		nxt:=root
+		for{
+			if  nxt == nil{
+				break
+			}
+			s += "main:   "+nxt.String() + "\r\n"
+			nxt = nxt.Next
+		}
+
+		dtb.RootLock.Unlock()
+		dtb.BackupLock.Lock()
+		root=dtb.Backup
+		nxt=root
+		for{
+			if  nxt == nil{
+				break
+			}
+			s += "backup: "+nxt.String() + "\r\n"
+			nxt = nxt.Next
+		}
+		dtb.BackupLock.Unlock()
+	}
+
+	return s
+}
+
 func (dt *DhtTable) Find(node *DTNode) *DTNode {
 	laddr := GetLocalNAddr()
 	dtaddr := node.P2pNode.NbsAddr
 
 	bucketidx, _ := NbsXorLen(laddr.Bytes(), dtaddr.Bytes())
 
-	bucket := dt.HashTable[bucketidx]
+	bucket := &dt.HashTable[bucketidx]
 
 	bucket.RootLock.Lock()
 	defer bucket.RootLock.Unlock()
 
-	return (&bucket).Find(node).Clone()
+	return bucket.Find(node).Clone()
 }
 
 func (dtb *DTBucket) Find(node *DTNode) *DTNode {
@@ -282,7 +315,7 @@ func (dt *DhtTable) FindNearest(node *DTNode, cnt int) []*DTNode {
 	dtnodes := make([]*DTNode, 0)
 
 	for i := startbucketidx; i < len(dt.HashTable); i++ {
-		bucket := dt.HashTable[i]
+		bucket := &dt.HashTable[i]
 		bucket.RootLock.Lock()
 
 		if bucket.RootCnt > 0 {
@@ -298,9 +331,9 @@ func (dt *DhtTable) FindNearest(node *DTNode, cnt int) []*DTNode {
 		bucket.RootLock.Unlock()
 	}
 
-	if startbucketidx > 1 {
-		for i := startbucketidx - 1; i > 0; i-- {
-			bucket := dt.HashTable[i]
+	if startbucketidx > 0 {
+		for i := startbucketidx - 1; i >= 0; i-- {
+			bucket := &dt.HashTable[i]
 			bucket.RootLock.Lock()
 
 			if bucket.RootCnt > 0 {
@@ -384,7 +417,6 @@ func (dtb *DTBucket) Insert(node *DTNode) {
 		return
 	}
 
-	//rootcnt >= maxkbucket
 	pingnode := PingNode{}
 	pingnode.Wait2Ping = dtb.GetLast().Clone()
 	pingnode.Wait2Insert = node
@@ -440,12 +472,16 @@ func (dtb *DTBucket) InsertBackup(node *DTNode) {
 
 func (dt *DhtTable) Insert(node *DTNode) {
 
+	fmt.Println("insert:",node.String())
+
 	laddr := GetLocalNAddr()
 	dtaddr := node.P2pNode.NbsAddr
 
 	bucketidx, _ := NbsXorLen(laddr.Bytes(), dtaddr.Bytes())
 
-	bucket := dt.HashTable[bucketidx]
+	fmt.Println("bucketidx:",bucketidx)
+
+	bucket := &dt.HashTable[bucketidx]
 
 	bucket.RootLock.Lock()
 	defer bucket.RootLock.Unlock()
@@ -459,7 +495,7 @@ func (dt *DhtTable) Update(pingNode PingNode) {
 
 	bucketidx, _ := NbsXorLen(laddr.Bytes(), dtaddr.Bytes())
 
-	bucket := dt.HashTable[bucketidx]
+	bucket := &dt.HashTable[bucketidx]
 
 	bucket.RootLock.Lock()
 	defer bucket.RootLock.Unlock()
@@ -477,7 +513,7 @@ func (dt *DhtTable) UpdateBackup(pingNode PingNode) {
 
 	bucketidx, _ := NbsXorLen(laddr.Bytes(), dtaddr.Bytes())
 
-	bucket := dt.HashTable[bucketidx]
+	bucket := &dt.HashTable[bucketidx]
 
 	bucket.RootLock.Lock()
 	bucket.Remove(pingNode.Wait2Ping)
@@ -546,12 +582,12 @@ func (dt *DhtTable) Remove(node *DTNode) {
 
 	bucketidx, _ := NbsXorLen(laddr.Bytes(), dtaddr.Bytes())
 
-	bucket := dt.HashTable[bucketidx]
+	bucket := &dt.HashTable[bucketidx]
 
 	bucket.RootLock.Lock()
 	defer bucket.RootLock.Unlock()
 
-	(&bucket).Remove(node)
+	bucket.Remove(node)
 }
 
 func (dt *DhtTable) RemoveBackup(node *DTNode) {
@@ -560,20 +596,34 @@ func (dt *DhtTable) RemoveBackup(node *DTNode) {
 
 	bucketidx, _ := NbsXorLen(laddr.Bytes(), dtaddr.Bytes())
 
-	bucket := dt.HashTable[bucketidx]
+	bucket := &dt.HashTable[bucketidx]
 
 	bucket.BackupLock.Lock()
 	defer bucket.BackupLock.Unlock()
 
-	(&bucket).RemoveBackup(node)
+	bucket.RemoveBackup(node)
+}
+
+func (dt *DhtTable)doPingTimes(pingNode PingNode,times int)  {
+	flag := false
+	for i:=0;i<times;i++{
+		if pingNode.Wait2Ping.P2pNode.Ping(){
+			flag = true
+			break
+		}else{
+			time.Sleep(time.Second)
+		}
+	}
+
+	if flag{
+		dt.Insert(pingNode.Wait2Ping)
+	}else {
+		dt.Update(pingNode)
+	}
 }
 
 func (dt *DhtTable) DoPing(pingNode PingNode) {
-	if pingNode.Wait2Ping.P2pNode.Ping() {
-		dt.Insert(pingNode.Wait2Ping)
-	} else {
-		dt.Update(pingNode)
-	}
+	go dt.doPingTimes(pingNode,3)
 }
 
 func (dt *DhtTable) DoTimeOut(node PingNode) {
@@ -590,7 +640,7 @@ func (dt *DhtTable) TimeOutUpdate(node *DTNode) {
 
 	bucketidx, _ := NbsXorLen(laddr.Bytes(), dtaddr.Bytes())
 
-	bucket := dt.HashTable[bucketidx]
+	bucket := &dt.HashTable[bucketidx]
 
 	bucket.RootLock.Lock()
 	bucket.Remove(node)
@@ -646,9 +696,9 @@ func (dt *DhtTable) TimeOut(tv int) {
 		tv = 3600000 //ms,1hour
 	}
 
-	for idx := 1; idx < len(dt.HashTable); idx++ {
+	for idx := 0; idx < len(dt.HashTable); idx++ {
 
-		bucket := dt.HashTable[idx]
+		bucket := &dt.HashTable[idx]
 		bucket.RootLock.Lock()
 		bucket.TimeOut(tv)
 		bucket.RootLock.Unlock()
