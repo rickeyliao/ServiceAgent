@@ -144,8 +144,6 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 
 		rnm.UnpackNatS(res[offset:])
 
-
-
 		fmt.Println(rnm.String())
 		//fmt.Println(rnm.CanService,rnm.ObservrIP.String(),cm.localAddr.CanService,cm.localAddr.InternetAddr.String())
 		//fill local address
@@ -160,9 +158,12 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 
 		GetAllNodeDht().Insert(dn)
 
-		if rnm.CanService {
+		if cm.localAddr.CanService{
 			//save to can service dht
 			GetCanServiceDht().Insert(dn.Clone())
+		}
+
+		if rnm.CanService {
 			//can service loop searching
 			lp.CanServiceLoop(rnm.localAddr)
 		}
