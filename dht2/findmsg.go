@@ -1,8 +1,18 @@
 package dht2
 
+import "strconv"
+
 type FindReqMsg struct {
 	CtrlMsg
 	NodeToFind NAddr
+}
+
+func (frm *FindReqMsg)String() string  {
+	s:=frm.CtrlMsg.String()
+
+	s += " " + string(frm.NodeToFind.ID())
+
+	return s
 }
 
 func NewReqFindMsg(msg *CtrlMsg,addr NAddr) *FindReqMsg  {
@@ -54,14 +64,11 @@ type FindRespMsg struct {
 }
 
 func (frm *FindRespMsg)String() string  {
-	s := frm.CtrlMsg.String()
-
-	s += string(frm.NodeToFind.ID())
-
+	s:=frm.CtrlMsg.String()
+	s+=" "+string(frm.NodeToFind.ID())
+	s+=" Total Nearest Count:"+strconv.Itoa(len(frm.NearestNodes))
 	for i:=0;i<len(frm.NearestNodes);i++{
-		addr:=&frm.NearestNodes[i]
-
-		s += addr.String()
+		s += "" + frm.NearestNodes[i].String()
 	}
 
 	return s

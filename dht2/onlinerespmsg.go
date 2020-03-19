@@ -18,6 +18,19 @@ func NewRespBSMsg(msg *CtrlMsg, bs []P2pAddr) *RespBSMsg {
 	return rbsm
 }
 
+func (rbm *RespBSMsg)String() string  {
+	s:=rbm.CtrlMsg.String()
+	if len(rbm.BSServer)>0{
+		s+=" Bootstrap Server:"
+	}
+
+	for i:=0;i<len(rbm.BSServer);i++{
+		s += rbm.BSServer[i].String()
+	}
+
+	return s
+}
+
 func BuildRespBSMsg(bs []P2pAddr) *RespBSMsg {
 	cm := BuildMsg(Msg_BS_Resp)
 

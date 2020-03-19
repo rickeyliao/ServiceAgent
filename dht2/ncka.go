@@ -50,6 +50,12 @@ type NCConnReq struct {
 	Wait4ConnNode *P2pAddr
 }
 
+func (nccr *NCConnReq)String() string{
+	s:=nccr.String()
+	s += " Want to connect to: "+ nccr.Wait4ConnNode.String()
+	return s
+}
+
 func NewNCConnReq(cm *CtrlMsg,w4n *P2pAddr) *NCConnReq {
 	nccr:=&NCConnReq{}
 

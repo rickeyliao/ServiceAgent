@@ -128,9 +128,6 @@ func getCryptSSInfo(pk *rsa.PublicKey) string {
 		return ""
 	}
 
-	//for debug
-	//fmt.Println("for send crypt ssinfo :", base58.Encode(encdata))
-
 	return base58.Encode(encdata)
 
 }

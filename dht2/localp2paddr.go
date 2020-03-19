@@ -114,21 +114,23 @@ func SendAndRcv(ip net.IP, port int, b2s []byte) (resp []byte, err error) {
 
 
 func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
-	b2s := BuildOnlineReq().Pack()
-
+	or := BuildOnlineReq()
+	b2s := or.Pack()
+	log.Println("Send Online Msg:",or.String(),"Remote IP",bsip.String(),"Remote Port",bsport)
 	res, err := SendAndRcv(bsip, bsport, b2s)
 	if err != nil {
 		BootsTrapFailed(naddr)
 		return err
 	}
 
-	fmt.Println("hex:",hex.EncodeToString(res))
+	//fmt.Println("hex:",hex.EncodeToString(res))
 
 	cm, offset := UnPackCtrlMsg(res)
 	if cm.typ == Msg_BS_Resp {
 		rbs := &RespBSMsg{}
 		rbs.CtrlMsg = *cm
 		rbs.UnpackBS(res[offset:])
+		log.Println("Receive Bootstrap Response:",rbs.String())
 		BootsTrapFailed(naddr)
 		if len(rbs.BSServer) == 0 {
 			return errors.New("No Bootstrap server")
@@ -140,11 +142,10 @@ func (lp *LocalP2pAddr) Online(naddr NAddr, bsip net.IP, bsport int) error {
 		rnm := &RespNatMsg{}
 		rnm.CtrlMsg = *cm
 
-		fmt.Println("reslen",len(res),"offset",offset)
 
 		rnm.UnpackNatS(res[offset:])
 
-		fmt.Println(rnm.String())
+		fmt.Println("Receive Nat Reponse: ",rnm.String())
 		//fmt.Println(rnm.CanService,rnm.ObservrIP.String(),cm.localAddr.CanService,cm.localAddr.InternetAddr.String())
 		//fill local address
 		lp.addr.CanService = rnm.CanService
@@ -359,7 +360,10 @@ func (lp *LocalP2pAddr) FindCanSrvNodeFromAddrs(node NAddr,arr []P2pAddr) (fnode
 
 		if nls.Left() == 0{
 			return nil,nil,errors.New("No Nearst DHT Node")
-		}
+	    }
+
+		log.Println("search from : ",nls.String())
+
 		arr1,err=lp.FindCanSrvNodeByA(nls,node)
 		if err!=nil{
 			return nil,arr,nil
@@ -425,18 +429,22 @@ func (lp *LocalP2pAddr)FindCanSrvNode(node NAddr,peer *P2pAddr) (nearstNode []P2
 	buf:=make([]byte,1024)
 	n:=req.Pack(buf)
 
+	log.Println("Find Request Msg: ",req.String(),"from :",peer.String())
+
 	respbuf,err:=lp.NatSendAndRcv(peer,buf[:n])
 	if err!=nil{
 		return nil,err
 	}
 
-	fmt.Println("find can srv node:",hex.EncodeToString(respbuf))
+	//fmt.Println("find can srv node:",hex.EncodeToString(respbuf))
 	cm,offset:=UnPackCtrlMsg(respbuf)
 	resp:=&FindRespMsg{}
 	resp.CtrlMsg = *cm
 	resp.UnPackFRespMsg(respbuf[offset:])
 
 	nearstNode = resp.NearestNodes
+
+	log.Println("Find Response Msg: ",resp.String(),"from :",peer.String())
 
 	return
 
@@ -445,6 +453,7 @@ func (lp *LocalP2pAddr)FindCanSrvNode(node NAddr,peer *P2pAddr) (nearstNode []P2
 func (lp *LocalP2pAddr)NatSendAndRcv(peer *P2pAddr,b2s []byte) (rcvbuf []byte,err error) {
 	sess:=lp.CreateConnSession(peer)
 	if sess != nil{
+		log.Println("sess created:",sess.String())
 		rcvbuf,err = sess.WriteAndRead(b2s)
 		if err == nil{
 			sess.Socket.Close()
@@ -461,6 +470,15 @@ type ConnSession struct {
 	LocalIP net.IP
 	LocalPort int
 	Socket *net.UDPConn
+}
+
+func (cs *ConnSession)String() string  {
+	s:="peer ip:"+cs.PeerIP.String()
+	s+=" "+strconv.Itoa(cs.PeerPort)
+	s += " local ip:"+cs.LocalIP.String()
+	s += " "+strconv.Itoa(cs.LocalPort)
+
+	return s
 }
 
 func (cs *ConnSession)WriteAndRead(wrt []byte) (rcv []byte,err error) {
@@ -508,9 +526,11 @@ func createSess(ip net.IP,port int,addr NAddr) (sess *ConnSession,err error) {
 		return nil,err
 	}
 
+
 	req:=BuildNCSessCreateReq()
 	buf:=make([]byte,1024)
 	offset:=req.Pack(buf)
+	log.Println("Sess Create Req:",req.String(),"remote ip",ip.String())
 
 	deadline := time.Now().Add(time.Second * 3)
 	conn.SetDeadline(deadline)
@@ -527,6 +547,7 @@ func createSess(ip net.IP,port int,addr NAddr) (sess *ConnSession,err error) {
 		conn.Close()
 		return nil,err
 	}
+	log.Println("Sess Create Resp:",cm.String(),"remote ip",ip.String())
 	sess = &ConnSession{}
 	sess.LocalIP = laddr.IP
 	sess.LocalPort = laddr.Port
@@ -558,6 +579,8 @@ func (lp *LocalP2pAddr)createNatSession(peer *P2pAddr) (*ConnSession,error) {
 	buf:=make([]byte,2048)
 	offset:=req.Pack(buf)
 
+	log.Println("Nat Conn request:",req.String()," peer",peer.String())
+
 	deadline := time.Now().Add(time.Second * 5)
 	conn.SetDeadline(deadline)
 	conn.Write(buf[:offset])
@@ -573,14 +596,17 @@ func (lp *LocalP2pAddr)createNatSession(peer *P2pAddr) (*ConnSession,error) {
 		if !cm.localAddr.NbsAddr.Cmp(peer.NbsAddr){
 			continue
 		}
+		log.Println("Nat Conn Recive:",cm.String())
 		switch cm.typ {
 		case Msg_Nat_Conn_Resp:
 			sessreq:=BuildNCSessCreateReq()
+			log.Println("NatConnSess Create Req:",sessreq.String())
 			bufreq:=make([]byte,1024)
 			of1:=sessreq.Pack(bufreq)
 			conn.Write(bufreq[:of1])
 		case Msg_Nat_Sess_Create_Req:
 			sessresp:=BuildNCSessCreateResp()
+			log.Println("reply NatConnSess create resp:",sessresp.String())
 			bufresp:=make([]byte,1024)
 			of2:=sessresp.Pack(bufresp)
 			conn.Write(bufresp[:of2])

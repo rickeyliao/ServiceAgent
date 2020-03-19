@@ -7,6 +7,7 @@ import (
 	"sort"
 	"github.com/pkg/errors"
 	"time"
+	"strconv"
 )
 
 //max node in bukcet
@@ -54,9 +55,26 @@ type NodeAndLen struct {
 	Node P2pAddr
 }
 
+func (nal *NodeAndLen)String() string  {
+	s:="Length:"+strconv.Itoa(nal.Len)
+	s+=" "+nal.Node.String()
+	return s
+}
+
 type NodeAndLens struct {
 	Nls []*NodeAndLen
 	Indicator int
+}
+
+func (nals *NodeAndLens)String() string  {
+	s := "Total:" + strconv.Itoa(len(nals.Nls))
+	s += " Indicator:"+strconv.Itoa(nals.Indicator)
+
+	for i:=0;i<len(nals.Nls);i++{
+		s += " "+strconv.Itoa(i) + " "+ nals.Nls[i].String()
+	}
+
+	return s
 }
 
 func (nal *NodeAndLens)Add(l int,node P2pAddr)  {

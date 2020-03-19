@@ -329,6 +329,9 @@ func getServer(srvl []SSServerListNode, nbsaddr string) *SSServerListNode {
 }
 
 func UpdateServer(nas int32, ip string, nbsaddr string) string {
+
+	fmt.Println(nas,ip,nbsaddr)
+
 	srvl := GetServerList()
 
 	delsrv := make([]string, 0)
