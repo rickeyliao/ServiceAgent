@@ -83,14 +83,14 @@ func NewFindRespMsg(cm *CtrlMsg,addr NAddr,nodes []P2pAddr) *FindRespMsg {
 	return frm
 }
 
-func BuildRespFindMsg(addr NAddr,nodes []P2pAddr) *FindRespMsg {
-	cm:=BuildMsg(Msg_Dht_Find_Resp)
+func BuildRespFindMsg(addr NAddr,nodes []P2pAddr,sn []byte) *FindRespMsg {
+	cm:=BuildMsgWithSN(Msg_Dht_Find_Resp,sn)
 
 	return NewFindRespMsg(cm,addr,nodes)
 }
 
-func BuildRespFindCanServiceMsg(addr NAddr,nodes []P2pAddr) *FindRespMsg {
-	cm:=BuildMsg(Msg_CanService_Find_Resp)
+func BuildRespFindCanServiceMsg(addr NAddr,nodes []P2pAddr,sn []byte) *FindRespMsg {
+	cm:=BuildMsgWithSN(Msg_CanService_Find_Resp,sn)
 
 	return NewFindRespMsg(cm,addr,nodes)
 }

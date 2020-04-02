@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"log"
+	"strconv"
 )
 
 const (
@@ -183,6 +185,20 @@ func (nc *NatClient) Wrt(buf []byte) error {
 	}
 }
 
+func (nc *NatClient)WrtTo(buf []byte, remoteIp net.IP,remotePort int) error {
+	blk   := &Block{buf:buf}
+	raddr := &net.UDPAddr{IP:remoteIp,Port:remotePort}
+	blk.raddr = raddr
+
+	select {
+	case nc.wrtQ <- blk:
+		return nil
+	default:
+		return errors.New("Buffer overflow")
+	}
+
+}
+
 func (nc *NatClient) rcv(blk *Block) {
 	cm, offset := UnPackCtrlMsg(blk.buf)
 
@@ -192,12 +208,15 @@ func (nc *NatClient) rcv(blk *Block) {
 		kar.CtrlMsg = *cm
 		offset = kar.UnPackNCKA(blk.buf[offset:])
 		nc.internetPort = kar.RPort
+		log.Println("Receive Msg:",kar.String())
 		return
 	case Msg_Nat_Conn_Inform:
 		inform:=&NCConnInForm{}
 		inform.CtrlMsg = *cm
 		offset += inform.UnPack(blk.buf[offset:])
-		reply:=BuildNCConnReply()
+		log.Println("Receive Msg:",inform.String())
+		reply:=BuildNCConnReply(cm.sn[:])
+		log.Println("Response Inform:",reply.String())
 		buf:=make([]byte,1024)
 		offset = reply.Pack(buf)
 		nc.Wrt(buf[:offset])
@@ -205,32 +224,43 @@ func (nc *NatClient) rcv(blk *Block) {
 		sess:=BuildNCSessCreateReq()
 		buf = make([]byte,1024)
 		offset = sess.Pack(buf)
-		go SendAndRcv(inform.Wait4ConnIP,inform.Wait4ConnPort,buf[:offset])
+		log.Println("Begin to create sess with wait4conn:",sess.String(),
+			"Wait4conn:",inform.Wait4ConnIP.String(),strconv.Itoa(inform.Wait4ConnPort))
+		//nc.Wrt()
+		nc.WrtTo(buf[:offset],inform.Wait4ConnIP,inform.Wait4ConnPort)
+		//go SendAndRcv(inform.Wait4ConnIP,inform.Wait4ConnPort,buf[:offset])
 		return
 	case Msg_Nat_Sess_Create_Resp:
+		log.Println("Receive Sess Response:",cm.String())
 		//nothing to do ...
 		return
 	case Msg_Nat_Sess_Create_Req:
 		sess:=&NCSessionCreateReq{}
 		sess.CtrlMsg = *cm
-		sessResp:=BuildNCSessCreateResp()
+		log.Println("Receive Sess Create req:",sess.String())
+		sessResp:=BuildNCSessCreateResp(cm.sn[:])
+		log.Println("Response Sess create req:",sessResp.String())
 		buf := make([]byte,1024)
 		offset = sessResp.Pack(buf)
-		go SendAndRcv(blk.raddr.IP,blk.raddr.Port,buf[:offset])
+		nc.WrtTo(buf[:offset],blk.raddr.IP,blk.raddr.Port)
 		return
 	case Msg_Dht_Find:
 		req:=&FindReqMsg{}
 		req.CtrlMsg = *cm
 		offset+=req.UnPackFRM(blk.buf[offset:])
 
+		log.Println("Receive Find Req Msg:",req.String())
+
 		dhtnode:=&DTNode{P2pNode:P2pAddr{NbsAddr:req.NodeToFind}}
 		dtns:=GetAllNodeDht().FindNearest(dhtnode,DHTNearstCount)
 		dn := &DTNode{P2pNode: *(cm.localAddr.Clone()), lastPingTime: tools.GetNowMsTime()}
 		GetAllNodeDht().Insert(dn)
-		resp:=BuildRespFindMsg(req.NodeToFind,DTNS2Addrs(dtns))
+		resp:=BuildRespFindMsg(req.NodeToFind,DTNS2Addrs(dtns),cm.sn[:])
 		buf := make([]byte,1024)
 		offset = resp.Pack(buf)
-		go SendAndRcv(blk.raddr.IP,blk.raddr.Port,buf[:offset])
+		log.Println("Response Find Resp Msg:",resp.String())
+		//go SendAndRcv(blk.raddr.IP,blk.raddr.Port,buf[:offset])
+		nc.WrtTo(buf[:offset],blk.raddr.IP,blk.raddr.Port)
 		return
 	}
 }

@@ -31,8 +31,8 @@ func (rbm *RespBSMsg)String() string  {
 	return s
 }
 
-func BuildRespBSMsg(bs []P2pAddr) *RespBSMsg {
-	cm := BuildMsg(Msg_BS_Resp)
+func BuildRespBSMsg(bs []P2pAddr,sn []byte) *RespBSMsg {
+	cm := BuildMsgWithSN(Msg_BS_Resp,sn)
 
 	return NewRespBSMsg(cm, bs)
 }
@@ -100,9 +100,9 @@ func NewRespNatMsg(msg *CtrlMsg, can bool, obsip net.IP, nats []P2pAddr) *RespNa
 	return rnm
 }
 
-func BuildRespNatMsg(can bool, obsip net.IP, nats []P2pAddr) *RespNatMsg {
+func BuildRespNatMsg(can bool, obsip net.IP, nats []P2pAddr,sn []byte) *RespNatMsg {
 
-	cm := BuildMsg(Msg_Nat_Resp)
+	cm := BuildMsgWithSN(Msg_Nat_Resp,sn)
 
 	return NewRespNatMsg(cm, can, obsip, nats)
 }
@@ -182,8 +182,8 @@ func NewRespNatRefreshMsg(msg *CtrlMsg, nats []P2pAddr) *RespNatRefreshMsg {
 	return rnrm
 }
 
-func BuildRespNatRefreshMsg(nats []P2pAddr) *RespNatRefreshMsg {
-	cm := BuildMsg(Msg_Nat_Refresh_Resp)
+func BuildRespNatRefreshMsg(nats []P2pAddr,sn []byte) *RespNatRefreshMsg {
+	cm := BuildMsgWithSN(Msg_Nat_Refresh_Resp,sn)
 
 	return NewRespNatRefreshMsg(cm, nats)
 

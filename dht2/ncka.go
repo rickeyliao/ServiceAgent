@@ -3,11 +3,18 @@ package dht2
 import (
 	"net"
 	"encoding/binary"
+	"strconv"
 )
 
 type NCKAResp struct {
 	CtrlMsg
 	RPort int
+}
+
+func (nckar *NCKAResp)String() string  {
+	s:=nckar.CtrlMsg.String()
+	s += " Remote Port: "+strconv.Itoa(nckar.RPort)
+	return s
 }
 
 func NewKAResp(msg *CtrlMsg, port int) *NCKAResp {
@@ -18,8 +25,8 @@ func NewKAResp(msg *CtrlMsg, port int) *NCKAResp {
 	return kar
 }
 
-func BuildRespNCKAMsg(port int) *NCKAResp {
-	cm := BuildMsg(Msg_Ka_Resp)
+func BuildRespNCKAMsg(port int,sn []byte) *NCKAResp {
+	cm := BuildMsgWithSN(Msg_Ka_Resp,sn)
 
 	return NewKAResp(cm, port)
 }
@@ -100,6 +107,17 @@ type NCConnResp struct {
 	RemotePort int
 }
 
+func (ncr *NCConnResp)String() string  {
+	msg:=ncr.CtrlMsg.String()
+	msg += " RemoteIP:" + ncr.RemoteIP.String()
+	msg += " RemotePort: " + strconv.Itoa(ncr.RemotePort)
+	msg += " ErrCode : " + strconv.Itoa(ncr.ErrCode)
+
+	return msg
+
+}
+
+
 func NewNCConnResp(cm *CtrlMsg,errCode int,remoteIP net.IP,remotePort int) *NCConnResp {
 	ncr:=&NCConnResp{}
 	ncr.CtrlMsg = *cm
@@ -110,8 +128,8 @@ func NewNCConnResp(cm *CtrlMsg,errCode int,remoteIP net.IP,remotePort int) *NCCo
 	return ncr
 }
 
-func BuildNCConnResp(errCode int,remoteIP net.IP,remotePort int) *NCConnResp {
-	cm:=BuildMsg(Msg_Nat_Conn_Resp)
+func BuildNCConnResp(errCode int,remoteIP net.IP,remotePort int,sn []byte) *NCConnResp {
+	cm:=BuildMsgWithSN(Msg_Nat_Conn_Resp,sn)
 
 	return NewNCConnResp(cm,errCode,remoteIP,remotePort)
 }
@@ -146,6 +164,14 @@ type NCConnInForm struct {
 	CtrlMsg
 	Wait4ConnIP net.IP
 	Wait4ConnPort int
+}
+
+func (nccif *NCConnInForm)String() string  {
+	s:=nccif.CtrlMsg.String()
+	s+="wait for conn ip:"+nccif.Wait4ConnIP.String()
+	s+=" port:"+strconv.Itoa(nccif.Wait4ConnPort)
+
+	return s
 }
 
 func NewNCConnInform(cm *CtrlMsg,w4ip net.IP,w4port int) *NCConnInForm {
@@ -189,8 +215,8 @@ type NCConnReply struct {
 	CtrlMsg
 }
 
-func BuildNCConnReply() *NCConnReply {
-	cm:=BuildMsg(Msg_Nat_Conn_Reply)
+func BuildNCConnReply(sn []byte) *NCConnReply {
+	cm:=BuildMsgWithSN(Msg_Nat_Conn_Reply,sn)
 
 	return &NCConnReply{*cm}
 }
@@ -225,8 +251,8 @@ type NCSessionCreateResp struct {
 	CtrlMsg
 }
 
-func BuildNCSessCreateResp() *NCSessionCreateResp {
-	cm:=BuildMsg(Msg_Nat_Sess_Create_Resp)
+func BuildNCSessCreateResp(sn []byte) *NCSessionCreateResp {
+	cm:=BuildMsgWithSN(Msg_Nat_Sess_Create_Resp,sn)
 
 	return &NCSessionCreateResp{*cm}
 }

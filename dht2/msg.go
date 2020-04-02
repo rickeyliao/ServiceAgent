@@ -51,6 +51,19 @@ func BuildMsg(typ byte) *CtrlMsg {
 	return cm
 }
 
+func BuildMsgWithSN(typ byte,sn []byte) *CtrlMsg{
+	cm:=&CtrlMsg{}
+	cm.typ = typ
+
+	for i:=0;i<len(sn) && i< SerialNumberBytesCount;i++{
+		cm.sn[i] = sn[i]
+	}
+	cm.localAddr = GetLocalP2pAddr().GetP2pAddr()
+
+	return cm
+}
+
+
 func BuildOnlineReq() *OnlineReq {
 	cm := BuildMsg(Msg_Online_Req)
 
@@ -63,8 +76,8 @@ func BuildCanServiceReq() *CanServiceReq {
 	return &CanServiceReq{*cm}
 }
 
-func BuildCanServiceResp() *CanServiceResp {
-	cm := BuildMsg(Msg_CanService_Resp)
+func BuildCanServiceResp(sn []byte) *CanServiceResp {
+	cm := BuildMsgWithSN(Msg_CanService_Resp,sn)
 
 	return &CanServiceResp{*cm}
 }
