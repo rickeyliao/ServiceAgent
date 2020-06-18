@@ -2,13 +2,9 @@ package login
 
 import (
 	"github.com/rickeyliao/ServiceAgent/common"
-	"github.com/rickeyliao/ServiceAgent/service/license"
-	"github.com/rickeyliao/go-manager/kingkey"
 	"html/template"
-	"log"
 	"net/http"
 	"path"
-	"strings"
 )
 
 type LoginInfo struct {
@@ -54,14 +50,14 @@ func (li *LoginInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if l, err := kingkey.GenLicense("YouPipe2019", r.Form["pubaddr"][0], "", 30); err != nil {
-			w.Write([]byte("Address not correct"))
-		} else {
-			arr := strings.Split(r.RemoteAddr, ":")
-			log.Println(r.Form["username"][0], r.Form["pubaddr"][0], 30, l)
-			license.Insert(r.Form["pubaddr"][0], r.Form["username"][0], 30, arr[0], l)
-			w.Write([]byte(l))
-		}
+		//if l, err := kingkey.GenLicense("YouPipe2019", r.Form["pubaddr"][0], "", 30); err != nil {
+		//	w.Write([]byte("Address not correct"))
+		//} else {
+		//	arr := strings.Split(r.RemoteAddr, ":")
+		//	log.Println(r.Form["username"][0], r.Form["pubaddr"][0], 30, l)
+		//	license.Insert(r.Form["pubaddr"][0], r.Form["username"][0], 30, arr[0], l)
+		//	w.Write([]byte(l))
+		//}
 
 	}
 

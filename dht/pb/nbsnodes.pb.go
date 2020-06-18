@@ -127,7 +127,9 @@ func init() {
 	proto.RegisterType((*NbsNodeList)(nil), "pbdht.NbsNodeList")
 }
 
-func init() { proto.RegisterFile("nbsnodes.proto", fileDescriptor_c9d585b967f51be7) }
+func init() {
+	proto.RegisterFile("nbsnodes.proto", fileDescriptor_c9d585b967f51be7)
+}
 
 var fileDescriptor_c9d585b967f51be7 = []byte{
 	// 157 bytes of a gzipped FileDescriptorProto

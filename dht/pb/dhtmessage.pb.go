@@ -95,7 +95,9 @@ func init() {
 	proto.RegisterType((*Dhtmessage)(nil), "pbdht.dhtmessage")
 }
 
-func init() { proto.RegisterFile("dhtmessage.proto", fileDescriptor_d1ea4edd9b40c358) }
+func init() {
+	proto.RegisterFile("dhtmessage.proto", fileDescriptor_d1ea4edd9b40c358)
+}
 
 var fileDescriptor_d1ea4edd9b40c358 = []byte{
 	// 152 bytes of a gzipped FileDescriptorProto

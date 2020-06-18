@@ -79,7 +79,9 @@ func init() {
 	proto.RegisterType((*Dhtstore)(nil), "pbdht.dhtstore")
 }
 
-func init() { proto.RegisterFile("dhtstore.proto", fileDescriptor_e022415cdf0545ce) }
+func init() {
+	proto.RegisterFile("dhtstore.proto", fileDescriptor_e022415cdf0545ce)
+}
 
 var fileDescriptor_e022415cdf0545ce = []byte{
 	// 107 bytes of a gzipped FileDescriptorProto
